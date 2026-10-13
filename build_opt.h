@@ -1,0 +1,7 @@
+-O2
+-DLV_MEM_SIZE=196608
+-include esp_heap_caps.h
+-DLV_MEM_POOL_ALLOC(size)=heap_caps_malloc(size,MALLOC_CAP_SPIRAM)
+-DLV_MEMCPY_MEMSET_STD=1
+-include esp_attr.h
+-DLV_ATTRIBUTE_FAST_MEM=IRAM_ATTR
