@@ -10,6 +10,9 @@ USB-Schicht (HID-Tastatur + Consumer + CDC) ist neu auf `esp_tinyusb` aufgesetzt
 Arduino-USB-Klassen werden hier nicht uebersetzt. Die Bildstreifen beim Speichern treten mit dieser Konfiguration nicht auf;
 Pixeltakt 30 MHz statt 15 MHz (weniger Flimmern). Ohne USB (`-DDECK_NO_USB=ON`) laeuft der Befehlskanal ueber den UART-Port.
 
+**Hinweise:** Eigene USB-ID 303A:4DC0 (nicht 1001: Kollision mit dem JTAG-Treiber unter Windows). Beim Flashen ueber den UART-Port
+darf der native USB-Port nicht gleichzeitig an einem anderen Rechner haengen. `bash build.sh clean` nach Aenderungen an `sdkconfig.defaults`.
+
 ```bash
 bash build.sh                       # bauen
 bash build.sh flash /dev/cu.xxx     # flashen (UART-Port)

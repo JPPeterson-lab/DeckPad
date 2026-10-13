@@ -11,7 +11,7 @@
 
 Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (gleiches Board). Das Projekt läuft vollständig in der **Arduino IDE**, ohne WLAN und ohne OTA.
 
-> **🟠 Alpha (v0.4.0):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
+> **🟠 Alpha (v0.4.0):** Läuft am Gerät und am Windows-PC (Tastatur, Medientasten, COM-Port, Editor, Icons). Hauptweg ist der **ESP-IDF-Build** (`platforms/idf/`): damit gibt es keine Bildstreifen beim Speichern und kein Flimmern. Der Arduino-IDE-Build bleibt als Notlösung bestehen (kompiliert, aber mit den bekannten Streifen). Einzelne Funktionen (Auto-Profilwechsel, Helfer-Modus) sind am Gerät noch nicht ausführlich getestet.
 
 ---
 
@@ -27,6 +27,7 @@ Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](htt
 | Einstellungen pro Profil (Theme hell/dunkel, Helligkeit) | 🧪 gebaut, ungetestet |
 | Taschenrechner (aus dem WetterCubePlus XL) | 🧪 portiert, ungetestet |
 | Küchentimer + Stoppuhr, Display blinkt bei Ablauf | 🧪 gebaut, ungetestet |
+| ESP-IDF-Build: keine Bildstreifen beim Speichern, 30 MHz Pixeltakt, eigene USB-Schicht | ✅ am Gerät und PC geprüft |
 | Eigene Partitionstabelle ohne OTA (4 MB App, 11,9 MB Daten) | ✅ geprüft (Tabelle gebaut und gelesen) |
 | Profile am PC bearbeiten und per CDC übertragen (DeckPad Editor, Web Serial) | 🧪 gebaut, im Demo-Modus getestet, am Gerät ungetestet |
 | Uhrzeit vom PC per CDC (setzt der Editor beim Verbinden) | 🧪 gebaut, ungetestet |
@@ -135,7 +136,19 @@ Konsequenzen: **CAN ist im DeckPad nicht nutzbar**. Die Polarität (`0` = USB) b
 
 ---
 
-## 🛠️ Installation (Arduino IDE / arduino-cli)
+## 🛠️ Bauen und Flashen mit ESP-IDF (empfohlen)
+
+1. **ESP-IDF 5.5.x** installieren: `git clone --branch v5.5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp/esp-idf-v5.5.5 && cd ~/esp/esp-idf-v5.5.5 && ./install.sh esp32s3,esp32p4`.
+2. Board über den **UART-Port** anschließen, dann bauen und flashen:
+```bash
+cd platforms/idf
+bash build.sh flash /dev/cu.usbmodemXXXX     # Port des UART-Anschlusses (CH343)
+```
+3. Danach den **nativen USB-Port** mit dem PC verbinden. **Beim Flashen darf dieser nicht gleichzeitig an einem anderen Rechner hängen** (sonst bricht das Schreiben ab). Windows richtet das Gerät beim ersten Anschließen neu ein (eigene USB-ID `303A:4DC0`, neue COM-Nummer).
+
+Pixeltakt: `PCLK=40 bash build.sh flash …` (Standard 30 MHz, ca. 33 Bilder/s). Details: [`platforms/idf/README.md`](platforms/idf/README.md).
+
+## 🛠️ Installation (Arduino IDE / arduino-cli, Notlösung)
 
 1. **ESP32-Core** (≥ 3.3) sowie die Bibliotheken **LVGL 8.x** und **ArduinoJson 7.x** installieren. Die gemeinsame `lv_conf.h` liegt in `Arduino/libraries/` neben dem Ordner `lvgl` – **`LV_COLOR_16_SWAP` muss `0` sein**.
 2. Ordner öffnen, **Board: ESP32S3 Dev Module** mit:
@@ -200,7 +213,7 @@ Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [Pico
 
 Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (same board). The project builds entirely in the **Arduino IDE**, with no Wi-Fi and no OTA.
 
-> **🟠 Alpha (v0.4.0):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
+> **🟠 Alpha (v0.4.0):** Runs on the device and on the Windows PC (keyboard, media keys, COM port, editor, icons). The main path is the **ESP-IDF build** (`platforms/idf/`): no streaks when saving and no flicker. The Arduino IDE build remains as a fallback (compiles, but with the known streaks). Some features (auto profile switch, helper mode) are not yet thoroughly tested on the device.
 
 ## 📊 Status
 
@@ -214,6 +227,7 @@ Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus 
 | Per-profile settings (theme light/dark, brightness) | 🧪 built, untested |
 | Calculator (from the WetterCubePlus XL) | 🧪 ported, untested |
 | Kitchen timer + stopwatch, display blinks when the timer ends | 🧪 built, untested |
+| ESP-IDF build: no streaks when saving, 30 MHz pixel clock, own USB layer | ✅ verified on device and PC |
 | Custom partition table without OTA (4 MB app, 11.9 MB data) | ✅ verified (table built and read back) |
 | Edit profiles on the PC and transfer them via CDC (DeckPad Editor, Web Serial) | 🧪 built, tested in demo mode, untested on the device |
 | Time from the PC via CDC (the editor sets it on connect) | 🧪 built, untested |
@@ -298,7 +312,19 @@ Consequence: **CAN cannot be used with the DeckPad**. The polarity (`0` = USB) i
 | `storage` (LittleFS) | 11.9 MB | profiles, later icons and images |
 | PSRAM (8 MB) | – | framebuffer (1.2 MB) and LVGL memory pool (192 KB); not partitioned |
 
-## 🛠️ Installation (Arduino IDE / arduino-cli)
+## 🛠️ Building and flashing with ESP-IDF (recommended)
+
+1. Install **ESP-IDF 5.5.x**: `git clone --branch v5.5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp/esp-idf-v5.5.5 && cd ~/esp/esp-idf-v5.5.5 && ./install.sh esp32s3,esp32p4`.
+2. Connect the board via the **UART port**, then build and flash:
+```bash
+cd platforms/idf
+bash build.sh flash /dev/cu.usbmodemXXXX     # port of the UART connector (CH343)
+```
+3. Afterwards connect the **native USB port** to the PC. **While flashing it must not be connected to another computer** (the write aborts otherwise). Windows sets the device up afresh on first connect (own USB id `303A:4DC0`, new COM number).
+
+Pixel clock: `PCLK=40 bash build.sh flash …` (default 30 MHz, about 33 frames/s). Details: [`platforms/idf/README.md`](platforms/idf/README.md).
+
+## 🛠️ Installation (Arduino IDE / arduino-cli, fallback)
 
 1. Install the **ESP32 core** (≥ 3.3) and the libraries **LVGL 8.x** and **ArduinoJson 7.x**. The shared `lv_conf.h` lives in `Arduino/libraries/` next to the `lvgl` folder – **`LV_COLOR_16_SWAP` must be `0`**.
 2. Open the folder, **board: ESP32S3 Dev Module** with the values from the German table above (PSRAM *OPI*, 16 MB / QIO, partition scheme *Custom*, **USB Mode: USB-OTG (TinyUSB)**, **USB CDC On Boot: Disabled** so that `Serial` stays on the UART port).
