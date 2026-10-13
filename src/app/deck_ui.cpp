@@ -1,4 +1,5 @@
 #include "deck_ui.h"
+#include "diag_log.h"
 #include <Arduino.h>
 #include <time.h>
 #include "app_config.h"
@@ -10,6 +11,7 @@
 #include "../ui/fonts/fonts.h"
 #include "../usb/usb_device.h"
 #include "../hardware/backlight.h"
+#include "../display/lvgl_port.h"
 
 // ── Gemeinsame Styles (ein Satz fuer alle Kacheln statt Einzel-Styles: spart LVGL-Speicher) ──
 static lv_style_t                 stTile, stTilePressed;
@@ -49,6 +51,7 @@ static void cbTile(lv_event_t* e)
     int i = (int)(intptr_t)lv_event_get_user_data(e);
     if (i < 0 || i >= p.tileCount) return;
     const DeckTile& t = p.tiles[i];
+    logDiag("[Taste] %d '%s' -> %s %s", i, t.label, deckActionTypeName(t.type), t.spec);
     deckActionRun(t.type, t.spec);          // sofort beim Berühren, nicht erst beim Loslassen: fühlt sich direkter an
 }
 
@@ -113,8 +116,8 @@ void deckUiApplyProfile()
 static void switchProfile(int index)
 {
     if (index == profileActiveIndex()) return;
-    if (profileActivate(index)) deckUiApplyProfile();
-    else Serial.printf("[UI] Profil %d konnte nicht geladen werden\n", index);
+    if (profileActivate(index)) { logDiag("[UI] Profil gewechselt: %s", profileActive().name); deckUiApplyProfile(); }
+    else logDiag("[UI] Profil %d konnte nicht geladen werden", index);
 }
 
 static void cbRoller(lv_event_t*) { switchProfile(lv_roller_get_selected(objects.rollerprofile)); }
@@ -142,6 +145,16 @@ static void cbTheme(lv_event_t*)
 static void setIfChanged(lv_obj_t* l, const char* txt)
 {
     if (strcmp(lv_label_get_text(l), txt) != 0) lv_label_set_text(l, txt);
+}
+
+static void diagTickCb(lv_timer_t*)
+{
+    // alle 10 s eine Zeile auf den UART-Port (nicht in den Ringpuffer, damit er die Ereignisse behaelt)
+    char b[320]; LvglFlushStats f;
+    lvglPortTakeFlushStats(f);
+    logStatus(b, sizeof(b));
+    Serial.printf("[Diag] %s | letzte 10 s: Flush n=%u avg=%u us max=%u us max_px=%u\n", b, (unsigned)f.count,
+                  (unsigned)(f.count ? f.sumUs / f.count : 0), (unsigned)f.maxUs, (unsigned)f.maxPx);
 }
 
 static void tickCb(lv_timer_t*)
@@ -195,5 +208,6 @@ void deckUiInit()
 
     deckUiApplyProfile();
     lv_timer_create(tickCb, 1000, nullptr);
+    lv_timer_create(diagTickCb, 10000, nullptr);
     tickCb(nullptr);
 }

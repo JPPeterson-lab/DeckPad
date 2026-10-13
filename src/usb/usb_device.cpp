@@ -1,4 +1,5 @@
 #include "usb_device.h"
+#include "../app/diag_log.h"
 #include "USBHIDKeyboard.h"
 #include "USBHIDConsumerControl.h"
 #include "../hardware/io_extension.h"
@@ -12,10 +13,10 @@ static volatile bool         s_hostUp = false;
 static void onUsbEvent(void*, esp_event_base_t, int32_t id, void*)
 {
   switch (id) {
-    case ARDUINO_USB_STARTED_EVENT: s_hostUp = true;  break;   // PC hat das Geraet erkannt
-    case ARDUINO_USB_RESUME_EVENT:  s_hostUp = true;  break;
-    case ARDUINO_USB_STOPPED_EVENT: s_hostUp = false; break;   // Kabel ab
-    case ARDUINO_USB_SUSPEND_EVENT: s_hostUp = false; break;   // PC im Standby
+    case ARDUINO_USB_STARTED_EVENT: s_hostUp = true;  logDiag("[USB] Ereignis: gestartet (PC hat das Geraet erkannt)"); break;
+    case ARDUINO_USB_RESUME_EVENT:  s_hostUp = true;  logDiag("[USB] Ereignis: aus dem Standby"); break;
+    case ARDUINO_USB_STOPPED_EVENT: s_hostUp = false; logDiag("[USB] Ereignis: gestoppt (Kabel ab)"); break;
+    case ARDUINO_USB_SUSPEND_EVENT: s_hostUp = false; logDiag("[USB] Ereignis: Standby"); break;
     default: break;
   }
 }
@@ -26,7 +27,7 @@ void usbDeviceInit()
   // (IO5) entscheidet, wer sie bekommt. Der Expander merkt sich alle Ausgaenge: einmal gesetzt,
   // bleibt IO5 auch bei den Schreibzugriffen auf Backlight/Touch-Reset unveraendert.
   IO_EXTENSION_Output(IO_EXTENSION_IO_5, DECK_USB_SELECT_LEVEL);
-  Serial.printf("[USB] IO5 = %d (USB-Pfad aktiv)\n", DECK_USB_SELECT_LEVEL);
+  logDiag("[USB] IO5 = %d (USB-Pfad aktiv)", DECK_USB_SELECT_LEVEL);
 
   USB.onEvent(onUsbEvent);
   USB.manufacturerName(DECK_USB_MANUFACTURER);
@@ -37,7 +38,7 @@ void usbDeviceInit()
   DeckSerial.setRxBufferSize(8192);         // Platz fuer spaeter uebertragene Profile (JSON)
   DeckSerial.begin();
   USB.begin();
-  Serial.println("[USB] HID-Tastatur + Consumer + CDC gestartet");
+  logDiag("[USB] HID-Tastatur + Consumer + CDC gestartet");
 }
 
 bool usbHostConnected() { return s_hostUp; }

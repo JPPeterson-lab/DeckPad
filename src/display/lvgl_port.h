@@ -36,3 +36,9 @@
 esp_err_t lvgl_port_init(esp_lcd_panel_handle_t lcd_handle, esp_lcd_touch_handle_t tp_handle);
 bool lvgl_port_lock(int timeout_ms);   // -1 = unbegrenzt warten
 void lvgl_port_unlock(void);
+
+// Statistik der Flush-Aufrufe (Kopieren in den PSRAM-Framebuffer) seit dem letzten Zuruecksetzen.
+// Lange Flushes sind der Verdacht bei Streifen und zerrissenen Zeilen (PSRAM-Bandbreite).
+struct LvglFlushStats { uint32_t count, sumUs, maxUs, maxPx; };
+void lvglPortPeekFlushStats(LvglFlushStats& out);   // lesen
+void lvglPortTakeFlushStats(LvglFlushStats& out);   // lesen und zuruecksetzen (nur aus dem LVGL-Task)

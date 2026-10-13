@@ -2,6 +2,7 @@
 // Der Screen wird erst beim Öffnen angelegt und beim Schließen wieder freigegeben, damit er im Normalbetrieb
 // keinen LVGL-Speicher belegt. Alles läuft im LVGL-Task (Callbacks), kein Zugriff aus anderen Tasks.
 #include <Arduino.h>
+#include "diag_log.h"
 #include "../display/lvgl_port.h"
 #include "lv_lock.h"
 #include <math.h>
@@ -256,7 +257,7 @@ static size_t lvglFreiBytes() {
 static void cbOpenRechner(lv_event_t*) {
   size_t vorher = lvglFreiBytes();
   if (vorher < 30000) {   // sonst droht ein LVGL-Out-of-Memory beim Anlegen
-    Serial.printf("[Rechner] zu wenig Speicher: frei %u\n", (unsigned)vorher);
+    logDiag("[Rechner] zu wenig Speicher: frei %u", (unsigned)vorher);
     return;
   }
   if (rcScreen) { lv_obj_del(rcScreen); rcScreen = rcWert = rcFormel = nullptr; }   // Rest eines nie geschlossenen Rechners
@@ -265,7 +266,7 @@ static void cbOpenRechner(lv_event_t*) {
   rcAktualisiere();
   lv_scr_load(rcScreen);
   size_t nachher = lvglFreiBytes();
-  Serial.printf("[Rechner] geoeffnet, LVGL-Speicher frei: %u (vorher %u), Bedarf %d Bytes\n", (unsigned)nachher, (unsigned)vorher, (int)((long)vorher - (long)nachher));
+  logDiag("[Rechner] geoeffnet, LVGL-Speicher frei: %u (vorher %u), Bedarf %d Bytes", (unsigned)nachher, (unsigned)vorher, (int)((long)vorher - (long)nachher));
 }
 
 void uiRechnerInit() {

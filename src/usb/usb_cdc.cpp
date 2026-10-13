@@ -2,6 +2,7 @@
 #include "usb_device.h"
 #include <string.h>
 #include <strings.h>
+#include "../app/diag_log.h"
 
 // ── Befehlstabelle ────────────────────────────────────────────────────────────
 // Ein Befehl bekommt den Rest der Zeile (ohne Befehlswort) und antwortet ueber usbCdcSendLine().
@@ -10,8 +11,14 @@ struct Cmd { const char* name; CmdHandler fn; };
 
 static void cmdPing(const char*) { usbCdcSendLine("PONG"); }
 
+static void cmdStatus(const char*) { char b[320]; logStatus(b, sizeof(b)); usbCdcSendLine(b); }
+static void emitLine(const char* l) { usbCdcSendLine(l); }
+static void cmdLog(const char*) { usbCdcSendLine("--- LOG Anfang ---"); logDump(emitLine); usbCdcSendLine("--- LOG Ende ---"); }
+
 static const Cmd CMDS[] = {
-  { "PING", cmdPing },
+  { "PING",   cmdPing },
+  { "STATUS", cmdStatus },   // eine Zeile: Version, Laufzeit, Speicher, Flush-Zeiten
+  { "LOG",    cmdLog },      // Ringpuffer der letzten Ereignisse
   // Weitere Befehle (Zeit setzen, Profile uebertragen, aktives Programm melden) folgen in spaeteren Schritten.
 };
 

@@ -1,4 +1,5 @@
 #include "deck_actions.h"
+#include "diag_log.h"
 #include <Arduino.h>
 #include <string.h>
 #include <strings.h>
@@ -110,7 +111,7 @@ static void execute(const Job& j)
   // Auch ohne gemeldete Verbindung senden: die USB-Bibliothek verwirft Berichte, wenn der PC nicht bereit ist,
   // und ein verpasstes Verbindungs-Ereignis soll nicht alle Tasten stilllegen.
   if (!usbHostConnected() && j.type != ACT_NONE)
-    Serial.printf("[Aktion] %s '%s': PC meldet sich nicht als verbunden\n", deckActionTypeName(j.type), j.spec);
+    logDiag("[Aktion] %s '%s': PC meldet sich nicht als verbunden", deckActionTypeName(j.type), j.spec);
   switch (j.type) {
     case ACT_MEDIA: {
       int c = lookup(MEDIA, sizeof(MEDIA) / sizeof(MEDIA[0]), j.spec, strlen(j.spec));

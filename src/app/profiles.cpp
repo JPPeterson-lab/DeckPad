@@ -1,4 +1,5 @@
 #include "profiles.h"
+#include "diag_log.h"
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <string.h>
@@ -101,7 +102,7 @@ bool profileLoad(const char* id, DeckProfile& out)
   JsonDocument doc;
   DeserializationError err = deserializeJson(doc, f);
   f.close();
-  if (err) { Serial.printf("[Profile] %s: JSON-Fehler %s\n", id, err.c_str()); return false; }
+  if (err) { logDiag("[Profile] %s: JSON-Fehler %s", id, err.c_str()); return false; }
   return fromJson(id, doc, out);
 }
 
@@ -109,6 +110,7 @@ bool profileSave(const DeckProfile& p)
 {
   Guard g;
   if (!s_fsOk || !idValid(p.id)) return false;
+  const uint32_t t0 = millis();
   JsonDocument doc;
   toJson(p, doc);
   String path = pathOf(p.id);
@@ -119,7 +121,10 @@ bool profileSave(const DeckProfile& p)
   f.close();
   if (!w) { LittleFS.remove(tmp); return false; }
   LittleFS.remove(path);
-  return LittleFS.rename(tmp, path);
+  bool ok = LittleFS.rename(tmp, path);
+  // Flash-Schreibzugriffe stoppen kurz den Cache (auch den PSRAM): hier mit Zeit festhalten, um Bildfehler zuzuordnen
+  logDiag("[Flash] Profil '%s' geschrieben: %s, %lu ms", p.id, ok ? "ok" : "FEHLER", (unsigned long)(millis() - t0));
+  return ok;
 }
 
 bool profileDelete(const char* id)
@@ -231,14 +236,14 @@ bool profilesInit()
   Guard g;
   s_fsOk = LittleFS.begin(true, "/littlefs", 10, DECK_STORAGE_LABEL);   // true = beim ersten Mal formatieren
   if (!s_fsOk) {
-    Serial.println("[Profile] LittleFS-Partition 'storage' nicht verfuegbar - Notprofil im RAM");
+    logDiag("[Profile] LittleFS-Partition 'storage' nicht verfuegbar - Notprofil im RAM");
     builtinFallback();
     return false;
   }
-  Serial.printf("[Profile] Speicher: %u von %u KB belegt\n", (unsigned)(LittleFS.usedBytes() / 1024), (unsigned)(LittleFS.totalBytes() / 1024));
+  logDiag("[Profile] Speicher: %u von %u KB belegt", (unsigned)(LittleFS.usedBytes() / 1024), (unsigned)(LittleFS.totalBytes() / 1024));
   if (!LittleFS.exists(DECK_PROFILE_DIR)) LittleFS.mkdir(DECK_PROFILE_DIR);
   scanList();
-  if (s_count == 0) { Serial.println("[Profile] keine Profile gefunden - lege Beispielprofile an"); seedProfiles(); scanList(); }
+  if (s_count == 0) { logDiag("[Profile] keine Profile gefunden - lege Beispielprofile an"); seedProfiles(); scanList(); }
   if (s_count == 0) { builtinFallback(); s_fsOk = false; return false; }
 
   // zuletzt aktives Profil wiederherstellen; ohne Config-Datei startet "Standard"
@@ -258,7 +263,7 @@ bool profilesInit()
     for (int i = 0; i < s_count && !ok; i++) if (profileLoad(s_list[i].id, s_cur)) { s_active = i; ok = true; }
     if (!ok) { builtinFallback(); return false; }
   }
-  Serial.printf("[Profile] %d Profile, aktiv: %s\n", s_count, s_cur.name);
+  logDiag("[Profile] %d Profile, aktiv: %s", s_count, s_cur.name);
   return true;
 }
 

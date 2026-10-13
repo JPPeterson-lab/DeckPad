@@ -1,7 +1,7 @@
 # 🎛️ DeckPad
 
 ![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.1.0-blue?style=flat-square&cacheSeconds=1)
+![Version](https://img.shields.io/badge/Version-v0.1.1-blue?style=flat-square&cacheSeconds=1)
 ![Hardware](https://img.shields.io/badge/Hardware-Waveshare%20ESP32--S3--Touch--LCD--7B-red?style=flat-square&logo=espressif&logoColor=white)
 ![Display](https://img.shields.io/badge/Display-7%22%201024×600%20RGB-informational?style=flat-square)
 ![Lizenz](https://img.shields.io/badge/Lizenz-CC%20BY--NC%204.0-lightgrey?style=flat-square)
@@ -11,7 +11,7 @@
 
 Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (gleiches Board). Das Projekt läuft vollständig in der **Arduino IDE**, ohne WLAN und ohne OTA.
 
-> **🟠 Alpha (v0.1.0):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
+> **🟠 Alpha (v0.1.1):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
 
 ---
 
@@ -22,7 +22,7 @@ Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](htt
 | RGB-Display 1024×600 + GT911-Touch, LVGL-Teilrendering (aus dem WetterCubePlus XL) | 🧪 übernommen, am DeckPad ungetestet |
 | Kachelraster (5×3 Standard, pro Profil bis 6×4), Farbwechsel beim Antippen | 🧪 gebaut, ungetestet |
 | USB-Composite: HID-Tastatur + Consumer/Media + virtueller COM-Port | 🧪 gebaut, ungetestet |
-| CDC-Kanal: `PING` → `PONG` | 🧪 gebaut, ungetestet |
+| CDC-Kanal: `PING` → `PONG`, `STATUS`, `LOG` | 🧪 gebaut, ungetestet |
 | Profile im Flash (LittleFS, JSON pro Profil), Auswahl per Roller und Pfeil-Tasten | 🧪 gebaut, ungetestet |
 | Einstellungen pro Profil (Theme hell/dunkel, Helligkeit) | 🧪 gebaut, ungetestet |
 | Taschenrechner (aus dem WetterCubePlus XL) | 🧪 portiert, ungetestet |
@@ -171,7 +171,7 @@ Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [Pico
 
 Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (same board). The project builds entirely in the **Arduino IDE**, with no Wi-Fi and no OTA.
 
-> **🟠 Alpha (v0.1.0):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
+> **🟠 Alpha (v0.1.1):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
 
 ## 📊 Status
 
@@ -180,7 +180,7 @@ Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus 
 | 1024×600 RGB display + GT911 touch, LVGL partial rendering (from the WetterCubePlus XL) | 🧪 taken over, untested on the DeckPad |
 | Tile grid (5×3 default, up to 6×4 per profile), colour change on touch | 🧪 built, untested |
 | USB composite: HID keyboard + consumer/media + virtual COM port | 🧪 built, untested |
-| CDC channel: `PING` → `PONG` | 🧪 built, untested |
+| CDC channel: `PING` → `PONG`, `STATUS`, `LOG` | 🧪 built, untested |
 | Profiles in flash (LittleFS, one JSON per profile), selection by roller and arrow keys | 🧪 built, untested |
 | Per-profile settings (theme light/dark, brightness) | 🧪 built, untested |
 | Calculator (from the WetterCubePlus XL) | 🧪 ported, untested |

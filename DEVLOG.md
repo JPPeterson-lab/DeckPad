@@ -1,5 +1,13 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.1.1: Streifen am linken Rand, Log
+
+Erster Test von v0.1.0 am Gerät: Streifen und zerrissene Zeilen am linken Rand der Kacheln, wie im WetterCubePlus XL (dort PSRAM-Bandbreite und Zurückschreiben des Caches beim Flush, siehe XL-DEVLOG). Die damaligen Gegenmaßnahmen sind übernommen (4-Zeilen-Stücke, 15 MHz, Bounce 12 Zeilen, 32-px-Ausrichtung) und reichen im DeckPad offenbar nicht. Neu gegenüber dem XL sind: Flash-Zugriffe durch LittleFS (Formatieren und Schreiben stoppen den Cache, auch für den PSRAM), TinyUSB statt HWCDC, die 350-ms-Farbübergänge der Kacheln (viele kleine Flushes) und ein anderes Lastprofil beim Aufbau von 15 abgerundeten Kacheln. Welcher Punkt es ist, ist nicht bekannt.
+
+Statt auf Verdacht an mehreren Stellen zugleich zu ändern (im XL ließ sich danach nicht mehr sagen, was gewirkt hat), wurde zuerst Messung eingebaut: Ringpuffer-Log (`LOG`), `STATUS` und eine Flush-Statistik. Nächster Schritt: Werte vom Gerät lesen, dann eine Maßnahme nach der anderen testen.
+
+---
+
 ## 2026-10-13 – v0.1.0: Grundgerüst
 
 **Ausgangslage.** Als Vorlage dient ausschließlich der WetterCubePlus XL (gleiches Board, Waveshare ESP32-S3-Touch-LCD-7B). Übernommen wurden `src/hardware/` (RGB-Panel, GT911, I²C, IO-Expander), `src/display/lvgl_port.*` (Teilrendering: LVGL zeichnet 20-Zeilen-Streifen im SRAM und kopiert sie in den PSRAM-Framebuffer) und `build_opt.h`. Gestrichen wurde `-DLODEPNG_NO_COMPILE_ALLOCATORS`: Es verlangt eigene Allokatoren für den PNG-Dekoder (im XL für die Warnkarte), das DeckPad hat keinen und der Linker meldete `lodepng_malloc` als undefiniert.

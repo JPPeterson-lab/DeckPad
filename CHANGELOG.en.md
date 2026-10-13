@@ -2,6 +2,13 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.1.1 (2026-10-13)
+
+### New
+- **Diagnostic log:** ring buffer with the last 64 events (start-up incl. reset reason and display settings, USB events, key presses, profile switches, **flash writes with duration**). Every line also goes to the UART port
+- **COM commands `STATUS` and `LOG`:** `STATUS` returns one line with version, uptime, free and minimum memory (SRAM, PSRAM) and the flush times; `LOG` prints the ring buffer
+- **Flush measurement:** count, average and maximum duration of copying into the PSRAM framebuffer; a `[Diag]` line on the UART port every 10 s. Purpose: narrow down streaks and torn lines (PSRAM bandwidth) with measurements instead of guesses
+
 ## v0.1.0 (2026-10-13)
 
 First skeleton. The code compiles; a test on the device is still pending.

@@ -2,6 +2,13 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.1.1 (2026-10-13)
+
+### Neu
+- **Diagnose-Log:** Ringpuffer mit den letzten 64 Ereignissen (Start inkl. Reset-Grund und Display-Einstellungen, USB-Ereignisse, Tastendrücke, Profilwechsel, **Flash-Schreibzugriffe mit Dauer**). Jede Zeile geht zusätzlich auf den UART-Port
+- **COM-Befehle `STATUS` und `LOG`:** `STATUS` liefert eine Zeile mit Version, Laufzeit, freiem und minimalem Speicher (SRAM, PSRAM) und den Flush-Zeiten; `LOG` gibt den Ringpuffer aus
+- **Flush-Messung:** Anzahl, mittlere und maximale Dauer des Kopierens in den PSRAM-Framebuffer; alle 10 s eine `[Diag]`-Zeile auf dem UART-Port. Zweck: Streifen und zerrissene Zeilen (PSRAM-Bandbreite) mit Messwerten statt Vermutungen eingrenzen
+
 ## v0.1.0 (2026-10-13)
 
 Erstes Grundgerüst. Der Code kompiliert, ein Test am Gerät steht noch aus.

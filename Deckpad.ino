@@ -21,12 +21,14 @@
 #include "src/app/deck_ui.h"
 #include "src/app/tools.h"
 #include "src/app/lv_lock.h"
+#include "src/app/diag_log.h"
+#include "esp_system.h"
 #include "src/ui/ui.h"
 
 // Statuszeile auf dem Bootscreen aktualisieren und LVGL kurz Zeit zum Zeichnen geben
 static void boot(const char* text, int percent)
 {
-    Serial.printf("[Boot] %s\n", text);
+    logDiag("[Boot] %s", text);
     { LvLock lock; deckUiBootStatus(text, percent); }
     vTaskDelay(pdMS_TO_TICKS(120));
 }
@@ -34,7 +36,12 @@ static void boot(const char* text, int percent)
 void setup()
 {
     Serial.begin(115200);                       // UART0 -> USB-C-UART-Port des Boards
-    Serial.println("\n[DeckPad] Start v" FIRMWARE_VERSION);
+    Serial.println();
+    logDiag("[DeckPad] Start v" FIRMWARE_VERSION ", Reset-Grund %d, CPU %u MHz, PSRAM %u KB", (int)esp_reset_reason(),
+            (unsigned)getCpuFrequencyMhz(), (unsigned)(ESP.getPsramSize() / 1024));
+    logDiag("[Display] Pixeltakt %u MHz, Bounce %d Zeilen, Zeichenpuffer %d Zeilen (SRAM), Flush-Stuecke %d Zeilen, Ausrichtung %d px",
+            (unsigned)(EXAMPLE_LCD_PIXEL_CLOCK_HZ / 1000000), (int)(EXAMPLE_RGB_BOUNCE_BUFFER_SIZE / EXAMPLE_LCD_H_RES),
+            LVGL_PORT_BUF_LINES, LVGL_PORT_FLUSH_CHUNK_LINES, LVGL_PORT_ALIGN_PX);
     setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);   // Mitteleuropäische Zeit; die Uhrzeit selbst kommt später vom PC
     tzset();
 
@@ -81,8 +88,9 @@ void setup()
     vTaskDelay(pdMS_TO_TICKS(500));
     if (lvgl_port_lock(-1)) { nav_goto(SCREEN_ID_SCREEN_1); lvgl_port_unlock(); }
 
-    Serial.printf("[Mem] SRAM frei %u | PSRAM frei %u\n",
-                  (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL), (unsigned)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+    logDiag("[Mem] nach dem Start: SRAM frei %u (groesster Block %u) | PSRAM frei %u",
+            (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL), (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL),
+            (unsigned)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
 }
 
 void loop()

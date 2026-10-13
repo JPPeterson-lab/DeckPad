@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include "lvgl_port.h"
 #include "src/ui/screens.h"
+#include <stdint.h>
 
 static const char *TAG = "lv_port";
 static SemaphoreHandle_t lvgl_mux;
@@ -29,20 +30,37 @@ static void monitor_cb(lv_disp_drv_t *, uint32_t ms, uint32_t px)
 }
 #endif
 
+static volatile LvglFlushStats s_stats = {0, 0, 0, 0};
+
+void lvglPortPeekFlushStats(LvglFlushStats& out)
+{
+    out.count = s_stats.count; out.sumUs = s_stats.sumUs; out.maxUs = s_stats.maxUs; out.maxPx = s_stats.maxPx;
+}
+
+void lvglPortTakeFlushStats(LvglFlushStats& out)
+{
+    lvglPortPeekFlushStats(out);
+    s_stats.count = s_stats.sumUs = s_stats.maxUs = s_stats.maxPx = 0;
+}
+
 static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
 {
     esp_lcd_panel_handle_t panel = (esp_lcd_panel_handle_t)drv->user_data;
-#if LVGL_PORT_PERF_LOG
     int64_t t0 = esp_timer_get_time();
-#endif
     // Kopiert den Bereich synchron in den Framebuffer (inkl. Cache-Rückschreiben), in kleinen Stücken
     const int w = area->x2 - area->x1 + 1;
     for (int y = area->y1; y <= area->y2; y += LVGL_PORT_FLUSH_CHUNK_LINES) {
         int yEnd = min(y + LVGL_PORT_FLUSH_CHUNK_LINES, (int)area->y2 + 1);
         esp_lcd_panel_draw_bitmap(panel, area->x1, y, area->x2 + 1, yEnd, color_map + (size_t)(y - area->y1) * w);
     }
+    uint32_t us = (uint32_t)(esp_timer_get_time() - t0);
+    uint32_t px = (uint32_t)w * (uint32_t)(area->y2 - area->y1 + 1);
+    s_stats.count = s_stats.count + 1;
+    s_stats.sumUs = s_stats.sumUs + us;
+    if (us > s_stats.maxUs) s_stats.maxUs = us;
+    if (px > s_stats.maxPx) s_stats.maxPx = px;
 #if LVGL_PORT_PERF_LOG
-    flush_us_sum += (uint32_t)(esp_timer_get_time() - t0);
+    flush_us_sum += us;
 #endif
     lv_disp_flush_ready(drv);
 }
