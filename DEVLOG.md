@@ -6,6 +6,8 @@
 
 **Verdacht, nicht bestätigt.** Jeder Profilwechsel schrieb `config.json` in den Flash (`saveConfig()`), ohne dass es im Log stand. Ein Schreibvorgang dauert laut Log bis über 100 ms und stoppt den Cache; der RGB-Treiber ist nicht IRAM-sicher (`CONFIG_LCD_RGB_ISR_IRAM_SAFE`, siehe XL-DEVLOG „OTA-Test: Display flackert“). Dazu kommt der Neuaufbau von 15 Kacheln mit Theme-Wechsel in einem Zug. Das passt zu „nach ein paar Mal“, ist aber noch keine Messung. Gegenmaßnahme ohne Nachteil: die Auswahl erst 8 s nach dem letzten Wechsel schreiben. Zusätzlich wird jeder Wechsel mit der Aufbaudauer protokolliert und jeder Flush über 20 ms mit Bereich ins Log geschrieben, damit sich Streifen einem Ereignis zuordnen lassen.
 
+**Ergebnis vom Gerät (v0.2.1).** Rund 25 Profilwechsel hintereinander: „sieht besser aus“. Im Log keine einzige Zeile `[Flush] langsam` (also kein Flush über 20 ms), der Kachel-Aufbau dauert 12–27 ms, die Auswahl wurde nur nach Pausen geschrieben (`[Flash] … 16–19 ms`). Das stützt den Verdacht auf die Flash-Schreibzugriffe, beweist ihn aber nicht: Es ist keine Messung vor und nach der Änderung mit gleichem Ablauf, und ob die Streifen ganz verschwunden sind, ist nicht festgehalten. Offen bleiben Schreibzugriffe, die sich nicht verschieben lassen (z. B. Profil vom Editor speichern, ca. 116 ms). Beobachten, ob Streifen kurz nach einer `[Flash]`-Zeile auftauchen.
+
 **Vorgehen.** Wie im XL nur eine Änderung auf einmal: nach v0.2.1 mehrfach Profile wechseln. Tauchen die Streifen weiter auf, `LOG` und `STATUS` direkt danach lesen (`[Flush] langsam`, `[UI] … Aufbau … ms`) und die nächste Maßnahme wählen (Raster-Aufbau in Teilen, Übergänge abschalten, Pixeltakt senken).
 
 ---
