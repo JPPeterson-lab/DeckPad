@@ -361,13 +361,6 @@ void create_screen_screen_1() {
             }
         }
         {
-            // containergrid
-            lv_obj_t *obj = lv_obj_create(parent_obj);
-            objects.containergrid = obj;
-            lv_obj_set_pos(obj, 27, 87);
-            lv_obj_set_size(obj, 950, 384);
-        }
-        {
             // labelconnectionpc
             lv_obj_t *obj = lv_label_create(parent_obj);
             objects.labelconnectionpc = obj;
@@ -408,6 +401,18 @@ void create_screen_screen_1() {
                     lv_obj_center(obj);
                 }
             }
+        }
+        {
+            // containergrid
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            objects.containergrid = obj;
+            lv_obj_set_pos(obj, 27, 87);
+            lv_obj_set_size(obj, 950, 384);
+            lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+            lv_obj_set_style_pad_all(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, LV_OPA_TRANSP, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         }
     }
 
@@ -576,10 +581,10 @@ void delete_screen_screen_1() {
     objects.labelbuttonbackward_label = 0;
     objects.labelbuttonforward = 0;
     objects.labelbuttonforward_label = 0;
-    objects.containergrid = 0;
     objects.labelconnectionpc = 0;
     objects.buttonsetting = 0;
     objects.buttonsetting_label = 0;
+    objects.containergrid = 0;
 }
 
 void delete_screen_screenboot() {
