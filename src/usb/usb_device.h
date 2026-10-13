@@ -13,10 +13,12 @@ void usbDeviceInit();
 // true, solange der PC das Geraet erkannt hat (und nicht im Standby ist)
 bool usbHostConnected();
 
-// Taste(n) gleichzeitig druecken und wieder loslassen. usages = HID-Tastencodes (0x04 = A ...)
-// inkl. Modifier (0xE0 = Strg links, 0xE1 = Shift links, 0xE2 = Alt, 0xE3 = Windows ...).
+// Taste(n) gleichzeitig druecken und wieder loslassen.
+//   Wert < 0x100: HID-Tastencode (physische Taste, z. B. 0x28 = Enter, 0xE0 = Strg links, 0xE3 = Windows)
+//   Wert 0x100 | Zeichen: Buchstabe/Ziffer ueber das Tastaturlayout (DECK_KEY_LAYOUT), damit z. B. "z" auf einer
+//   deutschen Tastatur die Taste mit dem Z liefert (nicht die an der US-Position, das waere dort das Y).
 // Blockiert ca. 30 ms - nicht aus dem LVGL-Task aufrufen, sondern ueber deck_actions.
-void usbKeyChord(const uint8_t* usages, uint8_t count);
+void usbKeyChord(const uint16_t* keys, uint8_t count);
 
 // Eine Consumer-Taste (Lautstaerke, Play/Pause ...) kurz druecken
 void usbConsumerTap(uint16_t usage);

@@ -2,6 +2,15 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.3.1 (2026-10-13)
+
+### New
+- **"Tasten am PC ausführen" (run keys on the PC):** second switch on the settings screen (default: off). Then the board does not act as a USB keyboard but sends every action as `DO <type> <spec>` over the COM port, and the **Windows helper** performs keys, media keys, text and program launches (`SendInput`, `Start-Process`). Meant for boards without a USB keyboard (e.g. the planned ESP32-P4 board) and as a fallback. Without the helper nothing happens (note in the log and on the display)
+- The helper now listens to the device every 40 ms (previously only 0.6 s); the foreground window is still checked every 0.6 s
+
+### Fixed
+- **Shortcuts with Z or Y were swapped on German keyboards:** letters and digits were sent as the *physical* key of the US layout; on a German layout the Z position is the Y (`ctrl+z` arrived as Ctrl+Y). Letters and digits now follow the PC's layout (`DECK_KEY_LAYOUT`, default German). Affects e.g. the example profile "Bambu Studio" (undo). Ctrl+Shift+M, Ctrl+C/V, Ctrl+S were not affected. With a US-layout PC set `DECK_KEY_LAYOUT` to `KeyboardLayout_en_US`
+
 ## v0.3.0 (2026-10-13)
 
 ### New

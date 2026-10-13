@@ -7,6 +7,9 @@
 #include "../usb/usb_device.h"
 #include "../usb/usb_cdc.h"
 #include "USBHIDConsumerControl.h"
+#include "profiles.h"
+#include "settings_extras.h"
+#include "diag_log.h"
 
 // ── Namenstabellen ────────────────────────────────────────────────────────────
 struct NameCode { const char* name; uint16_t code; };
@@ -46,11 +49,9 @@ static int keyCode(const char* s, size_t len)
 {
   int c = lookup(KEYS, sizeof(KEYS) / sizeof(KEYS[0]), s, len);
   if (c >= 0) return c;
-  if (len == 1) {
+  if (len == 1) {                                  // Buchstaben/Ziffern ueber das Layout (siehe usbKeyChord)
     char ch = (char)tolower((unsigned char)s[0]);
-    if (ch >= 'a' && ch <= 'z') return 0x04 + (ch - 'a');
-    if (ch >= '1' && ch <= '9') return 0x1E + (ch - '1');
-    if (ch == '0') return 0x27;
+    if ((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) return 0x100 | ch;
   }
   if ((s[0] == 'f' || s[0] == 'F') && len >= 2 && len <= 3) {
     int n = atoi(s + 1);
@@ -60,8 +61,8 @@ static int keyCode(const char* s, size_t len)
   return -1;
 }
 
-// "ctrl+shift+m" -> {0xE0, 0xE1, 0x10}; Rueckgabe: Anzahl oder 0 bei Syntaxfehler (max. 8 Teile)
-static uint8_t parseKeys(const char* spec, uint8_t* out, uint8_t maxN)
+// "ctrl+shift+m" -> {0xE0, 0xE1, 0x16D}; Rueckgabe: Anzahl oder 0 bei Syntaxfehler (max. 8 Teile)
+static uint8_t parseKeys(const char* spec, uint16_t* out, uint8_t maxN)
 {
   uint8_t n = 0;
   const char* p = spec;
@@ -72,7 +73,7 @@ static uint8_t parseKeys(const char* spec, uint8_t* out, uint8_t maxN)
     if (!len || n >= maxN) return 0;
     int c = keyCode(p, len);
     if (c < 0) return 0;
-    out[n++] = (uint8_t)c;
+    out[n++] = (uint16_t)c;
     p = *e ? e + 1 : e;
   }
   return n;
@@ -91,7 +92,7 @@ DeckActionType deckActionTypeFromName(const char* name)
 
 bool deckActionValid(DeckActionType type, const char* spec)
 {
-  uint8_t tmp[8];
+  uint16_t tmp[8];
   switch (type) {
     case ACT_NONE:  return true;
     case ACT_MEDIA: return lookup(MEDIA, sizeof(MEDIA) / sizeof(MEDIA[0]), spec, strlen(spec)) >= 0;
@@ -109,6 +110,14 @@ static QueueHandle_t s_queue = nullptr;
 
 static void execute(const Job& j)
 {
+  // Modus "Aktionen am PC": nichts ueber die USB-Tastatur senden, sondern dem PC-Helfer sagen, was er tun soll
+  if (profilesHostActions() && j.type != ACT_NONE && j.type != ACT_HOST) {
+    if (!settingsExtrasHelperAlive()) { logDiag("[Aktion] %s '%s': PC-Helfer nicht erkannt", deckActionTypeName(j.type), j.spec); return; }
+    char line[DECK_SPEC_MAX + 16];
+    snprintf(line, sizeof(line), "DO %s %s", deckActionTypeName(j.type), j.spec);
+    usbCdcSendLine(line);
+    return;
+  }
   // Auch ohne gemeldete Verbindung senden: die USB-Bibliothek verwirft Berichte, wenn der PC nicht bereit ist,
   // und ein verpasstes Verbindungs-Ereignis soll nicht alle Tasten stilllegen.
   if (!usbHostConnected() && j.type != ACT_NONE)
@@ -120,15 +129,15 @@ static void execute(const Job& j)
       break;
     }
     case ACT_KEYS: {
-      uint8_t k[8];
-      uint8_t n = parseKeys(j.spec, k, sizeof(k));
+      uint16_t k[8];
+      uint8_t n = parseKeys(j.spec, k, 8);
       if (n) usbKeyChord(k, n);
       break;
     }
     case ACT_TEXT: usbTypeText(j.spec); break;
     case ACT_RUN: {                                  // Win+R oeffnet "Ausfuehren", dort Pfad/Programm/Link + Enter
-      const uint8_t winR[2] = { 0xE3, 0x15 };
-      const uint8_t enter = 0x28;
+      const uint16_t winR[2] = { 0xE3, 0x15 };   // Win + R (physische Tasten, auf jedem Layout gleich)
+      const uint16_t enter = 0x28;
       usbKeyChord(winR, 2);
       vTaskDelay(pdMS_TO_TICKS(700));                // dem Dialog Zeit zum Oeffnen geben
       usbTypeText(j.spec);

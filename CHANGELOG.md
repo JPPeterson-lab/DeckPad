@@ -2,6 +2,15 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.3.1 (2026-10-13)
+
+### Neu
+- **„Tasten am PC ausführen“:** zweiter Schalter im Einstellungs-Screen (Standard: aus). Dann tritt das Board nicht als USB-Tastatur auf, sondern schickt jede Aktion als `DO <typ> <angabe>` über den COM-Port, und der **Windows-Helfer** führt Tasten, Medientasten, Text und Programmstarts aus (`SendInput`, `Start-Process`). Gedacht für Boards ohne USB-Tastatur (z. B. das geplante ESP32-P4-Board) und als Ausweichweg. Ohne Helfer passiert nichts (Hinweis im Log und am Display)
+- Der Helfer hört jetzt alle 40 ms auf das Gerät (vorher nur 0,6 s), das Vordergrundfenster wird weiter alle 0,6 s geprüft
+
+### Behoben
+- **Tastenkürzel mit Z oder Y waren auf deutschen Tastaturen vertauscht:** Buchstaben und Ziffern wurden als *physische* Taste der US-Belegung gesendet, auf deutscher Belegung ist das Z dort das Y (`ctrl+z` kam als Strg+Y an). Jetzt folgen Buchstaben und Ziffern dem Layout des PCs (`DECK_KEY_LAYOUT`, Standard Deutsch). Betrifft z. B. das Beispielprofil „Bambu Studio“ (Rückgängig). Strg+Shift+M, Strg+C/V, Strg+S waren nicht betroffen. Wer einen PC mit US-Belegung nutzt, stellt `DECK_KEY_LAYOUT` auf `KeyboardLayout_en_US`
+
 ## v0.3.0 (2026-10-13)
 
 ### Neu

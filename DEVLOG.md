@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.3.1: Aktionen über den Helfer, Layout-Fehler
+
+**Fehler in meiner Annahme (behoben).** In v0.1.0 hatte ich Tastenkombinationen über HID-Codes der *physischen* Taste gesendet und das als Vorteil dargestellt („unabhängig vom Windows-Layout“). Das stimmt nur für Tasten, die in beiden Layouts an derselben Stelle dasselbe Zeichen liefern. Bei Y/Z ist es falsch: `ctrl+z` kam auf deutscher Belegung als Strg+Y an, das mitgelieferte Beispielprofil „Bambu Studio“ hatte damit „Rückgängig“ und „Wiederholen“ vertauscht. Aufgefallen ist es bei der Planung des Helfer-Modus, weil `SendInput` mit virtuellen Tastencodes (VK) dem Layout folgt und beide Wege sonst unterschiedlich reagiert hätten. Jetzt gehen Buchstaben und Ziffern auch am Board über das Layout (`usbKeyChord` nimmt `0x100 | Zeichen`, die Bibliothek löst es über die Layout-Tabelle auf), Sondertasten und Modifier bleiben physisch. Das Layout ist eine Einstellung im Code (`DECK_KEY_LAYOUT`), weil das Board das Layout des PCs nicht kennen kann.
+
+**Aktionen über den Helfer.** Anlass ist das ESP32-P4-Board: Dessen USB-Anschlüsse erlauben ohne Bastelei keine Tastatur (siehe Schaltplan: UART-Port am CH343, „USB1.1“ am festen Serial/JTAG-Controller). Der Modus `hostactions` leitet jede Aktion als `DO …` über den COM-Port um; der PowerShell-Helfer setzt sie mit `SendInput` (Tasten, Text als Unicode-Zeichen) und `Start-Process` um. `Start-Process` ist für Programmstarts besser als Win+R, weil kein Dialog nötig ist. Medientasten nutzen die VK-Codes (`VK_VOLUME_UP` …). Das Verhalten ist beim S3 identisch zur USB-Tastatur, nur mit einem Programm dazwischen und etwas mehr Verzögerung.
+
+**Ungetestet:** Helfer-Aktionen (PowerShell/`SendInput`), Schalter, Layout-Korrektur am Gerät.
+
+---
+
 ## 2026-10-13 – v0.3.0: Icons, Auto-Profilwechsel, Statusfarbe
 
 **Icons.** Format: 4 Byte Kopf (`DI`, Breite, Höhe) und danach 3 Byte je Pixel (RGB565 low/high, Alpha), das ist LVGL `LV_IMG_CF_TRUE_COLOR_ALPHA` bei 16 Bit Farbtiefe, sodass das Gerät die Datei direkt als `lv_img_dsc_t` verwenden kann. Der Browser rechnet um: Emoji oder Bild auf ein Canvas (contain, Transparenz bleibt), `getImageData`, RGB565. Übertragung als Base64 in Zeilen zu 3200 Zeichen (2400 Byte), weil eine COM-Zeile höchstens 6 KB hat. Die Pixeldaten liegen im PSRAM, solange die Kachel existiert, und werden nach `lv_obj_clean` freigegeben. Sie werden beim Aufbau aus dem Flash gelesen (kein Dauer-Cache; 15 Kacheln × 48 × 48 × 3 Byte ≈ 100 KB). Bilder im PSRAM belasten die gleiche Bandbreite wie der Framebuffer, daher klein halten (Hinweis im Editor). Die Kachel nutzt Flex-Column (Icon oben, Text darunter).

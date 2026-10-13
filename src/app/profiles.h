@@ -34,6 +34,8 @@ const ProfileInfo& profileInfo(int index);
 int   profileActiveIndex();
 const DeckProfile& profileActive();
 bool  profileActivate(int index);                  // laden; die Auswahl wird verzoegert gespeichert (siehe profilesTick)
+bool  profilesHostActions();                       // Tasten vom PC-Helfer statt ueber die USB-Tastatur ausfuehren (Standard: aus)
+void  profilesSetHostActions(bool on);
 bool  profilesAutoSwitch();                        // automatischer Profilwechsel nach dem Vordergrund-Programm (Standard: aus)
 void  profilesSetAutoSwitch(bool on);              // wird verzoegert gespeichert
 int   profileIndexByExe(const char* exe);          // Profil zu einem Programmnamen (ohne Beachtung von Gross-/Kleinschreibung und ".exe"), -1 = keins

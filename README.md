@@ -1,7 +1,7 @@
 # 🎛️ DeckPad
 
 ![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.3.0-blue?style=flat-square&cacheSeconds=1)
+![Version](https://img.shields.io/badge/Version-v0.3.1-blue?style=flat-square&cacheSeconds=1)
 ![Hardware](https://img.shields.io/badge/Hardware-Waveshare%20ESP32--S3--Touch--LCD--7B-red?style=flat-square&logo=espressif&logoColor=white)
 ![Display](https://img.shields.io/badge/Display-7%22%201024×600%20RGB-informational?style=flat-square)
 ![Lizenz](https://img.shields.io/badge/Lizenz-CC%20BY--NC%204.0-lightgrey?style=flat-square)
@@ -11,7 +11,7 @@
 
 Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (gleiches Board). Das Projekt läuft vollständig in der **Arduino IDE**, ohne WLAN und ohne OTA.
 
-> **🟠 Alpha (v0.3.0):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
+> **🟠 Alpha (v0.3.1):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
 
 ---
 
@@ -30,6 +30,7 @@ Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](htt
 | Eigene Partitionstabelle ohne OTA (4 MB App, 11,9 MB Daten) | ✅ geprüft (Tabelle gebaut und gelesen) |
 | Profile am PC bearbeiten und per CDC übertragen (DeckPad Editor, Web Serial) | 🧪 gebaut, im Demo-Modus getestet, am Gerät ungetestet |
 | Uhrzeit vom PC per CDC (setzt der Editor beim Verbinden) | 🧪 gebaut, ungetestet |
+| Aktionen über den PC-Helfer statt USB-Tastatur (Schalter + PowerShell) | 🧪 gebaut, ungetestet |
 | Icons auf Kacheln (Emoji oder eigene Bilder, Upload über den Editor) | 🧪 gebaut, ungetestet |
 | Automatischer Profilwechsel nach aktivem Programm (Schalter + PC-Helfer, PowerShell) | 🧪 gebaut, ungetestet |
 | Statusanzeige „PC verbunden“ grün / „Kein PC“ rot | 🧪 gebaut, ungetestet |
@@ -101,7 +102,10 @@ Das DeckPad kann das Profil nach dem Programm im Vordergrund wählen. Einschalte
 2. `start-helper.cmd` doppelklicken; für den Autostart eine Verknüpfung darauf in den Ordner `shell:startup` legen.
 3. Im Profil das Feld **Programm** ausfüllen (z. B. `bambu-studio.exe`, den Namen zeigt der Task-Manager). Für Programme ohne eigenes Profil gilt **Standard**.
 
-Der Einstellungs-Screen zeigt, ob der Helfer erkannt wird. Ein COM-Port gehört immer nur einem Programm: Der Helfer gibt ihn frei, solange der Editor im Vordergrund ist; bleibt der Editor verbunden, bitte **„Trennen“** klicken. Der Helfer sendet nur den Namen des Vordergrundprogramms (z. B. `chrome.exe`) an das DeckPad und sonst nichts.
+Der Einstellungs-Screen zeigt, ob der Helfer erkannt wird. Ein COM-Port gehört immer nur einem Programm: Der Helfer gibt ihn frei, solange der Editor im Vordergrund ist; bleibt der Editor verbunden, bitte **„Trennen“** klicken. Der Helfer sendet nur den Namen des Vordergrundprogramms (z. B. `chrome.exe`) an das DeckPad.
+
+### Tasten am PC ausführen (ohne USB-Tastatur)
+Zweiter Schalter in den Einstellungen: **„Tasten am PC ausführen“** (Standard: aus). Dann sendet das Board die Aktionen über den COM-Port, und **derselbe Helfer** führt sie aus (Tasten, Medientasten, Text, Programmstart). Das ist für Boards gedacht, die sich nicht als USB-Tastatur anmelden können, und als Ausweichweg. Ohne laufenden Helfer passiert beim Antippen nichts. In diesem Modus liest der Helfer auch, was das Gerät schickt, und führt es aus; deshalb nur Helfer laufen lassen, die du kennst. Tastaturlayout: Buchstaben und Ziffern in Kürzeln folgen dem Layout des PCs (Standard Deutsch, einstellbar über `DECK_KEY_LAYOUT` in `app_config.h`).
 
 ## 🔌 Hardware
 
@@ -196,7 +200,7 @@ Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [Pico
 
 Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (same board). The project builds entirely in the **Arduino IDE**, with no Wi-Fi and no OTA.
 
-> **🟠 Alpha (v0.3.0):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
+> **🟠 Alpha (v0.3.1):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
 
 ## 📊 Status
 
@@ -213,6 +217,7 @@ Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus 
 | Custom partition table without OTA (4 MB app, 11.9 MB data) | ✅ verified (table built and read back) |
 | Edit profiles on the PC and transfer them via CDC (DeckPad Editor, Web Serial) | 🧪 built, tested in demo mode, untested on the device |
 | Time from the PC via CDC (the editor sets it on connect) | 🧪 built, untested |
+| Actions via the PC helper instead of a USB keyboard (switch + PowerShell) | 🧪 built, untested |
 | Icons on tiles (emoji or own images, upload via the editor) | 🧪 built, untested |
 | Automatic profile switch by active program (switch + PC helper, PowerShell) | 🧪 built, untested |
 | Status display "PC verbunden" green / "Kein PC" red | 🧪 built, untested |
@@ -264,7 +269,10 @@ The DeckPad can pick the profile by the program in the foreground. Enable it: **
 2. Double-click `start-helper.cmd`; for autostart put a shortcut to it into the folder `shell:startup`.
 3. Fill the profile's **Programm** field (e.g. `bambu-studio.exe`, the Task Manager shows the name). Programs without their own profile get **Standard**.
 
-The settings screen shows whether the helper is detected. A COM port can belong to one program only: the helper releases it while the editor is in the foreground; if the editor stays connected please click **"Trennen"**. The helper only sends the name of the foreground program (e.g. `chrome.exe`) to the DeckPad and nothing else.
+The settings screen shows whether the helper is detected. A COM port can belong to one program only: the helper releases it while the editor is in the foreground; if the editor stays connected please click **"Trennen"**. The helper only sends the name of the foreground program (e.g. `chrome.exe`) to the DeckPad.
+
+### Run keys on the PC (without a USB keyboard)
+Second switch in the settings: **"Tasten am PC ausführen"** (default: off). Then the board sends the actions over the COM port and **the same helper** performs them (keys, media keys, text, program launch). This is meant for boards that cannot enumerate as a USB keyboard, and as a fallback. Without a running helper nothing happens when you tap. In this mode the helper reads what the device sends and executes it, so only run helpers you know. Keyboard layout: letters and digits in shortcuts follow the PC's layout (default German, set via `DECK_KEY_LAYOUT` in `app_config.h`).
 
 ## 🔌 Hardware
 

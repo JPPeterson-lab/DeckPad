@@ -33,7 +33,7 @@ void usbDeviceInit()
   USB.manufacturerName(DECK_USB_MANUFACTURER);
   USB.productName(DECK_USB_PRODUCT);
 
-  s_keyboard.begin(KeyboardLayout_de_DE);   // nur fuer usbTypeText; Tastenkombis nutzen Raw-Codes
+  s_keyboard.begin(DECK_KEY_LAYOUT);        // Layout des PCs: gilt fuer Text und fuer Buchstaben/Ziffern in Tastenkombinationen
   s_consumer.begin();
   DeckSerial.setRxBufferSize(8192);         // Platz fuer spaeter uebertragene Profile (JSON)
   DeckSerial.setTxTimeoutMs(1000);           // grosse Antworten (Icons bis 37 KB) brauchen mehr als die Standard-250 ms
@@ -44,9 +44,12 @@ void usbDeviceInit()
 
 bool usbHostConnected() { return s_hostUp; }
 
-void usbKeyChord(const uint8_t* usages, uint8_t count)
+void usbKeyChord(const uint16_t* keys, uint8_t count)
 {
-  for (uint8_t i = 0; i < count; i++) s_keyboard.pressRaw(usages[i]);
+  for (uint8_t i = 0; i < count; i++) {
+    if (keys[i] & 0x100) s_keyboard.press((uint8_t)(keys[i] & 0xFF));   // Zeichen -> Taste laut Layout
+    else                 s_keyboard.pressRaw((uint8_t)keys[i]);
+  }
   delay(25);                                // kurz halten, damit Windows die Kombination sicher erkennt
   s_keyboard.releaseAll();
 }

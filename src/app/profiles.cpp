@@ -216,6 +216,7 @@ static void builtinFallback()                      // wenn der Flash-Speicher ni
 // Die Profilauswahl wird nicht bei jedem Wechsel geschrieben: Flash-Schreibzugriffe stoppen kurz den Cache
 // (damit auch den PSRAM-Zugriff des Displays) und verschleissen den Flash. Stattdessen merken und spaeter schreiben.
 static bool     s_autoSwitch = false;
+static bool     s_hostActions = false;
 static bool     s_cfgDirty = false;
 static uint32_t s_cfgT = 0;
 #define CFG_SAVE_DELAY_MS 8000
@@ -236,6 +237,7 @@ void profilesTick()
   JsonDocument doc;
   doc["active"] = s_list[s_active].id;
   doc["autoswitch"] = s_autoSwitch;
+  doc["hostactions"] = s_hostActions;
   File f = LittleFS.open(DECK_CONFIG_FILE, "w");
   if (f) { serializeJson(doc, f); f.close(); }
   logDiag("[Flash] Auswahl '%s' geschrieben, %lu ms", s_list[s_active].id, (unsigned long)(millis() - t0));
@@ -277,6 +279,7 @@ bool profilesInit()
     JsonDocument doc;
     if (!deserializeJson(doc, f)) {
       s_autoSwitch = doc["autoswitch"] | false;
+      s_hostActions = doc["hostactions"] | false;
       const char* a = doc["active"] | "";
       for (int i = 0; i < s_count; i++) if (strcmp(s_list[i].id, a) == 0) s_active = i;
     }
@@ -373,6 +376,8 @@ bool profileImportJson(const char* id, const char* json, const char*& err)
   return ok;
 }
 
+bool profilesHostActions() { return s_hostActions; }
+void profilesSetHostActions(bool on) { s_hostActions = on; saveConfig(); }
 bool profilesAutoSwitch() { return s_autoSwitch; }
 void profilesSetAutoSwitch(bool on) { s_autoSwitch = on; saveConfig(); }
 
