@@ -81,7 +81,7 @@ Beim ersten Start legt das Gerät zwei **Beispielprofile** an: **Standard** (Lau
 
 ## 🖥️ Profile am PC erstellen (DeckPad Editor)
 
-Datei **`tools/editor/deckpad-editor.html`** auf den Windows-PC kopieren (aus dem privaten Repo als Datei herunterladen), in **Chrome oder Edge** öffnen und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
+Datei **`tools/editor/deckpad-editor.html`** auf den Windows-PC kopieren ([direkter Download](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html), Rechtsklick → *Link speichern unter*), in **Chrome oder Edge** öffnen und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
 - Profil wählen oder **Neu** / **Kopie** anlegen, **Name**, Programm, Raster, Design und Helligkeit einstellen,
 - eine **Kachel anklicken**: Beschriftung, **Farbe** (Farbwähler oder Palette), **Aktion**: Medien/Lautstärke, **Tastenkombination**, **Programm, Datei oder Link starten**, Text tippen,
 - **„Auf DeckPad speichern“**: Das Gerät übernimmt das Profil sofort. **„Auf dem Gerät aktivieren“** schaltet es um.
@@ -231,7 +231,7 @@ On first start the device creates two **example profiles**: **Standard** (volume
 
 ## 🖥️ Creating profiles on the PC (DeckPad Editor)
 
-Copy **`tools/editor/deckpad-editor.html`** to the Windows PC (download it as a file from the private repo), open it in **Chrome or Edge** and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
+Copy **`tools/editor/deckpad-editor.html`** to the Windows PC ([direct download](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html), right-click → *Save link as*), open it in **Chrome or Edge** and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
 - pick a profile or create **Neu** (new) / **Kopie** (copy), set **name**, program, grid, theme and brightness,
 - **click a tile**: label, **colour** (picker or palette), **action**: media/volume, **key combination**, **start a program, file or link**, type text,
 - **"Auf DeckPad speichern"** (save): the device applies the profile immediately. **"Auf dem Gerät aktivieren"** switches to it.
