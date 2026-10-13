@@ -7,6 +7,7 @@
 ### New
 - **DeckPad Editor** (`tools/editor/deckpad-editor.html`): create, edit, copy, delete and activate profiles on the **Windows PC** in the browser (Chrome/Edge, Web Serial). Click tiles, set label, **colour** (picker and palette), **action** (media, key combination with modifier boxes and key capture, start a program, text, host message) and quick-pick templates. Back up a profile as a file, demo mode without a device. Sets the PC's **time** on connect. Shows status and device log
 - **Editor online:** available via GitHub Pages (<https://jppeterson-lab.github.io/DeckPad/>), nothing to install. `tools/deploy_editor.sh` copies the file to `docs/index.html`
+- **Editor recognises the wrong port:** the chooser only lists Espressif devices (VID 0x303A), i.e. the native USB port; the UART port (CH343) is recognised and explained. "Alle Ports anzeigen" (show all ports) removes the filter
 - **Action `run`:** starts a program, file or link via Win+R (program name, path, web address). The device presses Win+R, types the text and confirms with Enter
 - **COM commands:** `VER`, `LIST`, `GET <id>`, `PUT <id> <json>`, `DEL <id>`, `USE <id>`, `TIME <unix seconds>` (in addition to `PING`, `STATUS`, `LOG`). The device applies changes immediately (roller, grid, colours)
 - **Layers:** the USB layer only knows the channel; commands are registered by `app/host_commands.cpp`
@@ -44,5 +45,5 @@ First skeleton. The code compiles; a test on the device is still pending.
 - The 15 static tile containers on the deck screen were replaced by **one** placeholder container `ContainerGrid` (27, 87, 950 × 384). The old containers 1–6 and 9–17 still have to be deleted in PicoPixel; `deploy_ui.sh` reports them as long as they exist
 
 ### Known
-- Polarity of IO5 (`0` = USB) and the connection event not yet confirmed on the device
+- The connection event on the device is not yet confirmed (the polarity of IO5, `0` = USB, is confirmed by the Waveshare documentation)
 - The time shows `--:--` until a later step sets it from the PC

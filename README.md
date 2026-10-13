@@ -102,7 +102,7 @@ Der Editor setzt beim Verbinden außerdem die **Uhrzeit** des PCs und zeigt Stat
 
 ### ⚠️ USB-Pins GPIO19/20 teilen sich USB und CAN
 Das Board führt USB und den CAN-Transceiver auf **dieselben Pins GPIO19/20**. Über **IO5 des IO-Expanders** wird umgeschaltet (laut Waveshare-Header: `0` = USB, `1` = CAN). Die RGB-Panel-Pins überschneiden sich nicht mit GPIO19/20, USB ist also nutzbar – **aber**: Der Expander merkt sich alle acht Ausgänge, und der Treiber aus dem WetterCubePlus XL schreibt sie bei jedem Zugriff (Touch-Reset, Backlight). Wird IO5 nie gesetzt, steht er nach dem Start auf `1` (= CAN) und der native USB-Port bleibt stumm. Das DeckPad setzt IO5 deshalb nach der Display-/Touch-Initialisierung explizit (`DECK_USB_SELECT_LEVEL` in `src/app/app_config.h`).
-Konsequenzen: **CAN ist im DeckPad nicht nutzbar**. Falls der PC das Board nicht erkennt, `DECK_USB_SELECT_LEVEL` auf `1` setzen (Polarität am Gerät noch nicht bestätigt, die Waveshare-Beispiele sind an einer Stelle widersprüchlich).
+Konsequenzen: **CAN ist im DeckPad nicht nutzbar**. Die Polarität (`0` = USB) bestätigt die [Waveshare-Dokumentation](https://docs.waveshare.com/ESP32-S3-Touch-LCD-7B) („EXIO5 low = USB-Modus“).
 
 ---
 
@@ -252,7 +252,7 @@ On connect the editor also sets the PC's **time** and shows status and device lo
 
 ### ⚠️ GPIO19/20 are shared between USB and CAN
 The board routes USB and the CAN transceiver to the **same pins GPIO19/20**. **IO5 of the IO expander** switches them (per the Waveshare header: `0` = USB, `1` = CAN). The RGB panel pins do not overlap with GPIO19/20, so USB is usable – **but** the expander remembers all eight outputs and the driver from the WetterCubePlus XL rewrites them on every access (touch reset, backlight). If IO5 is never set it ends up at `1` (= CAN) after start-up and the native USB port stays silent. The DeckPad therefore sets IO5 explicitly after the display/touch initialisation (`DECK_USB_SELECT_LEVEL` in `src/app/app_config.h`).
-Consequence: **CAN cannot be used with the DeckPad**. If the PC does not detect the board, set `DECK_USB_SELECT_LEVEL` to `1` (polarity not yet confirmed on the device; the Waveshare examples contradict each other in one place).
+Consequence: **CAN cannot be used with the DeckPad**. The polarity (`0` = USB) is confirmed by the [Waveshare documentation](https://docs.waveshare.com/ESP32-S3-Touch-LCD-7B) ("EXIO5 low = USB mode").
 
 ## 💾 Storage
 
