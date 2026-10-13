@@ -46,12 +46,12 @@ static const uint8_t s_cfgDesc[] = {
   TUD_HID_DESCRIPTOR(ITF_NUM_HID, 5, HID_ITF_PROTOCOL_NONE, sizeof(s_hidReport), EPNUM_HID, 16, 10),
 };
 
-// VID/PID wie im Arduino-Build (Espressif 303A:1001), damit Editor und Helfer das Geraet weiter finden
+// VID/PID siehe app_config.h (eigene PID: 0x1001 gehoert der USB-JTAG-Schnittstelle und kollidiert unter Windows auf MI_02)
 static const tusb_desc_device_t s_devDesc = {
   .bLength = sizeof(tusb_desc_device_t), .bDescriptorType = TUSB_DESC_DEVICE, .bcdUSB = 0x0200,
   .bDeviceClass = TUSB_CLASS_MISC, .bDeviceSubClass = MISC_SUBCLASS_COMMON, .bDeviceProtocol = MISC_PROTOCOL_IAD,
   .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
-  .idVendor = 0x303A, .idProduct = 0x1001, .bcdDevice = 0x0100,
+  .idVendor = DECK_USB_VID, .idProduct = DECK_USB_PID, .bcdDevice = 0x0100,
   .iManufacturer = 1, .iProduct = 2, .iSerialNumber = 3, .bNumConfigurations = 1,
 };
 

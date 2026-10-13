@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – USB unter Windows: PID-Kollision
+
+**Befund.** IDF-Build am Windows-PC: Das Display zeigt „PC verbunden“, aber Tasten tun nichts und der Editor kann den Port nicht öffnen („Failed to open serial port“); der Port heißt jetzt COM9 statt COM6 (neue Seriennummer, erwartet). `Get-PnpDevice`: Das Gerät und der COM-Port sind „OK“, die Schnittstelle MI_02 („DeckPad Tasten“) hat aber die Klasse **USBDevice** statt HIDClass. Am Mac dagegen alles in Ordnung: HID-Tastatur und Consumer mit korrekter Berichtsbeschreibung (Usage-Paare 1/6 und 12/1), CDC antwortet auf `PING`/`VER`/`STATUS`. Die UART-Aufzeichnung zeigte, dass die Tastendrücke das Gerät erreichen und gesendet werden.
+
+**Ursache (Verdacht, durch den Mac-Test eingegrenzt).** 303A:1001 ist die Kennung der USB-JTAG/Seriell-Schnittstelle der Espressif-Chips; deren Windows-Treiber (WinUSB, z. B. durch die IDF/OpenOCD-Einrichtung) bindet sich an `USB\VID_303A&PID_1001&MI_02`. In der Arduino-Firmware lag die Tastatur an anderer Stelle (die Reihenfolge der `begin()`-Aufrufe bestimmt die Interface-Nummern), in der IDF-Firmware ist MI_02 die Tastatur: Windows legt dort WinUSB statt HID an.
+
+**Maßnahme.** Eigene Produkt-ID `303A:4DC0` (`DECK_USB_PID`, für beide Builds), Helfer sucht zuerst `PID_4DC0`, dann `PID_1001`. Provisorisch: Für eine Veröffentlichung eine eigene PID beantragen (Espressif vergibt sie kostenlos, alternativ pid.codes mit VID 0x1209). Am Mac verifiziert, am PC offen.
+
+---
+
 ## 2026-10-13 – ESP-IDF: Ergebnis, Pixeltakt, eigene USB-Schicht
 
 **Streifen weg.** Auf dem Board mit dem IDF-Build (Display-ISR flash-sicher, PSRAM 120 MHz, Code im PSRAM, 64-KB-Cache): fünf Profil-Speichervorgänge hintereinander, keine Streifen. Die Schreibzeiten sinken auf 29–93 ms (Arduino: 68–199 ms). Damit ist die Ursache bestätigt: die vorkompilierte Core-Konfiguration.

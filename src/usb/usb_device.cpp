@@ -42,6 +42,8 @@ void usbDeviceInit()
   logDiag("[USB] IO5 = %d (USB-Pfad aktiv)", DECK_USB_SELECT_LEVEL);
 
   USB.onEvent(onUsbEvent);
+  USB.VID(DECK_USB_VID);
+  USB.PID(DECK_USB_PID);
   USB.manufacturerName(DECK_USB_MANUFACTURER);
   USB.productName(DECK_USB_PRODUCT);
 

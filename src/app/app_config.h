@@ -6,6 +6,11 @@
 // ── USB-Geraet (so meldet sich das Board am Windows-PC an) ─────────────────────
 #define DECK_USB_MANUFACTURER "JPPeterson-lab"
 #define DECK_USB_PRODUCT      "DeckPad"
+// Kennung: Espressif-VID mit eigener PID. 0x1001 gehoert der USB-JTAG/Seriell-Schnittstelle der Chips; deren Windows-Treiber
+// (WinUSB, z. B. durch die IDF/OpenOCD-Einrichtung) bindet sich an USB\VID_303A&PID_1001&MI_02 und verdraengt dort die Tastatur.
+// PID provisorisch: fuer eine Veroeffentlichung eine eigene beantragen (Espressif vergibt sie kostenlos, oder pid.codes mit VID 0x1209).
+#define DECK_USB_VID 0x303A
+#define DECK_USB_PID 0x4DC0
 // IO5 des IO-Expanders schaltet die Pins GPIO19/20 zwischen USB und CAN um.
 // Laut Waveshare-Header: 0 = USB, 1 = CAN. Falls der PC das Board nicht sieht: Wert tauschen.
 #define DECK_USB_SELECT_LEVEL 0

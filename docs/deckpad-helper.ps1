@@ -11,7 +11,7 @@
 # solange ein Fenster mit "DeckPad Editor" im Titel im Vordergrund ist, damit sich der Editor verbinden kann.
 # Bleibt der Editor mit dem Geraet verbunden, den Knopf "Trennen" im Editor benutzen.
 param(
-  [string]$Port = "",          # z. B. COM6; leer = automatisch (USB-Geraet 303A:1001, das DeckPad)
+  [string]$Port = "",          # z. B. COM6; leer = automatisch (USB-Geraet 303A:4DC0, das DeckPad)
   [int]$IntervalMs = 600,      # wie oft das Vordergrundfenster geprueft wird
   [int]$RepeatSec = 3          # unveraendertes Programm so oft erneut melden (Lebenszeichen fuer die Anzeige am Geraet)
 )
@@ -94,9 +94,10 @@ function Get-Foreground {
 
 function Find-DeckPadPort {
   if ($Port) { return $Port }
-  $dev = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue |
-         Where-Object { $_.PNPDeviceID -like 'USB\VID_303A&PID_1001*' -and $_.Name -match '\((COM\d+)\)' } |
-         Select-Object -First 1
+  # Eigene Kennung 303A:4DC0 (neue Firmware), 303A:1001 als Rueckfall (aeltere Firmware)
+  $all = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '\((COM\d+)\)' }
+  $dev = $all | Where-Object { $_.PNPDeviceID -like 'USB\VID_303A&PID_4DC0*' } | Select-Object -First 1
+  if (-not $dev) { $dev = $all | Where-Object { $_.PNPDeviceID -like 'USB\VID_303A&PID_1001*' } | Select-Object -First 1 }
   if ($dev) { [void]($dev.Name -match '\((COM\d+)\)'); return $Matches[1] }
   return $null
 }
