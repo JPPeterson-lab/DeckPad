@@ -2,6 +2,12 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.3.2 (2026-10-13)
+
+### Neu
+- **Display neu zeichnen:** Knopf im Editor und COM-Befehl `REDRAW`. Zeichnet das ganze Display neu. Ist ein Bildstreifen danach weg, war nur der Bildinhalt gestört; bleibt er, liegt es an der Display-Ansteuerung selbst. Dient der Eingrenzung der Streifen am linken Rand
+- **Automatisches Neuzeichnen nach Flash-Schreibzugriffen** (Profil speichern, Icon hochladen, Auswahl sichern): Der RGB-Treiber ist im vorkompilierten Core nicht IRAM-sicher (`CONFIG_LCD_RGB_ISR_IRAM_SAFE` nicht gesetzt), die Ansteuerung setzt beim Schreiben kurz aus. Danach wird einmal der ganze Bildschirm neu gezeichnet; im Log als `[UI] Vollbild neu gezeichnet`
+
 ## v0.3.1 (2026-10-13)
 
 ### Neu

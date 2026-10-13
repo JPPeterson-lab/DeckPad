@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.3.2: Streifen kommen mit Icons wieder
+
+**Log vom Gerät.** Beim Hochladen und Speichern vieler Icons und Profile tauchen die Streifen wieder auf. Im Log: **kein einziger Eintrag `[Flush] langsam`**, auch nicht während der Flash-Schreibzugriffe (Profil 68–199 ms, Icon 30–63 ms, Auswahl 10–14 ms), also kein Flush über 20 ms. Der Profilwechsel kostet 12–28 ms, mit den neuen Icon-Kacheln einmal 71 ms. Damit ist ausgeschlossen, dass ein einzelner langer Kopiervorgang ins PSRAM die Ursache ist (die ursprüngliche XL-Hypothese). Übrig bleibt die Display-Ansteuerung selbst.
+
+**Konfiguration.** `CONFIG_LCD_RGB_ISR_IRAM_SAFE` und `CONFIG_GDMA_ISR_IRAM_SAFE` sind im vorkompilierten Arduino-Core **nicht** gesetzt (`CONFIG_LCD_RGB_RESTART_IN_VSYNC=y` ist gesetzt). Beim Schreiben in den Flash steht der Cache still; der Interrupt, der den Bounce-Buffer des Panels füllt, liegt im Flash-Cache und kann in dieser Zeit nicht laufen. Das Panel wird dann nicht mehr bedient (Flackern, wie beim OTA-Update im XL). Aus dem Sketch lässt sich das nicht ändern, es bräuchte einen Core mit anderer Konfiguration (Arduino-Lib-Builder oder ESP-IDF).
+
+**Was noch offen ist.** Ob die dauerhaften Streifen aus solchen Aussetzern entstehen oder eine andere Ursache haben, ist nicht belegt. Zwei Hilfen: (1) nach jedem Flash-Schreibzugriff zeichnet das Gerät den ganzen Bildschirm einmal neu (falls der Bildinhalt gestört wurde); (2) `REDRAW`/Editor-Knopf „Display neu zeichnen“ als gezielter Test: Verschwindet der Streifen damit, steckt der Fehler im Bildinhalt (Framebuffer), bleibt er, in der Ansteuerung des Panels. Außerdem zeigt das Log jetzt, ob der Streifen zeitlich zu einer `[Flash]`-Zeile passt.
+
+---
+
 ## 2026-10-13 – v0.3.1: Aktionen über den Helfer, Layout-Fehler
 
 **Fehler in meiner Annahme (behoben).** In v0.1.0 hatte ich Tastenkombinationen über HID-Codes der *physischen* Taste gesendet und das als Vorteil dargestellt („unabhängig vom Windows-Layout“). Das stimmt nur für Tasten, die in beiden Layouts an derselben Stelle dasselbe Zeichen liefern. Bei Y/Z ist es falsch: `ctrl+z` kam auf deutscher Belegung als Strg+Y an, das mitgelieferte Beispielprofil „Bambu Studio“ hatte damit „Rückgängig“ und „Wiederholen“ vertauscht. Aufgefallen ist es bei der Planung des Helfer-Modus, weil `SendInput` mit virtuellen Tastencodes (VK) dem Layout folgt und beide Wege sonst unterschiedlich reagiert hätten. Jetzt gehen Buchstaben und Ziffern auch am Board über das Layout (`usbKeyChord` nimmt `0x100 | Zeichen`, die Bibliothek löst es über die Layout-Tabelle auf), Sondertasten und Modifier bleiben physisch. Das Layout ist eine Einstellung im Code (`DECK_KEY_LAYOUT`), weil das Board das Layout des PCs nicht kennen kann.

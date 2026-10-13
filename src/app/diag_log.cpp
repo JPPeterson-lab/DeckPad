@@ -28,6 +28,10 @@ void logDiag(const char* fmt, ...)
   xSemaphoreGive(s_lock);
 }
 
+static volatile uint32_t s_flashWrites = 0;
+void diagFlashWritten() { s_flashWrites = s_flashWrites + 1; }
+uint32_t diagFlashCounter() { return s_flashWrites; }
+
 void logDump(void (*emit)(const char*))
 {
   if (!s_lock) return;

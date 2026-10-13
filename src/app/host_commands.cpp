@@ -114,6 +114,8 @@ static void cmdIconGet(const char* a)
   heap_caps_free(line);
 }
 
+static void cmdRedraw(const char*) { { LvLock lock; deckUiRedrawAll(); } logDiag("[PC] Vollbild neu zeichnen angefordert"); usbCdcSendLine("OK"); }
+
 static void cmdStatus(const char*) { char b[320]; logStatus(b, sizeof(b)); usbCdcSendLine(b); }
 static void emitLine(const char* l) { usbCdcSendLine(l); }
 static void cmdLog(const char*) { usbCdcSendLine("--- LOG Anfang ---"); logDump(emitLine); usbCdcSendLine("--- LOG Ende ---"); }
@@ -134,6 +136,7 @@ void hostCommandsInit()
   usbCdcRegister("ICONLIST",  cmdIconList);
   usbCdcRegister("ICONDEL",   cmdIconDel);
   usbCdcRegister("ICONGET",   cmdIconGet);
+  usbCdcRegister("REDRAW", cmdRedraw);
   usbCdcRegister("STATUS", cmdStatus);
   usbCdcRegister("LOG",    cmdLog);
 }

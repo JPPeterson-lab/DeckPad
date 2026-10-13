@@ -167,6 +167,7 @@ void deckUiProfilesChanged()
 }
 
 void deckUiRebuildGrid() { buildGrid(); }
+void deckUiRedrawAll() { lv_obj_invalidate(lv_scr_act()); }
 
 void deckUiAutoSwitch(const char* exe)
 {
@@ -231,6 +232,10 @@ static void tickCb(lv_timer_t*)
 {
     settingsExtrasTick();
     profilesTick();                                         // verzoegertes Speichern der Profilauswahl
+    // Nach einem Flash-Schreibzugriff ist die Display-Ansteuerung kurz ausgesetzt (der RGB-Treiber ist nicht IRAM-sicher).
+    // Damit nichts Fehlerhaftes stehen bleibt, einmal alles neu zeichnen.
+    static uint32_t lastFlash = 0;
+    if (diagFlashCounter() != lastFlash) { lastFlash = diagFlashCounter(); lv_obj_invalidate(lv_scr_act()); logDiag("[UI] Vollbild neu gezeichnet (nach Flash-Schreibzugriff)"); }
     LvglSlowFlush sf;                                       // Ausreisser-Flushes ins Log (Ringpuffer), damit sie sich Ereignissen zuordnen lassen
     if (lvglPortTakeSlowFlush(sf))
         logDiag("[Flush] langsam: %u mal, max %u us (%u px bei x=%d y=%d %dx%d)", (unsigned)sf.n, (unsigned)sf.maxUs, (unsigned)sf.px, sf.x, sf.y, sf.w, sf.h);

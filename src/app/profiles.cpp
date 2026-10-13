@@ -128,6 +128,7 @@ bool profileSave(const DeckProfile& p)
   bool ok = LittleFS.rename(tmp, path);
   // Flash-Schreibzugriffe stoppen kurz den Cache (auch den PSRAM): hier mit Zeit festhalten, um Bildfehler zuzuordnen
   logDiag("[Flash] Profil '%s' geschrieben: %s, %lu ms", p.id, ok ? "ok" : "FEHLER", (unsigned long)(millis() - t0));
+  diagFlashWritten();
   return ok;
 }
 
@@ -241,6 +242,7 @@ void profilesTick()
   File f = LittleFS.open(DECK_CONFIG_FILE, "w");
   if (f) { serializeJson(doc, f); f.close(); }
   logDiag("[Flash] Auswahl '%s' geschrieben, %lu ms", s_list[s_active].id, (unsigned long)(millis() - t0));
+  diagFlashWritten();
 }
 
 bool profileActivate(int index)

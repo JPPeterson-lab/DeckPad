@@ -2,6 +2,12 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.3.2 (2026-10-13)
+
+### New
+- **Redraw display:** button in the editor and COM command `REDRAW`. Redraws the whole display. If a streak is gone afterwards, only the image content was disturbed; if it stays, the display drive itself is at fault. Used to narrow down the streaks at the left edge
+- **Automatic redraw after flash writes** (saving a profile, uploading an icon, saving the selection): the RGB driver in the precompiled core is not IRAM-safe (`CONFIG_LCD_RGB_ISR_IRAM_SAFE` not set), so the drive pauses briefly during writes. Afterwards the whole screen is redrawn once; in the log as `[UI] Vollbild neu gezeichnet`
+
 ## v0.3.1 (2026-10-13)
 
 ### New

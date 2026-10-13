@@ -94,6 +94,7 @@ bool iconEnd(const char*& err)
   }
   if (ok) { LittleFS.remove(path); ok = LittleFS.rename(tmp, path); } else LittleFS.remove(tmp);
   logDiag("[Flash] Icon '%s' %ux%u geschrieben: %s, %lu ms", s_upId, s_upW, s_upH, ok ? "ok" : "FEHLER", (unsigned long)(millis() - t0));
+  diagFlashWritten();
   upFree();
   if (!ok) err = "Schreiben fehlgeschlagen";
   return ok;
