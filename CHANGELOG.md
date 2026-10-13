@@ -2,6 +2,14 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.3.0 (2026-10-13)
+
+### Neu
+- **Icons auf den Kacheln:** Symbole (Emoji-Auswahl) oder eigene Bilder (PNG, JPG, SVG …), im Editor in 32–80 px umgewandelt und per COM-Port ins Gerät geladen (RGB565 + Alpha, `/icons/<id>.bin`, bis 96 × 96 px). Mehrere Profile können dasselbe Icon nutzen. Die Schnellauswahl im Editor bringt passende Symbole mit. COM-Befehle `ICONBEGIN`, `ICONDATA`, `ICONEND`, `ICONLIST`, `ICONGET`, `ICONDEL`
+- **Automatischer Profilwechsel (einstellbar):** Schalter „Automatischer Profilwechsel“ im Einstellungs-Screen (Standard: aus). Ein kleiner **Windows-Helfer** (`tools/helper/deckpad-helper.ps1`, ohne Installation) meldet das Programm im Vordergrund; das DeckPad wählt das Profil mit passendem Feld „Programm“ (z. B. `bambu-studio.exe`), sonst „Standard“. Der Einstellungs-Screen zeigt, ob der Helfer erkannt wird. COM-Befehl `ACTIVE <programm.exe>`
+- **Editor:** Knopf **„Trennen“** gibt den COM-Port frei (der Helfer gibt ihn außerdem von selbst frei, solange der Editor im Vordergrund ist)
+- **Statusanzeige:** „PC verbunden“ ist grün hinterlegt, „Kein PC“ rot
+
 ## v0.2.1 (2026-10-13)
 
 ### Geändert

@@ -6,6 +6,9 @@
 #include "deck_ui.h"
 #include "diag_log.h"
 #include "lv_lock.h"
+#include "icons.h"
+#include "settings_extras.h"
+#include "esp_heap_caps.h"
 #include "../usb/usb_cdc.h"
 
 // Antworten: Einzeiler. Erfolg "OK", Fehler "ERR <Grund>", LIST/GET/STATUS liefern direkt ihre Daten.
@@ -65,6 +68,52 @@ static void cmdTime(const char* a)
   usbCdcSendLine("OK");
 }
 
+// ACTIVE <programm.exe>   vom PC-Helfer: Vordergrund-Programm gemeldet (wird alle paar Sekunden wiederholt)
+static void cmdActive(const char* a)
+{
+  settingsExtrasHelperSeen();
+  if (!profilesAutoSwitch()) { usbCdcSendLine("OK aus"); return; }
+  { LvLock lock; deckUiAutoSwitch(a); }
+  usbCdcSendLine("OK");
+}
+
+// ICONBEGIN <id> <w> <h>, ICONDATA <base64> (mehrfach), ICONEND
+static void cmdIconBegin(const char* a)
+{
+  char id[32]; int w = 0, h = 0;
+  if (sscanf(a, "%31s %d %d", id, &w, &h) != 3) { err("Format: ICONBEGIN <id> <w> <h>"); return; }
+  const char* why = "";
+  if (!iconBegin(id, w, h, why)) { err(why); return; }
+  usbCdcSendLine("OK");
+}
+static void cmdIconData(const char* a)
+{
+  const char* why = "";
+  if (!iconChunk(a, why)) { err(why); return; }
+  usbCdcSendLine("OK");
+}
+static void cmdIconEnd(const char*)
+{
+  const char* why = "";
+  if (!iconEnd(why)) { err(why); return; }
+  { LvLock lock; deckUiRebuildGrid(); }                      // falls das aktive Profil dieses Icon nutzt
+  usbCdcSendLine("OK");
+}
+static void cmdIconList(const char*) { String s; iconListJson(s); usbCdcSendLine(s.c_str()); }
+static void cmdIconDel(const char* a)
+{
+  if (!iconDelete(a)) { err("unbekannt"); return; }
+  { LvLock lock; deckUiRebuildGrid(); }
+  usbCdcSendLine("OK");
+}
+static void cmdIconGet(const char* a)
+{
+  char* line = iconMakeLine(a);
+  if (!line) { err("unbekannt"); return; }
+  usbCdcSendLine(line);
+  heap_caps_free(line);
+}
+
 static void cmdStatus(const char*) { char b[320]; logStatus(b, sizeof(b)); usbCdcSendLine(b); }
 static void emitLine(const char* l) { usbCdcSendLine(l); }
 static void cmdLog(const char*) { usbCdcSendLine("--- LOG Anfang ---"); logDump(emitLine); usbCdcSendLine("--- LOG Ende ---"); }
@@ -78,6 +127,13 @@ void hostCommandsInit()
   usbCdcRegister("DEL",    cmdDel);
   usbCdcRegister("USE",    cmdUse);
   usbCdcRegister("TIME",   cmdTime);
+  usbCdcRegister("ACTIVE",    cmdActive);
+  usbCdcRegister("ICONBEGIN", cmdIconBegin);
+  usbCdcRegister("ICONDATA",  cmdIconData);
+  usbCdcRegister("ICONEND",   cmdIconEnd);
+  usbCdcRegister("ICONLIST",  cmdIconList);
+  usbCdcRegister("ICONDEL",   cmdIconDel);
+  usbCdcRegister("ICONGET",   cmdIconGet);
   usbCdcRegister("STATUS", cmdStatus);
   usbCdcRegister("LOG",    cmdLog);
 }

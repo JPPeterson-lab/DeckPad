@@ -3,6 +3,7 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <string.h>
+#include <ctype.h>
 
 static ProfileInfo  s_list[DECK_MAX_PROFILES];
 static int          s_count   = 0;
@@ -65,6 +66,8 @@ static bool fromJson(const char* id, JsonDocument& doc, DeckProfile& p)
     d.color = parseColor(t["color"] | "", 0x34495e);
     d.type  = deckActionTypeFromName(t["type"] | "none");
     strlcpy(d.spec, t["spec"] | "", sizeof(d.spec));
+    strlcpy(d.icon, t["icon"] | "", sizeof(d.icon));
+    if (d.icon[0] && !idValid(d.icon)) d.icon[0] = 0;               // nur a-z 0-9 - _
     if (!deckActionValid(d.type, d.spec)) { d.type = ACT_NONE; d.spec[0] = 0; }   // kaputte Aktion nie ausfuehren
   }
   return true;
@@ -89,6 +92,7 @@ static void toJson(const DeckProfile& p, JsonDocument& doc)
     o["color"] = col;
     o["type"]  = deckActionTypeName(t.type);
     o["spec"]  = t.spec;
+    if (t.icon[0]) o["icon"] = t.icon;
   }
 }
 
@@ -211,6 +215,7 @@ static void builtinFallback()                      // wenn der Flash-Speicher ni
 
 // Die Profilauswahl wird nicht bei jedem Wechsel geschrieben: Flash-Schreibzugriffe stoppen kurz den Cache
 // (damit auch den PSRAM-Zugriff des Displays) und verschleissen den Flash. Stattdessen merken und spaeter schreiben.
+static bool     s_autoSwitch = false;
 static bool     s_cfgDirty = false;
 static uint32_t s_cfgT = 0;
 #define CFG_SAVE_DELAY_MS 8000
@@ -230,6 +235,7 @@ void profilesTick()
   const uint32_t t0 = millis();
   JsonDocument doc;
   doc["active"] = s_list[s_active].id;
+  doc["autoswitch"] = s_autoSwitch;
   File f = LittleFS.open(DECK_CONFIG_FILE, "w");
   if (f) { serializeJson(doc, f); f.close(); }
   logDiag("[Flash] Auswahl '%s' geschrieben, %lu ms", s_list[s_active].id, (unsigned long)(millis() - t0));
@@ -270,6 +276,7 @@ bool profilesInit()
   if (f) {
     JsonDocument doc;
     if (!deserializeJson(doc, f)) {
+      s_autoSwitch = doc["autoswitch"] | false;
       const char* a = doc["active"] | "";
       for (int i = 0; i < s_count; i++) if (strcmp(s_list[i].id, a) == 0) s_active = i;
     }
@@ -364,4 +371,29 @@ bool profileImportJson(const char* id, const char* json, const char*& err)
   delete p;
   if (!ok) err = "Schreiben fehlgeschlagen";
   return ok;
+}
+
+bool profilesAutoSwitch() { return s_autoSwitch; }
+void profilesSetAutoSwitch(bool on) { s_autoSwitch = on; saveConfig(); }
+
+static void exeBase(const char* in, char* out, size_t n)       // "Bambu-Studio.EXE" -> "bambu-studio"
+{
+  size_t i = 0;
+  for (; in[i] && i < n - 1; i++) out[i] = (char)tolower((unsigned char)in[i]);
+  out[i] = 0;
+  if (i > 4 && strcmp(out + i - 4, ".exe") == 0) out[i - 4] = 0;
+}
+
+int profileIndexByExe(const char* exe)
+{
+  Guard g;
+  char a[48], b[48];
+  exeBase(exe, a, sizeof(a));
+  if (!a[0]) return -1;
+  for (int i = 0; i < s_count; i++) {
+    if (!s_list[i].exe[0]) continue;
+    exeBase(s_list[i].exe, b, sizeof(b));
+    if (strcmp(a, b) == 0) return i;
+  }
+  return -1;
 }

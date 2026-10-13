@@ -2,6 +2,14 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.3.0 (2026-10-13)
+
+### New
+- **Icons on the tiles:** symbols (emoji picker) or your own images (PNG, JPG, SVG …), converted to 32–80 px in the editor and loaded onto the device over the COM port (RGB565 + alpha, `/icons/<id>.bin`, up to 96 × 96 px). Several profiles can share an icon. The quick-pick in the editor brings matching symbols. COM commands `ICONBEGIN`, `ICONDATA`, `ICONEND`, `ICONLIST`, `ICONGET`, `ICONDEL`
+- **Automatic profile switch (switchable):** switch "Automatischer Profilwechsel" on the settings screen (default: off). A small **Windows helper** (`tools/helper/deckpad-helper.ps1`, no installation) reports the foreground program; the DeckPad picks the profile whose "Programm" field matches (e.g. `bambu-studio.exe`), otherwise "Standard". The settings screen shows whether the helper is detected. COM command `ACTIVE <program.exe>`
+- **Editor:** a **"Trennen"** (disconnect) button releases the COM port (the helper also releases it by itself while the editor is in the foreground)
+- **Status display:** "PC verbunden" has a green background, "Kein PC" a red one
+
 ## v0.2.1 (2026-10-13)
 
 ### Changed

@@ -1,5 +1,17 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.3.0: Icons, Auto-Profilwechsel, Statusfarbe
+
+**Icons.** Format: 4 Byte Kopf (`DI`, Breite, Höhe) und danach 3 Byte je Pixel (RGB565 low/high, Alpha), das ist LVGL `LV_IMG_CF_TRUE_COLOR_ALPHA` bei 16 Bit Farbtiefe, sodass das Gerät die Datei direkt als `lv_img_dsc_t` verwenden kann. Der Browser rechnet um: Emoji oder Bild auf ein Canvas (contain, Transparenz bleibt), `getImageData`, RGB565. Übertragung als Base64 in Zeilen zu 3200 Zeichen (2400 Byte), weil eine COM-Zeile höchstens 6 KB hat. Die Pixeldaten liegen im PSRAM, solange die Kachel existiert, und werden nach `lv_obj_clean` freigegeben. Sie werden beim Aufbau aus dem Flash gelesen (kein Dauer-Cache; 15 Kacheln × 48 × 48 × 3 Byte ≈ 100 KB). Bilder im PSRAM belasten die gleiche Bandbreite wie der Framebuffer, daher klein halten (Hinweis im Editor). Die Kachel nutzt Flex-Column (Icon oben, Text darunter).
+
+**Auto-Profilwechsel.** Ein USB-Gerät kann das Vordergrundfenster des PCs nicht sehen, also braucht es einen Helfer. Ein PowerShell-Skript (`System.IO.Ports.SerialPort`, `GetForegroundWindow`) schickt `ACTIVE <exe>` alle 0,6 s bei Änderung und sonst alle 3 s als Lebenszeichen. Problem: Ein COM-Port gehört genau einem Programm. Ein **zweiter CDC-Port** wäre sauberer (Core 3.3.12 kennt zwei, laut Sdkconfig `CONFIG_TINYUSB_CDC_MAX_PORTS=2`), aber die Endpunkte des ESP32-S3 sind knapp (HID + 2 × CDC ≈ 5 von 6) und ein Fehler hätte die funktionierende USB-Verbindung zerstört, ohne dass ich es am Gerät prüfen kann. Gewählt ist ein einfacherer Weg: Der Helfer gibt den Port frei, solange ein Fenster mit „DeckPad Editor“ im Titel im Vordergrund ist. Der Editor hat außerdem einen Knopf „Trennen“. Nachteil: Während der Editor verbunden bleibt und im Hintergrund liegt, wechselt die Automatik nicht. Wechselt das Gerät zu „Standard“, wenn zum Programm kein Profil existiert, springt es bei jedem Fensterwechsel dorthin; das ist Absicht (wie beim Stream Deck), der Schalter erlaubt, es auszuschalten. Der Schalter ist Teil von `config.json` (`autoswitch`) und wird wie die Auswahl verzögert geschrieben.
+
+**Oberfläche.** Schalter und Hinweis entstehen im Code im Einstellungs-Screen (unter den beiden Containern), nicht in PicoPixel, damit kein neuer Export nötig ist; Farben folgen dem Theme. „PC verbunden“/„Kein PC“ bekommen Hintergrund grün/rot; `change_color_theme` setzt die Textfarbe zurück, daher wird die Statusfarbe nach jedem Theme-Wechsel neu gesetzt.
+
+**Ungetestet am Gerät.** Icon-Übertragung und -Darstellung, Schalter, `ACTIVE` und das PowerShell-Skript (auf dem Mac gibt es keine PowerShell).
+
+---
+
 ## 2026-10-13 – v0.2.1: Streifen nach Profilwechseln
 
 **Befund vom Gerät.** USB, Editor, Profile, Tasten und `run` funktionieren (Log vom Gerät: USB-Ereignis „gestartet“ nach 1,3 s, `Profil 'notepad' geschrieben: ok, 116 ms`). Die Streifen am linken Rand sind **nach dem Boot sauber und tauchen nach mehreren Profilwechseln wieder auf**. Der Flush-Zähler war in diesem Log nicht dabei (nur `LOG`, nicht `STATUS`).

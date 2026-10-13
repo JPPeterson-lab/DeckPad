@@ -11,6 +11,7 @@ struct DeckTile {
   uint32_t       color;              // 0xRRGGBB
   DeckActionType type;
   char           spec[DECK_SPEC_MAX];
+  char           icon[24];           // Icon-ID (Datei /icons/<id>.bin), leer = kein Icon
 };
 
 struct DeckProfile {
@@ -33,6 +34,9 @@ const ProfileInfo& profileInfo(int index);
 int   profileActiveIndex();
 const DeckProfile& profileActive();
 bool  profileActivate(int index);                  // laden; die Auswahl wird verzoegert gespeichert (siehe profilesTick)
+bool  profilesAutoSwitch();                        // automatischer Profilwechsel nach dem Vordergrund-Programm (Standard: aus)
+void  profilesSetAutoSwitch(bool on);              // wird verzoegert gespeichert
+int   profileIndexByExe(const char* exe);          // Profil zu einem Programmnamen (ohne Beachtung von Gross-/Kleinschreibung und ".exe"), -1 = keins
 void  profilesTick();                              // regelmaessig aufrufen (1 s): schreibt die Auswahl, wenn 8 s nichts gewechselt wurde
 void  profileNamesJoined(String& out);             // "A\nB\nC" fuer das Roller-Widget
 

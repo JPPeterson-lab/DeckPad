@@ -12,6 +12,8 @@
 #include "../usb/usb_device.h"
 #include "../hardware/backlight.h"
 #include "../display/lvgl_port.h"
+#include "icons.h"
+#include "settings_extras.h"
 
 // ── Gemeinsame Styles (ein Satz fuer alle Kacheln statt Einzel-Styles: spart LVGL-Speicher) ──
 static lv_style_t                 stTile, stTilePressed;
@@ -44,7 +46,26 @@ static void initStyles()
     stylesReady = true;
 }
 
+// "PC verbunden" gruen hinterlegt, "Kein PC" rot (change_color_theme setzt die Textfarbe zurueck, daher neu anwenden)
+static void styleStatus(bool up)
+{
+    lv_obj_t* l = objects.labelconnectionpc;
+    lv_obj_set_style_text_color(l, lv_color_white(), 0);
+    lv_obj_set_style_bg_opa(l, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_color(l, lv_color_hex(up ? 0x1e8e4e : 0xc0392b), 0);
+    lv_obj_set_style_radius(l, 6, 0);
+}
+
 // ── Kachelraster ──────────────────────────────────────────────────────────────
+// Geladene Icons: Pixeldaten liegen im PSRAM und muessen so lange leben wie die Kacheln, die sie anzeigen.
+struct IconSlot { lv_img_dsc_t dsc; uint8_t* data; };
+static IconSlot s_icons[DECK_MAX_TILES];
+
+static void freeIcons()
+{
+    for (auto& s : s_icons) { if (s.data) { heap_caps_free(s.data); s.data = nullptr; } }
+}
+
 static void cbTile(lv_event_t* e)
 {
     const DeckProfile& p = profileActive();
@@ -60,6 +81,7 @@ static void buildGrid()
     lv_obj_t* g = objects.containergrid;
     if (!g) return;
     lv_obj_clean(g);
+    freeIcons();                                            // erst nach dem Loeschen der Bilder, die darauf zeigten
 
     const DeckProfile& p = profileActive();
     const int gap = DECK_GRID_GAP;
@@ -91,11 +113,19 @@ static void buildGrid()
             lv_obj_add_style(b, &stTilePressed, LV_STATE_PRESSED);
             lv_obj_set_style_bg_color(b, lv_color_hex(t.color), 0);
             lv_obj_set_style_bg_color(b, lv_color_lighten(lv_color_hex(t.color), 110), LV_STATE_PRESSED);
-            lv_obj_t* l = lv_label_create(b);
-            lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
-            lv_obj_set_width(l, tw - 12);
-            lv_label_set_text(l, t.label);
-            lv_obj_center(l);
+            lv_obj_set_flex_flow(b, LV_FLEX_FLOW_COLUMN);           // Icon oben, Beschriftung darunter, beides mittig
+            lv_obj_set_flex_align(b, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+            lv_obj_set_style_pad_row(b, 2, 0);
+            if (t.icon[0] && iconLoad(t.icon, s_icons[i].dsc, &s_icons[i].data)) {
+                lv_obj_t* im = lv_img_create(b);
+                lv_img_set_src(im, &s_icons[i].dsc);
+            }
+            if (t.label[0] || !s_icons[i].data) {                   // ohne Icon immer eine Beschriftung (auch leer), mit Icon nur wenn Text da ist
+                lv_obj_t* l = lv_label_create(b);
+                lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+                lv_obj_set_width(l, tw - 12);
+                lv_label_set_text(l, t.label);
+            }
             lv_obj_add_event_cb(b, cbTile, LV_EVENT_PRESSED, (void*)(intptr_t)i);
         }
     }
@@ -106,6 +136,8 @@ void deckUiApplyProfile()
 {
     const DeckProfile& p = profileActive();
     change_color_theme(p.theme);                            // PicoPixel: alle Farben des Themes
+    styleStatus(usbHostConnected());                        // setzt die Textfarbe des Status-Labels zurueck, daher neu
+    settingsExtrasApplyTheme();
     backlightSet(p.brightness);
     lv_arc_set_value(objects.labellightchangevalue, p.brightness);
     lv_label_set_text(objects.labelprofil, p.name);
@@ -132,6 +164,18 @@ void deckUiProfilesChanged()
     lv_roller_set_options(objects.rollerprofile, names.c_str(), LV_ROLLER_MODE_NORMAL);
     profileActivate(profileActiveIndex());                  // aktives Profil neu aus der Datei laden (kann ueberschrieben worden sein)
     deckUiApplyProfile();
+}
+
+void deckUiRebuildGrid() { buildGrid(); }
+
+void deckUiAutoSwitch(const char* exe)
+{
+    if (!profilesAutoSwitch()) return;
+    int i = profileIndexByExe(exe);
+    if (i < 0) i = profileIndexOf("standard");                  // kein Profil fuer dieses Programm: Standard
+    if (i < 0 || i == profileActiveIndex()) return;
+    logDiag("[Auto] Vordergrund '%s' -> Profil '%s'", exe, profileInfo(i).name);
+    switchProfile(i);
 }
 
 bool deckUiSelectProfile(const char* id)
@@ -162,6 +206,8 @@ static void cbTheme(lv_event_t*)
 {
     // PicoPixel hat das Theme in seinem eigenen Callback bereits umgeschaltet (zuerst registriert).
     profileSaveActiveSettings((uint8_t)active_theme_index, backlightGet());
+    styleStatus(usbHostConnected());
+    settingsExtrasApplyTheme();
     buildGrid();                                            // leere Plätze folgen der Theme-Farbe
 }
 
@@ -183,6 +229,7 @@ static void diagTickCb(lv_timer_t*)
 
 static void tickCb(lv_timer_t*)
 {
+    settingsExtrasTick();
     profilesTick();                                         // verzoegertes Speichern der Profilauswahl
     LvglSlowFlush sf;                                       // Ausreisser-Flushes ins Log (Ringpuffer), damit sie sich Ereignissen zuordnen lassen
     if (lvglPortTakeSlowFlush(sf))
@@ -196,7 +243,10 @@ static void tickCb(lv_timer_t*)
         strcpy(buf, "--:--");
     }
     setIfChanged(objects.labeltime, buf);
-    setIfChanged(objects.labelconnectionpc, usbHostConnected() ? "PC verbunden" : "Kein PC");
+    const bool up = usbHostConnected();
+    static int lastUp = -1;
+    if (lastUp != (int)up) { lastUp = (int)up; styleStatus(up); }
+    setIfChanged(objects.labelconnectionpc, up ? "PC verbunden" : "Kein PC");
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -234,6 +284,7 @@ void deckUiInit()
 
     lv_label_set_text(objects.labelversion, "v" FIRMWARE_VERSION);
 
+    settingsExtrasInit();
     deckUiApplyProfile();
     lv_timer_create(tickCb, 1000, nullptr);
     lv_timer_create(diagTickCb, 10000, nullptr);

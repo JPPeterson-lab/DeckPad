@@ -10,4 +10,6 @@ void deckUiBootStatus(const char* text, int percent);   // Statuszeile + Balken 
 
 // Fuer COM-Befehle vom PC. Beide nur mit gehaltenem lvgl_port_lock() aufrufen.
 void deckUiProfilesChanged();                           // Dateien geaendert: Liste neu lesen, Roller und aktives Profil auffrischen
-bool deckUiSelectProfile(const char* id);               // Profil per id aktivieren (false = unbekannt)
+bool deckUiSelectProfile(const char* id);
+void deckUiRebuildGrid();                               // Kacheln neu aufbauen (z. B. nach einem neuen Icon)
+void deckUiAutoSwitch(const char* exe);                 // Profil zum Vordergrund-Programm waehlen (nur wenn der Automatik-Schalter an ist)               // Profil per id aktivieren (false = unbekannt)

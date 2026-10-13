@@ -54,6 +54,12 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
 #console{background:var(--code);border-radius:8px;padding:8px 10px;height:170px;overflow:auto;font:12px/1.4 ui-monospace,Consolas,monospace;white-space:pre-wrap}
 .out{color:var(--accent)} .err{color:var(--danger)}
 .hidden{display:none}
+.tile img{display:block;margin:0 auto 2px;image-rendering:auto}
+.iconrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#iconPrev{width:56px;height:56px;border-radius:8px;background:var(--code);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;overflow:hidden}
+#iconPrev img{max-width:100%;max-height:100%}
+#emojiPick{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:4px;margin-top:8px;max-height:190px;overflow:auto;padding:6px;background:var(--code);border-radius:8px}
+#emojiPick button{font-size:22px;padding:2px;line-height:1.3;background:var(--panel)}
 .banner{padding:10px 14px;border-radius:8px;background:color-mix(in srgb,var(--danger) 14%,transparent);margin:0 20px 0;max-width:1160px}
 </style>
 </head>
@@ -64,6 +70,7 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
   <button id="btnAllPorts" title="zeigt auch andere COM-Ports, z. B. den UART-Port">Alle Ports anzeigen</button>
   <button id="btnDemo">Demo ohne Gerät</button>
   <span id="status" class="pill">nicht verbunden</span>
+  <button id="btnDisc" class="hidden" title="gibt den COM-Port frei (nötig, wenn der Auto-Profilwechsel-Helfer ihn nutzen soll)">Trennen</button>
   <span style="flex:1"></span>
   <button id="btnPing" disabled>Ping</button>
   <button id="btnStatus" disabled>Status</button>
@@ -115,6 +122,17 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
             <textarea id="tLabel" rows="2" maxlength="27"></textarea>
             <label for="tPreset">Schnellauswahl</label>
             <select id="tPreset"></select>
+            <label>Icon (optional)</label>
+            <div class="iconrow">
+              <div id="iconPrev">kein Icon</div>
+              <button id="btnEmoji">Symbol wählen</button>
+              <button id="btnImg">Bild laden …</button>
+              <button id="btnIconDel" class="danger">Entfernen</button>
+              <select id="iconSize" style="width:auto" title="Größe auf dem Gerät"><option value="32">32 px</option><option value="48" selected>48 px</option><option value="64">64 px</option><option value="80">80 px</option></select>
+            </div>
+            <input id="iconFile" type="file" accept="image/*" class="hidden">
+            <div id="emojiPick" class="hidden"></div>
+            <p class="hint">Mit Icon und Text bitte 48 px oder kleiner, nur Icon darf größer sein.</p>
           </div>
           <div>
             <label>Farbe</label>
@@ -172,14 +190,14 @@ const KEYLIST = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p"
   "enter","esc","tab","space","backspace","delete","insert","home","end","pageup","pagedown","up","down","left","right","printscreen","pause","capslock"];
 const PRESETS = [
   ["","– Vorlage wählen –"],
-  ["Lauter|#27ae60|media|vol_up","Lauter"],["Leiser|#2980b9|media|vol_down","Leiser"],["Stumm|#c0392b|media|mute","Stumm"],
-  ["Play\nPause|#d35400|media|play_pause","Play / Pause"],["Weiter|#16a085|media|next","Nächster Titel"],["Zurück|#16a085|media|prev","Vorheriger Titel"],
-  ["Kopieren|#2980b9|keys|ctrl+c","Kopieren (Strg+C)"],["Einfügen|#2980b9|keys|ctrl+v","Einfügen (Strg+V)"],["Rückgängig|#8e44ad|keys|ctrl+z","Rückgängig (Strg+Z)"],
-  ["Speichern|#27ae60|keys|ctrl+s","Speichern (Strg+S)"],["Mikrofon|#8e44ad|keys|ctrl+shift+m","Mikrofon (Strg+Shift+M)"],
-  ["Screenshot|#d35400|keys|win+shift+s","Bildschirmausschnitt (Win+Shift+S)"],["Desktop|#34495e|keys|win+d","Desktop anzeigen (Win+D)"],
+  ["Lauter|#27ae60|media|vol_up|🔊","Lauter"],["Leiser|#2980b9|media|vol_down|🔉","Leiser"],["Stumm|#c0392b|media|mute|🔇","Stumm"],
+  ["Play\nPause|#d35400|media|play_pause|⏯️","Play / Pause"],["Weiter|#16a085|media|next|⏭️","Nächster Titel"],["Zurück|#16a085|media|prev|⏮️","Vorheriger Titel"],
+  ["Kopieren|#2980b9|keys|ctrl+c|📋","Kopieren (Strg+C)"],["Einfügen|#2980b9|keys|ctrl+v|📌","Einfügen (Strg+V)"],["Rückgängig|#8e44ad|keys|ctrl+z|↩️","Rückgängig (Strg+Z)"],
+  ["Speichern|#27ae60|keys|ctrl+s|💾","Speichern (Strg+S)"],["Mikrofon|#8e44ad|keys|ctrl+shift+m|🎤","Mikrofon (Strg+Shift+M)"],
+  ["Screenshot|#d35400|keys|win+shift+s|📷","Bildschirmausschnitt (Win+Shift+S)"],["Desktop|#34495e|keys|win+d|🖥️","Desktop anzeigen (Win+D)"],
   ["Task-\nmanager|#7f8c8d|keys|ctrl+shift+esc","Task-Manager"],
-  ["Rechner|#16a085|run|calc","Programm: Rechner"],["Editor|#2c3e50|run|notepad","Programm: Editor"],["Explorer|#f39c12|run|explorer","Programm: Explorer"],
-  ["Browser|#2980b9|run|https://www.google.com","Link: Browser mit Startseite"]
+  ["Rechner|#16a085|run|calc|🧮","Programm: Rechner"],["Editor|#2c3e50|run|notepad|📝","Programm: Editor"],["Explorer|#f39c12|run|explorer|📁","Programm: Explorer"],
+  ["Browser|#2980b9|run|https://www.google.com|🌐","Link: Browser mit Startseite"]
 ];
 
 /* ───────── Transport: Web Serial oder Demo ───────── */
@@ -250,7 +268,7 @@ class DemoTransport {   // Verhält sich wie das Gerät, nur im Speicher
         {label:"Strg+Shift+M",color:"#8e44ad",type:"keys",spec:"ctrl+shift+m"},{label:"Stumm",color:"#c0392b",type:"media",spec:"mute"}]},
       bambu:{name:"Bambu Studio",exe:"bambu-studio.exe",cols:5,rows:3,settings:{theme:"dark",brightness:70},tiles:[
         {label:"Speichern",color:"#27ae60",type:"keys",spec:"ctrl+s"},{label:"Editor",color:"#2c3e50",type:"run",spec:"notepad"}]}};
-    this.active="standard";
+    this.active="standard"; this.icons={}; this.up=null;
   }
   async open(){} async close(){}
   async send(line, multi){
@@ -261,6 +279,13 @@ class DemoTransport {   // Verhält sich wie das Gerät, nur im Speicher
     if(cmd==="STATUS") return ["v=demo up=1s usb=1 flush_n=0"];
     if(cmd==="LOG") return ["--- LOG Anfang ---","       1 [Demo] kein echtes Gerät","--- LOG Ende ---"];
     if(cmd==="TIME") return ["OK"];
+    if(cmd==="ICONBEGIN"){ const [id,w,h]=a.split(" "); this.up={id,w:+w,h:+h,b64:""}; return ["OK"]; }
+    if(cmd==="ICONDATA"){ if(!this.up) return ["ERR kein ICONBEGIN"]; this.up.b64+=a; return ["OK"]; }
+    if(cmd==="ICONEND"){ if(!this.up) return ["ERR kein ICONBEGIN"]; const u=this.up; this.up=null;
+      if(atob(u.b64).length!==u.w*u.h*3) return ["ERR unvollstaendig"]; this.icons[u.id]=u; return ["OK"]; }
+    if(cmd==="ICONLIST") return [JSON.stringify({icons:Object.values(this.icons).map(i=>({id:i.id,w:i.w,h:i.h}))})];
+    if(cmd==="ICONGET") return this.icons[a] ? ["ICON "+this.icons[a].w+" "+this.icons[a].h+" "+this.icons[a].b64] : ["ERR unbekannt"];
+    if(cmd==="ICONDEL"){ delete this.icons[a]; return ["OK"]; }
     if(cmd==="LIST") return [JSON.stringify({active:this.active,profiles:Object.entries(this.p).map(([id,v])=>({id,name:v.name,exe:v.exe}))})];
     if(cmd==="GET") return this.p[a] ? [JSON.stringify(Object.assign({v:1},this.p[a]))] : ["ERR unbekannt"];
     if(cmd==="PUT"){ const i=a.indexOf(" "); try{ this.p[a.slice(0,i)]=JSON.parse(a.slice(i+1)); return ["OK"]; }catch(e){ return ["ERR JSON fehlerhaft"]; } }
@@ -286,7 +311,7 @@ async function cmd(line, multi){
   return r;
 }
 function setStatus(txt, on){ const s=$("status"); s.textContent=txt; s.classList.toggle("on",!!on); }
-function enableTools(on){ ["btnPing","btnStatus","btnLog","btnTime"].forEach(i=>$(i).disabled=!on); }
+function enableTools(on){ ["btnPing","btnStatus","btnLog","btnTime"].forEach(i=>$(i).disabled=!on); $("btnDisc").classList.toggle("hidden",!on); }
 
 /* ───────── Verbinden ───────── */
 function hex(v){ return v===undefined ? "?" : "0x"+v.toString(16).toUpperCase().padStart(4,"0"); }
@@ -319,6 +344,12 @@ $("btnConnect").onclick = () => start(new SerialTransport(), "verbunden", false)
 $("btnAllPorts").onclick = () => start(new SerialTransport(), "verbunden", true);
 $("btnDemo").onclick = () => start(new DemoTransport(), "Demo-Modus");
 
+$("btnDisc").onclick = async () => {
+  try{ if(T && T.close) await T.close(); }catch(_){}
+  T = null; S.cur=null; $("editor").classList.add("hidden"); S.list=[]; renderList();
+  setStatus("getrennt – Port frei", false); enableTools(false); log("Verbindung getrennt; der COM-Port ist wieder frei.");
+};
+
 /* ───────── Profilliste ───────── */
 async function refreshList(){
   const r = await cmd("LIST");
@@ -349,7 +380,7 @@ function normalize(p){
   p.cols = clamp(p.cols||5,1,6); p.rows = clamp(p.rows||3,1,4);
   p.settings = p.settings||{}; p.settings.theme = p.settings.theme==="dark"?"dark":"light";
   p.settings.brightness = clamp(p.settings.brightness||80,3,100);
-  p.tiles = (p.tiles||[]).map(t=>({label:t.label||"",color:t.color||"#34495e",type:t.type||"none",spec:t.spec||""}));
+  p.tiles = (p.tiles||[]).map(t=>({label:t.label||"",color:t.color||"#34495e",type:t.type||"none",spec:t.spec||"",icon:t.icon||""}));
   p.v = 1; return p;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||a));
@@ -411,9 +442,15 @@ function renderDeck(){
   d.style.gridTemplateColumns = `repeat(${p.cols},minmax(0,1fr))`;
   for(let i=0;i<p.cols*p.rows;i++){
     const t=p.tiles[i], b=document.createElement("button"); b.className="tile";
-    if(t){ b.style.background=t.color; b.textContent=t.label||"(ohne Text)"; } else { b.classList.add("empty"); b.textContent="+"; }
+    if(t){
+      b.style.background=t.color;
+      const ic=t.icon?ICONS[t.icon]:null;
+      if(t.icon && !ic) ensureIcon(t.icon);
+      if(ic){ const im=document.createElement("img"); im.src=ic.url; im.width=Math.min(ic.w,56); im.height=Math.min(ic.h,56); b.appendChild(im); }
+      if(t.label || !ic) b.appendChild(document.createTextNode(t.label||(ic?"":"(ohne Text)")));
+    } else { b.classList.add("empty"); b.textContent="+"; }
     if(i===S.sel) b.classList.add("sel");
-    b.onclick=()=>{ S.sel=i; while(p.tiles.length<=i) p.tiles.push({label:"",color:"#34495e",type:"none",spec:""}); renderDeck(); renderTile(); };
+    b.onclick=()=>{ S.sel=i; while(p.tiles.length<=i) p.tiles.push({label:"",color:"#34495e",type:"none",spec:"",icon:""}); renderDeck(); renderTile(); };
     d.appendChild(b);
   }
 }
@@ -427,7 +464,7 @@ MODS.forEach(([v,t])=>{ const l=document.createElement("label"); const c=documen
 const tile = () => S.cur && S.sel>=0 ? S.cur.tiles[S.sel] : null;
 function renderTile(){
   const t=tile(); $("tileEd").classList.toggle("hidden", !t); if(!t) return;
-  $("tLabel").value=t.label; $("tColor").value=t.color; $("tColorHex").textContent=t.color; $("tType").value=t.type; $("tPreset").value="";
+  $("tLabel").value=t.label; showIconPrev(); $("tColor").value=t.color; $("tColorHex").textContent=t.color; $("tType").value=t.type; $("tPreset").value="";
   showAction(t.type);
   if(t.type==="media") $("tMedia").value=t.spec;
   if(t.type==="run") $("tRun").value=t.spec;
@@ -451,8 +488,10 @@ $("tRun").oninput = e => tile().spec=e.target.value;
 $("tText").oninput = e => tile().spec=e.target.value;
 $("tHost").oninput = e => tile().spec=e.target.value;
 $("tPreset").onchange = e => {
-  const v=e.target.value; if(!v) return; const [label,color,type,spec]=v.split("|"); const t=tile();
-  Object.assign(t,{label,color,type,spec}); renderTile(); renderDeck();
+  const v=e.target.value; if(!v) return; const [label,color,type,spec,emoji]=v.split("|"); const t=tile();
+  Object.assign(t,{label,color,type,spec,icon:""});
+  if(emoji) setIcon(makeEmojiIcon(emoji, +$("iconSize").value));
+  renderTile(); renderDeck();
 };
 $("btnTileClear").onclick = () => {
   S.cur.tiles.splice(S.sel,1); S.sel=-1; renderDeck(); renderTile();
@@ -484,10 +523,78 @@ $("kKey").addEventListener("keydown", e => {
 });
 $("kList").onchange = e => { $("kKey").value=e.target.value; keysChanged(); };
 
+/* ───────── Icons ───────── */
+const ICONS = {};          // id -> {w,h,raw(Uint8Array,RGB565+A),b64,url,onDevice}
+const ICON_PENDING = new Set();
+const EMOJIS = "🔊 🔉 🔇 🎵 🎧 🎤 ⏯️ ⏭️ ⏮️ ⏹️ ⏺️ 🎬 📺 📷 🎮 🖥️ 💻 ⌨️ 🖱️ 🖨️ 📁 📂 💾 📝 📋 📌 ✂️ 🗑️ ↩️ ↪️ 🔍 🏠 ⚙️ 🔒 🔓 🔑 🌐 📧 💬 📞 🔔 ⏰ ⏱️ ⏳ 🧮 📊 📈 🧰 🔧 🔨 🛠️ 💡 🔥 ⭐ ❤️ ✅ ❌ ➕ ➖ ⚡ 🌙 ☀️ 🚀 🎨 🖌️ 📐 🧩 ▶️ ⏸️ 🔴 🟢 🔵 🟡 ⬆️ ⬇️ ⬅️ ➡️".split(" ");
+function toB64(u8){ let s=""; for(let i=0;i<u8.length;i+=8192) s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192)); return btoa(s); }
+function fromB64(b){ const s=atob(b), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; }
+function canvasToRaw(cv){            // RGBA -> RGB565 (low, high) + Alpha, wie LVGL "TRUE_COLOR_ALPHA"
+  const w=cv.width,h=cv.height, d=cv.getContext("2d").getImageData(0,0,w,h).data, raw=new Uint8Array(w*h*3);
+  for(let i=0,o=0;i<w*h;i++,o+=3){ const v=((d[i*4]>>3)<<11)|((d[i*4+1]>>2)<<5)|(d[i*4+2]>>3); raw[o]=v&255; raw[o+1]=v>>8; raw[o+2]=d[i*4+3]; }
+  return raw;
+}
+function rawToUrl(raw,w,h){          // Gegenrichtung: Vorschau aus den Gerätedaten
+  const cv=document.createElement("canvas"); cv.width=w; cv.height=h; const c=cv.getContext("2d"), im=c.createImageData(w,h);
+  for(let i=0,o=0;i<w*h;i++,o+=3){ const v=raw[o]|(raw[o+1]<<8); im.data[i*4]=((v>>11)&31)*255/31; im.data[i*4+1]=((v>>5)&63)*255/63; im.data[i*4+2]=(v&31)*255/31; im.data[i*4+3]=raw[o+2]; }
+  c.putImageData(im,0,0); return cv.toDataURL();
+}
+function hash8(raw){ let h=2166136261; for(let i=0;i<raw.length;i++){ h^=raw[i]; h=Math.imul(h,16777619); } return (h>>>0).toString(16).padStart(8,"0"); }
+function iconFromCanvas(cv, idBase){
+  const raw=canvasToRaw(cv), id=(idBase||("u"+hash8(raw)))+"-"+cv.width;
+  return ICONS[id] = {id,w:cv.width,h:cv.height,raw,b64:toB64(raw),url:rawToUrl(raw,cv.width,cv.height),onDevice:false};
+}
+function makeEmojiIcon(ch,size){
+  const cv=document.createElement("canvas"); cv.width=cv.height=size; const c=cv.getContext("2d");
+  c.font=`${Math.round(size*0.78)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif`;
+  c.textAlign="center"; c.textBaseline="middle"; c.fillText(ch,size/2,size/2+size*0.05);
+  const base=("e"+[...ch].map(x=>x.codePointAt(0).toString(16)).filter(x=>x!=="fe0f").join("-")).slice(0,17);
+  return iconFromCanvas(cv, base);
+}
+function imageToIcon(img,size){
+  const cv=document.createElement("canvas"); cv.width=cv.height=size; const c=cv.getContext("2d");
+  const k=Math.min(size/img.width,size/img.height), w=img.width*k, h=img.height*k;
+  c.drawImage(img,(size-w)/2,(size-h)/2,w,h); return iconFromCanvas(cv);
+}
+function setIcon(ic){ const t=tile(); if(!t||!ic) return; t.icon=ic.id; showIconPrev(); renderDeck(); }
+function showIconPrev(){
+  const t=tile(), box=$("iconPrev"); box.textContent="kein Icon"; if(!t||!t.icon) return;
+  const ic=ICONS[t.icon]; if(!ic){ box.textContent=t.icon; ensureIcon(t.icon).then(showIconPrev); return; }
+  const im=document.createElement("img"); im.src=ic.url; box.textContent=""; box.appendChild(im);
+}
+async function ensureIcon(id){        // Icon vom Gerät holen, falls es nur dort liegt
+  if(ICONS[id]||ICON_PENDING.has(id)||!T) return;
+  ICON_PENDING.add(id);
+  try{
+    const r=await cmd("ICONGET "+id); const m=/^ICON (\d+) (\d+) (\S+)/.exec(r[0]);
+    if(m){ const w=+m[1],h=+m[2],raw=fromB64(m[3]); ICONS[id]={id,w,h,raw,b64:m[3],url:rawToUrl(raw,w,h),onDevice:true}; renderDeck(); }
+  }catch(e){ log("Icon '"+id+"' nicht geladen: "+e.message,"err"); }
+  ICON_PENDING.delete(id);
+}
+async function uploadIcons(){
+  const used=new Set(S.cur.tiles.slice(0,S.cur.cols*S.cur.rows).map(t=>t.icon).filter(Boolean));
+  for(const id of used){
+    const ic=ICONS[id]; if(!ic||ic.onDevice) continue;
+    let r=await cmd("ICONBEGIN "+id+" "+ic.w+" "+ic.h); if(r[0]!=="OK") throw new Error("Icon "+id+": "+r[0]);
+    for(let i=0;i<ic.raw.length;i+=2400){ r=await cmd("ICONDATA "+toB64(ic.raw.subarray(i,i+2400))); if(r[0]!=="OK") throw new Error("Icon "+id+": "+r[0]); }
+    r=await cmd("ICONEND"); if(r[0]!=="OK") throw new Error("Icon "+id+": "+r[0]);
+    ic.onDevice=true;
+  }
+}
+EMOJIS.forEach(e=>{ const b=document.createElement("button"); b.textContent=e; b.onclick=()=>{ setIcon(makeEmojiIcon(e,+$("iconSize").value)); $("emojiPick").classList.add("hidden"); }; $("emojiPick").appendChild(b); });
+$("btnEmoji").onclick=()=>$("emojiPick").classList.toggle("hidden");
+$("btnImg").onclick=()=>$("iconFile").click();
+$("iconFile").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return; const img=new Image();
+  img.onload=()=>{ setIcon(imageToIcon(img,+$("iconSize").value)); URL.revokeObjectURL(img.src); };
+  img.onerror=()=>alert("Das Bild konnte nicht gelesen werden."); img.src=URL.createObjectURL(f); e.target.value="";
+};
+$("btnIconDel").onclick=()=>{ const t=tile(); if(!t) return; t.icon=""; showIconPrev(); renderDeck(); };
+
 /* ───────── Speichern ───────── */
 function toJson(){
   const p=S.cur, n=p.cols*p.rows;
-  const tiles=p.tiles.slice(0,n).map(t=>({label:t.label,color:t.color,type:t.type,spec:t.spec}));
+  const tiles=p.tiles.slice(0,n).map(t=>{ const o={label:t.label,color:t.color,type:t.type,spec:t.spec}; if(t.icon) o.icon=t.icon; return o; });
   const bad=tiles.findIndex(t=>t.type!=="none"&&!t.spec);
   if(bad>=0) throw new Error("Kachel "+(bad+1)+" hat eine Aktion ohne Angabe.");
   return JSON.stringify({v:1,name:p.name,exe:p.exe,cols:p.cols,rows:p.rows,settings:p.settings,tiles});
@@ -496,7 +603,9 @@ $("btnSave").onclick = async () => {
   try{
     if(!S.cur.name.trim()) throw new Error("Bitte einen Namen eintragen.");
     if(!S.id) throw new Error("Bitte eine ID eintragen.");
-    const r = await cmd("PUT "+S.id+" "+toJson());
+    const body = toJson();
+    await uploadIcons();                                   // neue Icons zuerst aufs Gerät
+    const r = await cmd("PUT "+S.id+" "+body);
     if(r[0]!=="OK") throw new Error(r[0]);
     S.isNew=false; $("pId").disabled=true; $("saveInfo").textContent="Gespeichert ✓";
     await refreshList();

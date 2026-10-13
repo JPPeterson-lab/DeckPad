@@ -5,7 +5,7 @@
 
 // ── Befehlstabelle ────────────────────────────────────────────────────────────
 struct Cmd { const char* name; UsbCdcHandler fn; };
-#define CDC_MAX_CMDS 16
+#define CDC_MAX_CMDS 24
 static Cmd    s_cmds[CDC_MAX_CMDS];
 static size_t s_cmdN = 0;
 

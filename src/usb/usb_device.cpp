@@ -36,6 +36,7 @@ void usbDeviceInit()
   s_keyboard.begin(KeyboardLayout_de_DE);   // nur fuer usbTypeText; Tastenkombis nutzen Raw-Codes
   s_consumer.begin();
   DeckSerial.setRxBufferSize(8192);         // Platz fuer spaeter uebertragene Profile (JSON)
+  DeckSerial.setTxTimeoutMs(1000);           // grosse Antworten (Icons bis 37 KB) brauchen mehr als die Standard-250 ms
   DeckSerial.begin();
   USB.begin();
   logDiag("[USB] HID-Tastatur + Consumer + CDC gestartet");

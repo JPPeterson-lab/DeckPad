@@ -1,7 +1,7 @@
 # 🎛️ DeckPad
 
 ![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.2.1-blue?style=flat-square&cacheSeconds=1)
+![Version](https://img.shields.io/badge/Version-v0.3.0-blue?style=flat-square&cacheSeconds=1)
 ![Hardware](https://img.shields.io/badge/Hardware-Waveshare%20ESP32--S3--Touch--LCD--7B-red?style=flat-square&logo=espressif&logoColor=white)
 ![Display](https://img.shields.io/badge/Display-7%22%201024×600%20RGB-informational?style=flat-square)
 ![Lizenz](https://img.shields.io/badge/Lizenz-CC%20BY--NC%204.0-lightgrey?style=flat-square)
@@ -11,7 +11,7 @@
 
 Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (gleiches Board). Das Projekt läuft vollständig in der **Arduino IDE**, ohne WLAN und ohne OTA.
 
-> **🟠 Alpha (v0.2.1):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
+> **🟠 Alpha (v0.3.0):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
 
 ---
 
@@ -30,7 +30,9 @@ Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](htt
 | Eigene Partitionstabelle ohne OTA (4 MB App, 11,9 MB Daten) | ✅ geprüft (Tabelle gebaut und gelesen) |
 | Profile am PC bearbeiten und per CDC übertragen (DeckPad Editor, Web Serial) | 🧪 gebaut, im Demo-Modus getestet, am Gerät ungetestet |
 | Uhrzeit vom PC per CDC (setzt der Editor beim Verbinden) | 🧪 gebaut, ungetestet |
-| Automatischer Profilwechsel nach aktivem Programm (PC-Helfer) | 📋 geplant |
+| Icons auf Kacheln (Emoji oder eigene Bilder, Upload über den Editor) | 🧪 gebaut, ungetestet |
+| Automatischer Profilwechsel nach aktivem Programm (Schalter + PC-Helfer, PowerShell) | 🧪 gebaut, ungetestet |
+| Statusanzeige „PC verbunden“ grün / „Kein PC“ rot | 🧪 gebaut, ungetestet |
 
 ---
 
@@ -68,7 +70,7 @@ Jedes Profil ist eine JSON-Datei `/profiles/<id>.json` auf der Datenpartition. E
 
 | `type` | `spec` | Wirkung |
 |---|---|---|
-| `none` | – | nur Farbwechsel |
+| `none` | – | nur Farbwechsel (jede Kachel kann zusätzlich ein `icon` mit Icon-ID haben) |
 | `media` | `vol_up`, `vol_down`, `mute`, `play_pause`, `next`, `prev`, `stop`, `calculator`, `browser`, `mail` | Medien-/Consumer-Taste |
 | `keys` | z. B. `ctrl+shift+m` (Teile mit `+`) | Tastenkombination; Modifier `ctrl shift alt win altgr`, Tasten `a-z 0-9 f1-f24 enter esc tab space backspace delete insert home end pageup pagedown up down left right printscreen pause capslock` |
 | `text` | beliebiger Text | wird getippt (deutsches Layout) |
@@ -89,6 +91,17 @@ Auf dem Windows-PC in **Chrome oder Edge** <https://jppeterson-lab.github.io/Dec
 Der Editor setzt beim Verbinden außerdem die **Uhrzeit** des PCs und zeigt Status und Geräte-Log. Ohne Gerät lässt er sich mit **„Demo ohne Gerät“** ausprobieren. Als lokal gespeicherte Datei kann Web Serial je nach Browser blockiert sein; dann `python -m http.server` im Ordner `tools/editor` starten und `http://localhost:8000/deckpad-editor.html` öffnen.
 
 **Programm starten** (`run`): Das DeckPad drückt Win+R, tippt den Text und bestätigt mit Enter, geeignet sind Programmname (`notepad`, `calc`), vollständiger Pfad oder Internetadresse.
+
+### Icons auf Kacheln
+Im Editor bei einer Kachel **„Symbol wählen“** (Emoji) oder **„Bild laden …“** (PNG, JPG, SVG). Die Größe (32–80 px) wählst du daneben; mit Text darunter besser 48 px oder kleiner. Beim Speichern lädt der Editor neue Icons ins Gerät (dort bis 96 × 96 px, gemeinsam für alle Profile).
+
+## 🔄 Automatischer Profilwechsel
+Das DeckPad kann das Profil nach dem Programm im Vordergrund wählen. Einschalten: **Einstellungen → „Automatischer Profilwechsel“** (Standard: aus). Dazu braucht der PC den kleinen **Helfer**:
+1. [`deckpad-helper.ps1`](https://jppeterson-lab.github.io/DeckPad/deckpad-helper.ps1) und [`start-helper.cmd`](https://jppeterson-lab.github.io/DeckPad/start-helper.cmd) in denselben Ordner speichern (Rechtsklick → *Link speichern unter*; ggf. Eigenschaften → *Zulassen*).
+2. `start-helper.cmd` doppelklicken; für den Autostart eine Verknüpfung darauf in den Ordner `shell:startup` legen.
+3. Im Profil das Feld **Programm** ausfüllen (z. B. `bambu-studio.exe`, den Namen zeigt der Task-Manager). Für Programme ohne eigenes Profil gilt **Standard**.
+
+Der Einstellungs-Screen zeigt, ob der Helfer erkannt wird. Ein COM-Port gehört immer nur einem Programm: Der Helfer gibt ihn frei, solange der Editor im Vordergrund ist; bleibt der Editor verbunden, bitte **„Trennen“** klicken. Der Helfer sendet nur den Namen des Vordergrundprogramms (z. B. `chrome.exe`) an das DeckPad und sonst nichts.
 
 ## 🔌 Hardware
 
@@ -183,7 +196,7 @@ Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [Pico
 
 Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (same board). The project builds entirely in the **Arduino IDE**, with no Wi-Fi and no OTA.
 
-> **🟠 Alpha (v0.2.1):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
+> **🟠 Alpha (v0.3.0):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
 
 ## 📊 Status
 
@@ -200,7 +213,9 @@ Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus 
 | Custom partition table without OTA (4 MB app, 11.9 MB data) | ✅ verified (table built and read back) |
 | Edit profiles on the PC and transfer them via CDC (DeckPad Editor, Web Serial) | 🧪 built, tested in demo mode, untested on the device |
 | Time from the PC via CDC (the editor sets it on connect) | 🧪 built, untested |
-| Automatic profile switch by active program (PC helper) | 📋 planned |
+| Icons on tiles (emoji or own images, upload via the editor) | 🧪 built, untested |
+| Automatic profile switch by active program (switch + PC helper, PowerShell) | 🧪 built, untested |
+| Status display "PC verbunden" green / "Kein PC" red | 🧪 built, untested |
 
 ## 🎬 Screens
 
@@ -220,7 +235,7 @@ Each profile is a JSON file `/profiles/<id>.json` on the data partition: name, p
 
 | `type` | `spec` | Effect |
 |---|---|---|
-| `none` | – | colour change only |
+| `none` | – | colour change only (every tile may additionally have an `icon` with an icon id) |
 | `media` | `vol_up`, `vol_down`, `mute`, `play_pause`, `next`, `prev`, `stop`, `calculator`, `browser`, `mail` | media / consumer key |
 | `keys` | e.g. `ctrl+shift+m` (parts joined by `+`) | key combination; modifiers `ctrl shift alt win altgr`, keys `a-z 0-9 f1-f24 enter esc tab space backspace delete insert home end pageup pagedown up down left right printscreen pause capslock` |
 | `text` | any text | typed out (German layout) |
@@ -239,6 +254,17 @@ On the Windows PC open <https://jppeterson-lab.github.io/DeckPad/> in **Chrome o
 On connect the editor also sets the PC's **time** and shows status and device log. Without a device try **"Demo ohne Gerät"**. As a locally saved file Web Serial may be blocked depending on the browser; then run `python -m http.server` in the folder `tools/editor` and open `http://localhost:8000/deckpad-editor.html`.
 
 **Start a program** (`run`): the DeckPad presses Win+R, types the text and confirms with Enter; program name (`notepad`, `calc`), full path or web address work.
+
+### Icons on tiles
+In the editor choose **"Symbol wählen"** (emoji) or **"Bild laden …"** (image: PNG, JPG, SVG) for a tile. Choose the size (32–80 px) next to it; with text underneath prefer 48 px or smaller. On save the editor loads new icons onto the device (up to 96 × 96 px there, shared by all profiles).
+
+## 🔄 Automatic profile switch
+The DeckPad can pick the profile by the program in the foreground. Enable it: **settings → "Automatischer Profilwechsel"** (default: off). The PC needs the small **helper** for this:
+1. Save [`deckpad-helper.ps1`](https://jppeterson-lab.github.io/DeckPad/deckpad-helper.ps1) and [`start-helper.cmd`](https://jppeterson-lab.github.io/DeckPad/start-helper.cmd) into the same folder (right-click → *Save link as*; if needed properties → *Unblock*).
+2. Double-click `start-helper.cmd`; for autostart put a shortcut to it into the folder `shell:startup`.
+3. Fill the profile's **Programm** field (e.g. `bambu-studio.exe`, the Task Manager shows the name). Programs without their own profile get **Standard**.
+
+The settings screen shows whether the helper is detected. A COM port can belong to one program only: the helper releases it while the editor is in the foreground; if the editor stays connected please click **"Trennen"**. The helper only sends the name of the foreground program (e.g. `chrome.exe`) to the DeckPad and nothing else.
 
 ## 🔌 Hardware
 
