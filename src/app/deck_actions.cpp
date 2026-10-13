@@ -79,13 +79,13 @@ static uint8_t parseKeys(const char* spec, uint8_t* out, uint8_t maxN)
 }
 
 // ── Namen <-> Typ ─────────────────────────────────────────────────────────────
-static const char* const TYPE_NAMES[] = { "none", "media", "keys", "text", "host" };
+static const char* const TYPE_NAMES[] = { "none", "media", "keys", "text", "host", "run" };
 
-const char* deckActionTypeName(DeckActionType t) { return t <= ACT_HOST ? TYPE_NAMES[t] : "none"; }
+const char* deckActionTypeName(DeckActionType t) { return t <= ACT_LAST ? TYPE_NAMES[t] : "none"; }
 
 DeckActionType deckActionTypeFromName(const char* name)
 {
-  if (name) for (uint8_t i = 0; i <= ACT_HOST; i++) if (strcasecmp(name, TYPE_NAMES[i]) == 0) return (DeckActionType)i;
+  if (name) for (uint8_t i = 0; i <= ACT_LAST; i++) if (strcasecmp(name, TYPE_NAMES[i]) == 0) return (DeckActionType)i;
   return ACT_NONE;
 }
 
@@ -97,7 +97,8 @@ bool deckActionValid(DeckActionType type, const char* spec)
     case ACT_MEDIA: return lookup(MEDIA, sizeof(MEDIA) / sizeof(MEDIA[0]), spec, strlen(spec)) >= 0;
     case ACT_KEYS:  return parseKeys(spec, tmp, sizeof(tmp)) > 0;
     case ACT_TEXT:
-    case ACT_HOST:  return spec && *spec;
+    case ACT_HOST:
+    case ACT_RUN:   return spec && *spec;
   }
   return false;
 }
@@ -125,6 +126,16 @@ static void execute(const Job& j)
       break;
     }
     case ACT_TEXT: usbTypeText(j.spec); break;
+    case ACT_RUN: {                                  // Win+R oeffnet "Ausfuehren", dort Pfad/Programm/Link + Enter
+      const uint8_t winR[2] = { 0xE3, 0x15 };
+      const uint8_t enter = 0x28;
+      usbKeyChord(winR, 2);
+      vTaskDelay(pdMS_TO_TICKS(700));                // dem Dialog Zeit zum Oeffnen geben
+      usbTypeText(j.spec);
+      vTaskDelay(pdMS_TO_TICKS(80));
+      usbKeyChord(&enter, 1);
+      break;
+    }
     case ACT_HOST: {
       char line[DECK_SPEC_MAX + 12];
       snprintf(line, sizeof(line), "ACTION %s", j.spec);

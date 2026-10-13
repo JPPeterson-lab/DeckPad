@@ -286,3 +286,65 @@ void profileNamesJoined(String& out)
   out = "";
   for (int i = 0; i < s_count; i++) { if (i) out += "\n"; out += s_list[i].name; }
 }
+
+// ── Befehle vom PC ────────────────────────────────────────────────────────────
+int profileIndexOf(const char* id)
+{
+  for (int i = 0; i < s_count; i++) if (strcmp(s_list[i].id, id) == 0) return i;
+  return -1;
+}
+
+void profilesRescan()
+{
+  Guard g;
+  if (!s_fsOk) return;
+  char keep[sizeof(s_list[0].id)];
+  strlcpy(keep, s_count ? s_list[s_active].id : "standard", sizeof(keep));
+  scanList();
+  int i = profileIndexOf(keep);
+  if (i < 0) i = profileIndexOf("standard");
+  s_active = i < 0 ? 0 : i;
+}
+
+void profileListJson(String& out)
+{
+  Guard g;
+  JsonDocument doc;
+  doc["active"] = s_count ? s_list[s_active].id : "";
+  JsonArray a = doc["profiles"].to<JsonArray>();
+  for (int i = 0; i < s_count; i++) {
+    JsonObject o = a.add<JsonObject>();
+    o["id"] = s_list[i].id; o["name"] = s_list[i].name; o["exe"] = s_list[i].exe;
+  }
+  out = "";
+  serializeJson(doc, out);
+}
+
+bool profileReadRaw(const char* id, String& out)
+{
+  Guard g;
+  if (!s_fsOk || !idValid(id)) return false;
+  File f = LittleFS.open(pathOf(id), "r");
+  if (!f) return false;
+  out = f.readString();
+  f.close();
+  out.replace("\r", ""); out.replace("\n", "");
+  return out.length() > 0;
+}
+
+bool profileImportJson(const char* id, const char* json, const char*& err)
+{
+  Guard g;
+  if (!s_fsOk) { err = "kein Speicher"; return false; }
+  if (!idValid(id)) { err = "ungueltige id (a-z 0-9 - _, max 23)"; return false; }
+  if (s_count >= DECK_MAX_PROFILES && profileIndexOf(id) < 0) { err = "zu viele Profile"; return false; }
+  JsonDocument doc;
+  if (deserializeJson(doc, json)) { err = "JSON fehlerhaft"; return false; }
+  DeckProfile* p = new DeckProfile;
+  if (!p) { err = "Speicher voll"; return false; }
+  fromJson(id, doc, *p);                          // kappt zu lange Texte, ersetzt ungueltige Aktionen durch 'none'
+  bool ok = profileSave(*p);
+  delete p;
+  if (!ok) err = "Schreiben fehlgeschlagen";
+  return ok;
+}

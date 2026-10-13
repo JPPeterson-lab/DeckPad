@@ -1,5 +1,19 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.2.0: Editor am PC und Programmstart
+
+**Anlass.** Entwickelt wird am Mac, benutzt wird alles am Windows-PC. Profile mussten deshalb von Windows aus erstellbar sein, ohne Werkzeuge zu installieren: eine einzelne HTML-Datei mit **Web Serial** (Chrome/Edge), die die COM-Schnittstelle des DeckPad direkt anspricht.
+
+**Protokoll.** Zeilenbasiert; `PUT <id> <json>` überträgt ein Profil als eine Zeile. Das Gerät prüft (`fromJson` kappt zu lange Texte und ersetzt ungültige Aktionen durch `none`), schreibt über Temp-Datei und Umbenennen und aktualisiert dann die Oberfläche.
+
+**Threading.** Die Befehle laufen im CDC-Task (Core 0), die UI im LVGL-Task (Core 1). Regeln, damit es keinen Deadlock gibt: (1) Datei-Zugriffe unter dem Profil-Mutex, danach loslassen; (2) erst *dann* `LvLock` für die UI; nie umgekehrt. (3) Das aktive Profil im RAM (`s_cur`) wird nur im LVGL-Task neu geladen: ein `PUT` auf das aktive Profil schreibt nur die Datei, `deckUiProfilesChanged()` lädt es unter `LvLock` neu.
+
+**Programm starten.** Ein HID-Gerät kann kein Programm direkt starten. `run` nutzt, was Windows ohnehin anbietet: Win+R, Text tippen, Enter (700 ms Wartezeit, bis der Dialog offen ist). Das funktioniert für Programmnamen, Pfade und Links. Grenzen: kostet knapp eine Sekunde, braucht ein freies Eingabefenster, und wegen des deutschen Tastaturlayouts beim Tippen müssen Pfadzeichen zum Windows-Layout passen. Für präzisere Steuerung (Fenster aktivieren, Programm nur starten, wenn es nicht läuft) bleibt der Typ `host` mit einem späteren PC-Helfer.
+
+**Web Serial.** `port.open` mit 115200 Baud, danach DTR/RTS setzen: `usbCdcSendLine` sendet nur, wenn die Gegenseite DTR gesetzt hat (`DeckSerial` ist dann „true“). Der Editor wurde im Demo-Modus (Gerätesimulator im Browser) getestet; am echten Gerät steht der Test noch aus.
+
+---
+
 ## 2026-10-13 – v0.1.1: Streifen am linken Rand, Log
 
 Erster Test von v0.1.0 am Gerät: Streifen und zerrissene Zeilen am linken Rand der Kacheln, wie im WetterCubePlus XL (dort PSRAM-Bandbreite und Zurückschreiben des Caches beim Flush, siehe XL-DEVLOG). Die damaligen Gegenmaßnahmen sind übernommen (4-Zeilen-Stücke, 15 MHz, Bounce 12 Zeilen, 32-px-Ausrichtung) und reichen im DeckPad offenbar nicht. Neu gegenüber dem XL sind: Flash-Zugriffe durch LittleFS (Formatieren und Schreiben stoppen den Cache, auch für den PSRAM), TinyUSB statt HWCDC, die 350-ms-Farbübergänge der Kacheln (viele kleine Flushes) und ein anderes Lastprofil beim Aufbau von 15 abgerundeten Kacheln. Welcher Punkt es ist, ist nicht bekannt.

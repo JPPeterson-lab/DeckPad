@@ -1,7 +1,7 @@
 # 🎛️ DeckPad
 
 ![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.1.1-blue?style=flat-square&cacheSeconds=1)
+![Version](https://img.shields.io/badge/Version-v0.2.0-blue?style=flat-square&cacheSeconds=1)
 ![Hardware](https://img.shields.io/badge/Hardware-Waveshare%20ESP32--S3--Touch--LCD--7B-red?style=flat-square&logo=espressif&logoColor=white)
 ![Display](https://img.shields.io/badge/Display-7%22%201024×600%20RGB-informational?style=flat-square)
 ![Lizenz](https://img.shields.io/badge/Lizenz-CC%20BY--NC%204.0-lightgrey?style=flat-square)
@@ -11,7 +11,7 @@
 
 Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (gleiches Board). Das Projekt läuft vollständig in der **Arduino IDE**, ohne WLAN und ohne OTA.
 
-> **🟠 Alpha (v0.1.1):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
+> **🟠 Alpha (v0.2.0):** Der Code kompiliert und ist gegen die ESP32-Core-Version 3.3.12 geprüft, ein Test am Gerät steht noch aus. Das Gerüst enthält Display + Touch, Kachelraster, USB (HID + CDC), Profile im Flash, Taschenrechner und Küchentimer/Stoppuhr – siehe [Status](#-status).
 
 ---
 
@@ -28,8 +28,8 @@ Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](htt
 | Taschenrechner (aus dem WetterCubePlus XL) | 🧪 portiert, ungetestet |
 | Küchentimer + Stoppuhr, Display blinkt bei Ablauf | 🧪 gebaut, ungetestet |
 | Eigene Partitionstabelle ohne OTA (4 MB App, 11,9 MB Daten) | ✅ geprüft (Tabelle gebaut und gelesen) |
-| Profile am PC bearbeiten und per CDC übertragen | 📋 geplant (nächster Schritt) |
-| Uhrzeit vom PC per CDC | 📋 geplant (nächster Schritt) |
+| Profile am PC bearbeiten und per CDC übertragen (DeckPad Editor, Web Serial) | 🧪 gebaut, im Demo-Modus getestet, am Gerät ungetestet |
+| Uhrzeit vom PC per CDC (setzt der Editor beim Verbinden) | 🧪 gebaut, ungetestet |
 | Automatischer Profilwechsel nach aktivem Programm (PC-Helfer) | 📋 geplant |
 
 ---
@@ -72,11 +72,23 @@ Jedes Profil ist eine JSON-Datei `/profiles/<id>.json` auf der Datenpartition. E
 | `media` | `vol_up`, `vol_down`, `mute`, `play_pause`, `next`, `prev`, `stop`, `calculator`, `browser`, `mail` | Medien-/Consumer-Taste |
 | `keys` | z. B. `ctrl+shift+m` (Teile mit `+`) | Tastenkombination; Modifier `ctrl shift alt win altgr`, Tasten `a-z 0-9 f1-f24 enter esc tab space backspace delete insert home end pageup pagedown up down left right printscreen pause capslock` |
 | `text` | beliebiger Text | wird getippt (deutsches Layout) |
+| `run` | `notepad`, `C:\Pfad\x.exe`, `https://…` | startet Programm/Datei/Link über Win+R |
 | `host` | frei | geht als `ACTION <spec>` über die COM-Schnittstelle an ein PC-Programm |
 
 Beim ersten Start legt das Gerät zwei **Beispielprofile** an: **Standard** (Lauter, Leiser, Strg+Shift+M, Stumm, Play/Pause, Zurück, Weiter + Test-Kacheln) und **Bambu Studio** (Beispiel für ein Programm-Profil mit dunklem Theme). Gewechselt wird über den **Roller** in den Einstellungen oder die **Pfeil-Tasten** auf dem Deck. Theme und Helligkeit gelten **pro Profil** und werden beim Verstellen automatisch im aktiven Profil gespeichert.
 
 ---
+
+## 🖥️ Profile am PC erstellen (DeckPad Editor)
+
+Datei **`tools/editor/deckpad-editor.html`** auf den Windows-PC kopieren (aus dem privaten Repo als Datei herunterladen), in **Chrome oder Edge** öffnen und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
+- Profil wählen oder **Neu** / **Kopie** anlegen, **Name**, Programm, Raster, Design und Helligkeit einstellen,
+- eine **Kachel anklicken**: Beschriftung, **Farbe** (Farbwähler oder Palette), **Aktion**: Medien/Lautstärke, **Tastenkombination**, **Programm, Datei oder Link starten**, Text tippen,
+- **„Auf DeckPad speichern“**: Das Gerät übernimmt das Profil sofort. **„Auf dem Gerät aktivieren“** schaltet es um.
+
+Der Editor setzt beim Verbinden außerdem die **Uhrzeit** des PCs und zeigt Status und Geräte-Log. Ohne Gerät lässt er sich mit **„Demo ohne Gerät“** ausprobieren. Funktioniert Web Serial beim Öffnen der Datei nicht, die Datei über `python -m http.server` im Ordner `tools/editor` bereitstellen und `http://localhost:8000/deckpad-editor.html` öffnen.
+
+**Programm starten** (`run`): Das DeckPad drückt Win+R, tippt den Text und bestätigt mit Enter, geeignet sind Programmname (`notepad`, `calc`), vollständiger Pfad oder Internetadresse.
 
 ## 🔌 Hardware
 
@@ -131,7 +143,7 @@ arduino-cli upload  --fqbn "esp32:esp32:esp32s3:PSRAM=opi,FlashSize=16M,FlashMod
 - Tippe auf **Lauter / Leiser** – die Windows-Lautstärke ändert sich. Tippe auf **Strg+Shift+M** – im Programm mit dieser Tastenkombination (z. B. Teams) wird sie ausgelöst.
 - Windows: Geräte-Manager → *Tastaturen* (HID-Tastatur) und *Anschlüsse (COM & LPT)* (USB-Seriell-Gerät).
 - COM-Port mit einem Terminalprogramm (PuTTY, Tera Term, 115200 – die Baudrate ist egal) öffnen, `PING` + Enter senden → Antwort `PONG`.
-- Debug-Ausgabe: serieller Monitor auf dem **UART-Port** (115200).
+- Debug-Ausgabe: serieller Monitor auf dem **UART-Port** (115200). Am Windows-PC lässt sich dieselbe Diagnose über den **COM-Port** abrufen: im DeckPad Editor „Status“ / „Geräte-Log“ oder in einem Terminal `STATUS` bzw. `LOG` senden.
 
 ### Neu-Export der Oberfläche
 Die Oberfläche entsteht in [PicoPixel](https://picopixel.io) (LVGL 8, 1024×600, 16 Bit). Nach jedem Export im Projektordner `./tools/deploy_ui.sh` ausführen (benennt Bilder in `.inc` um, schaltet die Screen-Überblendung ab und prüft, ob alle verdrahteten Objekte noch existieren).
@@ -171,7 +183,7 @@ Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [Pico
 
 Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (same board). The project builds entirely in the **Arduino IDE**, with no Wi-Fi and no OTA.
 
-> **🟠 Alpha (v0.1.1):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
+> **🟠 Alpha (v0.2.0):** The code compiles and was checked against ESP32 core 3.3.12; it has **not been tested on the device yet**. The skeleton contains display + touch, tile grid, USB (HID + CDC), profiles in flash, calculator and kitchen timer/stopwatch – see [Status](#-status-1).
 
 ## 📊 Status
 
@@ -186,8 +198,8 @@ Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus 
 | Calculator (from the WetterCubePlus XL) | 🧪 ported, untested |
 | Kitchen timer + stopwatch, display blinks when the timer ends | 🧪 built, untested |
 | Custom partition table without OTA (4 MB app, 11.9 MB data) | ✅ verified (table built and read back) |
-| Edit profiles on the PC and transfer them via CDC | 📋 planned (next step) |
-| Time from the PC via CDC | 📋 planned (next step) |
+| Edit profiles on the PC and transfer them via CDC (DeckPad Editor, Web Serial) | 🧪 built, tested in demo mode, untested on the device |
+| Time from the PC via CDC (the editor sets it on connect) | 🧪 built, untested |
 | Automatic profile switch by active program (PC helper) | 📋 planned |
 
 ## 🎬 Screens
@@ -212,9 +224,21 @@ Each profile is a JSON file `/profiles/<id>.json` on the data partition: name, p
 | `media` | `vol_up`, `vol_down`, `mute`, `play_pause`, `next`, `prev`, `stop`, `calculator`, `browser`, `mail` | media / consumer key |
 | `keys` | e.g. `ctrl+shift+m` (parts joined by `+`) | key combination; modifiers `ctrl shift alt win altgr`, keys `a-z 0-9 f1-f24 enter esc tab space backspace delete insert home end pageup pagedown up down left right printscreen pause capslock` |
 | `text` | any text | typed out (German layout) |
+| `run` | `notepad`, `C:\path\x.exe`, `https://…` | starts a program/file/link via Win+R |
 | `host` | free | sent as `ACTION <spec>` over the COM port to a PC program |
 
 On first start the device creates two **example profiles**: **Standard** (volume up/down, Ctrl+Shift+M, mute, play/pause, previous/next + test tiles) and **Bambu Studio** (example of a per-program profile with dark theme). Switch with the **roller** in the settings or the **arrow keys** on the deck. Theme and brightness are **per profile** and are saved to the active profile as you change them.
+
+## 🖥️ Creating profiles on the PC (DeckPad Editor)
+
+Copy **`tools/editor/deckpad-editor.html`** to the Windows PC (download it as a file from the private repo), open it in **Chrome or Edge** and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
+- pick a profile or create **Neu** (new) / **Kopie** (copy), set **name**, program, grid, theme and brightness,
+- **click a tile**: label, **colour** (picker or palette), **action**: media/volume, **key combination**, **start a program, file or link**, type text,
+- **"Auf DeckPad speichern"** (save): the device applies the profile immediately. **"Auf dem Gerät aktivieren"** switches to it.
+
+On connect the editor also sets the PC's **time** and shows status and device log. Without a device try **"Demo ohne Gerät"**. If Web Serial does not work when opening the file, serve the folder `tools/editor` with `python -m http.server` and open `http://localhost:8000/deckpad-editor.html`.
+
+**Start a program** (`run`): the DeckPad presses Win+R, types the text and confirms with Enter; program name (`notepad`, `calc`), full path or web address work.
 
 ## 🔌 Hardware
 
@@ -252,7 +276,7 @@ The `arduino-cli` commands are shown in the German section.
 - Tap **Lauter / Leiser** (volume up/down) – the Windows volume changes. Tap **Strg+Shift+M** – the key combination fires in the program that listens for it (e.g. Teams).
 - Windows: Device Manager → *Keyboards* (HID keyboard) and *Ports (COM & LPT)* (USB serial device).
 - Open the COM port in a terminal program (PuTTY, Tera Term; the baud rate does not matter), send `PING` + Enter → reply `PONG`.
-- Debug output: serial monitor on the **UART port** (115200).
+- Debug output: serial monitor on the **UART port** (115200). On the Windows PC the same diagnostics are available via the **COM port**: "Status" / "Geräte-Log" in the DeckPad Editor, or send `STATUS` / `LOG` in a terminal.
 
 ### Re-exporting the UI
 The UI is designed in [PicoPixel](https://picopixel.io) (LVGL 8, 1024×600, 16 bit). After every export run `./tools/deploy_ui.sh` (renames images to `.inc`, disables the screen fade and checks that all wired objects still exist).

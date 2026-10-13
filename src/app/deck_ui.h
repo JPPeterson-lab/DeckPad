@@ -7,3 +7,7 @@
 void deckUiInit();                                      // nach ui_init() und nav_init(), Profile muessen geladen sein
 void deckUiApplyProfile();                              // Theme, Helligkeit, Titel, Raster des aktiven Profils uebernehmen
 void deckUiBootStatus(const char* text, int percent);   // Statuszeile + Balken auf dem Bootscreen
+
+// Fuer COM-Befehle vom PC. Beide nur mit gehaltenem lvgl_port_lock() aufrufen.
+void deckUiProfilesChanged();                           // Dateien geaendert: Liste neu lesen, Roller und aktives Profil auffrischen
+bool deckUiSelectProfile(const char* id);               // Profil per id aktivieren (false = unbekannt)

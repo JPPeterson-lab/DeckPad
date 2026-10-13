@@ -120,6 +120,26 @@ static void switchProfile(int index)
     else logDiag("[UI] Profil %d konnte nicht geladen werden", index);
 }
 
+void deckUiProfilesChanged()
+{
+    profilesRescan();                                       // Liste neu; aktives Profil bleibt per id erhalten
+    String names;
+    profileNamesJoined(names);
+    lv_roller_set_options(objects.rollerprofile, names.c_str(), LV_ROLLER_MODE_NORMAL);
+    profileActivate(profileActiveIndex());                  // aktives Profil neu aus der Datei laden (kann ueberschrieben worden sein)
+    deckUiApplyProfile();
+}
+
+bool deckUiSelectProfile(const char* id)
+{
+    int i = profileIndexOf(id);
+    if (i < 0) return false;
+    if (i != profileActiveIndex() && !profileActivate(i)) return false;
+    logDiag("[UI] Profil per PC gewaehlt: %s", profileActive().name);
+    deckUiApplyProfile();
+    return true;
+}
+
 static void cbRoller(lv_event_t*) { switchProfile(lv_roller_get_selected(objects.rollerprofile)); }
 static void cbPrev(lv_event_t*)   { int n = profileCount(); if (n > 1) switchProfile((profileActiveIndex() + n - 1) % n); }
 static void cbNext(lv_event_t*)   { int n = profileCount(); if (n > 1) switchProfile((profileActiveIndex() + 1) % n); }

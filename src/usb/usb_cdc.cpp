@@ -2,28 +2,24 @@
 #include "usb_device.h"
 #include <string.h>
 #include <strings.h>
-#include "../app/diag_log.h"
 
 // ── Befehlstabelle ────────────────────────────────────────────────────────────
-// Ein Befehl bekommt den Rest der Zeile (ohne Befehlswort) und antwortet ueber usbCdcSendLine().
-typedef void (*CmdHandler)(const char* args);
-struct Cmd { const char* name; CmdHandler fn; };
+struct Cmd { const char* name; UsbCdcHandler fn; };
+#define CDC_MAX_CMDS 16
+static Cmd    s_cmds[CDC_MAX_CMDS];
+static size_t s_cmdN = 0;
+
+bool usbCdcRegister(const char* name, UsbCdcHandler fn)
+{
+  if (s_cmdN >= CDC_MAX_CMDS) return false;
+  s_cmds[s_cmdN++] = { name, fn };
+  return true;
+}
 
 static void cmdPing(const char*) { usbCdcSendLine("PONG"); }
 
-static void cmdStatus(const char*) { char b[320]; logStatus(b, sizeof(b)); usbCdcSendLine(b); }
-static void emitLine(const char* l) { usbCdcSendLine(l); }
-static void cmdLog(const char*) { usbCdcSendLine("--- LOG Anfang ---"); logDump(emitLine); usbCdcSendLine("--- LOG Ende ---"); }
-
-static const Cmd CMDS[] = {
-  { "PING",   cmdPing },
-  { "STATUS", cmdStatus },   // eine Zeile: Version, Laufzeit, Speicher, Flush-Zeiten
-  { "LOG",    cmdLog },      // Ringpuffer der letzten Ereignisse
-  // Weitere Befehle (Zeit setzen, Profile uebertragen, aktives Programm melden) folgen in spaeteren Schritten.
-};
-
 // ── Zeilenleser ───────────────────────────────────────────────────────────────
-#define CDC_LINE_MAX 256     // wird mit den Profil-Befehlen auf mehrere KB wachsen
+#define CDC_LINE_MAX 6144    // ein Profil als JSON-Zeile (24 Kacheln) braucht ca. 4 KB
 
 static void handleLine(char* line)
 {
@@ -36,8 +32,8 @@ static void handleLine(char* line)
   while (*args && *args != ' ') args++;
   if (*args) { *args++ = 0; while (*args == ' ') args++; }
 
-  for (const Cmd& c : CMDS) {
-    if (strcasecmp(line, c.name) == 0) { c.fn(args); return; }   // Gross-/Kleinschreibung egal
+  for (size_t i = 0; i < s_cmdN; i++) {
+    if (strcasecmp(line, s_cmds[i].name) == 0) { s_cmds[i].fn(args); return; }   // Gross-/Kleinschreibung egal
   }
   // Unbekannte Eingaben werden bewusst nicht beantwortet.
 }
@@ -70,5 +66,6 @@ void usbCdcSendLine(const char* line)
 
 void usbCdcInit()
 {
-  xTaskCreatePinnedToCore(cdcTask, "cdc", 4096, nullptr, 1, nullptr, 0);   // Core 0, LVGL laeuft auf Core 1
+  usbCdcRegister("PING", cmdPing);
+  xTaskCreatePinnedToCore(cdcTask, "cdc", 8192, nullptr, 1, nullptr, 0);   // Core 0, LVGL laeuft auf Core 1
 }

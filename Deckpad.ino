@@ -21,6 +21,7 @@
 #include "src/app/deck_ui.h"
 #include "src/app/tools.h"
 #include "src/app/lv_lock.h"
+#include "src/app/host_commands.h"
 #include "src/app/diag_log.h"
 #include "esp_system.h"
 #include "src/ui/ui.h"
@@ -74,6 +75,7 @@ void setup()
     // ── Profile aus dem Flash ──
     boot("Lade Profile...", 55);
     bool storageOk = profilesInit();
+    hostCommandsInit();                         // COM-Befehle: Profile, Uhrzeit, Diagnose
 
     // ── Oberfläche mit Profilen verdrahten ──
     boot(storageOk ? "Baue Oberfläche..." : "Speicher nicht lesbar - Notprofil", 80);

@@ -1,5 +1,9 @@
 #pragma once
 // Kommandokanal ueber die virtuelle COM-Schnittstelle. Zeilenbasiert (Abschluss \n oder \r\n).
-// Aktueller Stand: nur "PING" -> "PONG". Neue Befehle werden in usb_cdc.cpp in die Tabelle eingetragen.
-void usbCdcInit();                         // Lese-Task starten (nach usbDeviceInit)
-void usbCdcSendLine(const char* line);     // eine Zeile an den PC schicken (z. B. fuer Host-Aktionen)
+// Diese Schicht kennt nur den Kanal selbst (und PING). Alle weiteren Befehle meldet die App-Schicht
+// ueber usbCdcRegister() an (siehe app/host_commands.cpp).
+typedef void (*UsbCdcHandler)(const char* args);      // args = Rest der Zeile nach dem Befehlswort
+
+void usbCdcInit();                                    // Lese-Task starten (nach usbDeviceInit)
+bool usbCdcRegister(const char* name, UsbCdcHandler fn);   // Name in Grossbuchstaben, max. 16 Befehle
+void usbCdcSendLine(const char* line);                // eine Zeile an den PC schicken

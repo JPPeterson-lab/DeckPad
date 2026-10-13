@@ -42,3 +42,10 @@ bool  profileSaveActiveSettings(uint8_t theme, uint8_t brightness);
 bool  profileLoad(const char* id, DeckProfile& out);
 bool  profileSave(const DeckProfile& p);
 bool  profileDelete(const char* id);
+
+// Fuer die Befehle vom PC (CDC). Nur Datei-Zugriffe - das aktive Profil im RAM aendert ausschliesslich der LVGL-Task.
+void  profilesRescan();                                   // Dateiliste neu lesen; aktives Profil bleibt (per id) erhalten
+int   profileIndexOf(const char* id);                     // -1 = unbekannt
+void  profileListJson(String& out);                       // {"active":"id","profiles":[{"id","name","exe"},...]}
+bool  profileReadRaw(const char* id, String& out);        // Dateiinhalt (eine Zeile JSON)
+bool  profileImportJson(const char* id, const char* json, const char*& err);   // pruefen und speichern
