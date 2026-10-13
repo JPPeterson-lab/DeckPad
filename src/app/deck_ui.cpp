@@ -225,8 +225,8 @@ static void diagTickCb(lv_timer_t*)
     lvglPortTakeFlushStats(f);
     logStatus(b, sizeof(b));
 #ifndef DECK_NO_USB
-    Serial.printf("[Diag] %s | letzte 10 s: Flush n=%u avg=%u us max=%u us max_px=%u\n", b, (unsigned)f.count,
-                  (unsigned)(f.count ? f.sumUs / f.count : 0), (unsigned)f.maxUs, (unsigned)f.maxPx);
+    Serial.printf("[Diag] %s | letzte 10 s: Flush n=%u avg=%u us max=%u us max_px=%u, laengste LVGL-Runde %u us\n", b, (unsigned)f.count,
+                  (unsigned)(f.count ? f.sumUs / f.count : 0), (unsigned)f.maxUs, (unsigned)f.maxPx, (unsigned)f.loopMaxUs);
 #endif
 }
 

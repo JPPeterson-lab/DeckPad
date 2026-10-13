@@ -43,7 +43,8 @@ static const uint8_t s_hidReport[] = {
 static const uint8_t s_cfgDesc[] = {
   TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CFG_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
   TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 4, EPNUM_CDC_NOTIF, 8, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
-  TUD_HID_DESCRIPTOR(ITF_NUM_HID, 5, HID_ITF_PROTOCOL_NONE, sizeof(s_hidReport), EPNUM_HID, 16, 10),
+  // Abfrageintervall 1 ms (wie die Arduino-Bibliothek): bei 10 ms wartet jeder Bericht bis zu 10 ms, ein Text dauert dann ewig
+  TUD_HID_DESCRIPTOR(ITF_NUM_HID, 5, HID_ITF_PROTOCOL_NONE, sizeof(s_hidReport), EPNUM_HID, 16, 1),
 };
 
 // VID/PID siehe app_config.h (eigene PID: 0x1001 gehoert der USB-JTAG-Schnittstelle und kollidiert unter Windows auf MI_02)
@@ -194,11 +195,9 @@ void usbTypeText(const char* text)
     uint8_t mod = 0, code = 0, kc[6] = {0};
     if (!layoutKey((uint8_t)*p, mod, code)) continue;       // nur ASCII
     kc[0] = code;
-    sendKbd(mod, kc);
-    vTaskDelay(pdMS_TO_TICKS(8));
+    sendKbd(mod, kc);                              // sendKbd wartet selbst, bis der vorige Bericht abgeholt ist
     uint8_t none[6] = {0};
     sendKbd(0, none);
-    vTaskDelay(pdMS_TO_TICKS(8));
   }
 }
 #endif  // DECK_USB_IDF

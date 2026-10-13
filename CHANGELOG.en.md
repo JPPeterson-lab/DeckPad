@@ -2,6 +2,21 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.4.0 (2026-10-13)
+
+### New
+- **ESP-IDF build (`platforms/idf/`) as the main path:** same source code, but with its own configuration instead of the precompiled Arduino core. Display drive flash-safe (`LCD_RGB_ISR_IRAM_SAFE`, `GDMA_ISR_IRAM_SAFE`), PSRAM 120 MHz, code in PSRAM, 64 KB data cache. **The streaks when saving no longer occur**, write times drop (29–93 ms instead of 68–199 ms). Build and flash: `platforms/idf/build.sh`
+- **Pixel clock 30 MHz** (was 15 MHz): about 33 instead of 16 frames/s, the flicker is gone. Adjustable (`PCLK=40 bash build.sh`, `DECK_PIXEL_CLOCK_HZ`)
+- **Own USB layer for IDF** (`src/usb/usb_device_idf.cpp`, `esp_tinyusb`): HID keyboard + media keys + COM port, same interface as the Arduino build
+- **Measurements in the log:** per action wait time and send duration (`[Aktion] …: Warten x ms, Senden y ms`), longest UI round in the `[Diag]` line
+
+### Changed
+- **Own USB product id `303A:4DC0`** (both builds). 303A:1001 belongs to the chips' USB-JTAG interface; its Windows driver displaced the keyboard under IDF (interface MI_02 was set up as WinUSB instead of HID). Windows sets the device up afresh on first connect (new COM number). The helper looks for the new id first
+- **Program start (`run`) and typing text much faster:** HID poll interval 1 ms (was 10 ms), no extra pauses between characters: about 3 ms instead of 13–15 ms per character. A long Chrome command takes 1.2 s instead of 2.2 s (0.7 s of that is the wait for the Run dialog)
+
+### Note
+- **Flashing:** when flashing via the UART port, the cable of the native USB port must not be connected to another computer at the same time (otherwise the write aborts)
+
 ## v0.3.3 (2026-10-13)
 
 ### New

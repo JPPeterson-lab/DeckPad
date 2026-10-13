@@ -40,7 +40,7 @@ void lvgl_port_unlock(void);
 
 // Statistik der Flush-Aufrufe (Kopieren in den PSRAM-Framebuffer) seit dem letzten Zuruecksetzen.
 // Lange Flushes sind der Verdacht bei Streifen und zerrissenen Zeilen (PSRAM-Bandbreite).
-struct LvglFlushStats { uint32_t count, sumUs, maxUs, maxPx; };
+struct LvglFlushStats { uint32_t count, sumUs, maxUs, maxPx, loopMaxUs; };   // loopMaxUs: laengste Runde der LVGL-Schleife (Zeichnen + Eingaben)
 void lvglPortPeekFlushStats(LvglFlushStats& out);   // lesen
 void lvglPortTakeFlushStats(LvglFlushStats& out);   // lesen und zuruecksetzen (nur aus dem LVGL-Task)
 

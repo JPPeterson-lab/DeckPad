@@ -1,6 +1,7 @@
 #include "deck_actions.h"
 #include "diag_log.h"
 #include <Arduino.h>
+#include "esp_timer.h"
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
@@ -119,7 +120,7 @@ bool deckActionValid(DeckActionType type, const char* spec)
 }
 
 // ── Task: fuehrt die Aktionen nacheinander aus ───────────────────────────────
-struct Job { DeckActionType type; char spec[DECK_SPEC_MAX]; };
+struct Job { DeckActionType type; char spec[DECK_SPEC_MAX]; int64_t tEnq; };
 static QueueHandle_t s_queue = nullptr;
 
 static void execute(const Job& j)
@@ -172,7 +173,14 @@ static void execute(const Job& j)
 static void actionTask(void*)
 {
   Job j;
-  for (;;) if (xQueueReceive(s_queue, &j, portMAX_DELAY) == pdTRUE) execute(j);
+  for (;;) {
+    if (xQueueReceive(s_queue, &j, portMAX_DELAY) != pdTRUE) continue;
+    const int64_t t0 = esp_timer_get_time();
+    execute(j);
+    const int64_t t1 = esp_timer_get_time();
+    // Zeiten: Warten in der Warteschlange (Druck -> Start) und Ausfuehren (Senden an den PC), in Millisekunden
+    logDiag("[Aktion] %s: Warten %ld ms, Senden %ld ms", deckActionTypeName(j.type), (long)((t0 - j.tEnq) / 1000), (long)((t1 - t0) / 1000));
+  }
 }
 
 void deckActionsInit()
@@ -186,6 +194,7 @@ bool deckActionRun(DeckActionType type, const char* spec)
   if (type == ACT_NONE || !s_queue) return true;
   Job j;
   j.type = type;
+  j.tEnq = esp_timer_get_time();
   strlcpy(j.spec, spec ? spec : "", sizeof(j.spec));
   return xQueueSend(s_queue, &j, 0) == pdTRUE;
 }

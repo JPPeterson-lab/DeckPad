@@ -38,7 +38,7 @@ void lvglPortRestartPanel(void)
     if (s_panel) esp_lcd_rgb_panel_restart(s_panel);
 }
 
-static volatile LvglFlushStats s_stats = {0, 0, 0, 0};
+static volatile LvglFlushStats s_stats = {0, 0, 0, 0, 0};
 static volatile uint32_t s_slowN = 0, s_slowUs = 0, s_slowPx = 0;
 static volatile int s_slowX = 0, s_slowY = 0, s_slowW = 0, s_slowH = 0;
 
@@ -53,13 +53,13 @@ bool lvglPortTakeSlowFlush(LvglSlowFlush& out)
 
 void lvglPortPeekFlushStats(LvglFlushStats& out)
 {
-    out.count = s_stats.count; out.sumUs = s_stats.sumUs; out.maxUs = s_stats.maxUs; out.maxPx = s_stats.maxPx;
+    out.count = s_stats.count; out.sumUs = s_stats.sumUs; out.maxUs = s_stats.maxUs; out.maxPx = s_stats.maxPx; out.loopMaxUs = s_stats.loopMaxUs;
 }
 
 void lvglPortTakeFlushStats(LvglFlushStats& out)
 {
     lvglPortPeekFlushStats(out);
-    s_stats.count = s_stats.sumUs = s_stats.maxUs = s_stats.maxPx = 0;
+    s_stats.count = s_stats.sumUs = s_stats.maxUs = s_stats.maxPx = s_stats.loopMaxUs = 0;
 }
 
 static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
@@ -147,7 +147,10 @@ static void lvgl_port_task(void *)
     uint32_t delay_ms = LVGL_PORT_TASK_MAX_DELAY_MS;
     while (1) {
         if (lvgl_port_lock(-1)) {
+            const int64_t tl0 = esp_timer_get_time();
             delay_ms = lv_timer_handler();
+            const uint32_t tl = (uint32_t)(esp_timer_get_time() - tl0);
+            if (tl > s_stats.loopMaxUs) s_stats.loopMaxUs = tl;
             lvgl_port_unlock();
         }
         if (delay_ms > LVGL_PORT_TASK_MAX_DELAY_MS) delay_ms = LVGL_PORT_TASK_MAX_DELAY_MS;

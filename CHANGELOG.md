@@ -2,6 +2,21 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.4.0 (2026-10-13)
+
+### Neu
+- **ESP-IDF-Build (`platforms/idf/`) als Hauptweg:** gleicher Quellcode, aber mit eigener Konfiguration statt des vorkompilierten Arduino-Cores. Display-Ansteuerung flash-sicher (`LCD_RGB_ISR_IRAM_SAFE`, `GDMA_ISR_IRAM_SAFE`), PSRAM 120 MHz, Code im PSRAM, 64-KB-Daten-Cache. **Die Bildstreifen beim Speichern treten nicht mehr auf**, die Schreibzeiten sinken (29–93 ms statt 68–199 ms). Bauen und Flashen: `platforms/idf/build.sh`
+- **Pixeltakt 30 MHz** (vorher 15 MHz): ca. 33 statt 16 Bilder/s, das Flimmern ist weg. Einstellbar (`PCLK=40 bash build.sh`, `DECK_PIXEL_CLOCK_HZ`)
+- **Eigene USB-Schicht für IDF** (`src/usb/usb_device_idf.cpp`, `esp_tinyusb`): HID-Tastatur + Medientasten + COM-Port, gleiche Schnittstelle wie im Arduino-Build
+- **Messwerte im Log:** pro Aktion Wartezeit und Sendedauer (`[Aktion] …: Warten x ms, Senden y ms`), längste Runde der Oberfläche in der `[Diag]`-Zeile
+
+### Geändert
+- **Eigene USB-Produkt-ID `303A:4DC0`** (beide Builds). 303A:1001 gehört der USB-JTAG-Schnittstelle der Chips; deren Windows-Treiber verdrängte unter IDF die Tastatur (Schnittstelle MI_02 wurde als WinUSB statt HID eingerichtet). Windows legt das Gerät beim ersten Anschließen neu an (neue COM-Nummer). Der Helfer sucht zuerst die neue ID
+- **Programmstart (`run`) und Text tippen deutlich schneller:** HID-Abfrageintervall 1 ms (vorher 10 ms), keine zusätzlichen Pausen zwischen den Zeichen: ca. 3 ms statt 13–15 ms pro Zeichen. Ein langer Chrome-Befehl dauert 1,2 s statt 2,2 s (davon 0,7 s Wartezeit für den Run-Dialog)
+
+### Hinweis
+- **Flashen:** Beim Flashen über den UART-Port darf das Kabel des nativen USB-Ports nicht gleichzeitig an einem anderen Rechner hängen (sonst bricht der Schreibvorgang ab)
+
 ## v0.3.3 (2026-10-13)
 
 ### Neu

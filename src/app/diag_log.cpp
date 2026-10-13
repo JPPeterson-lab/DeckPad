@@ -48,13 +48,13 @@ void logStatus(char* out, size_t n)
   LvglFlushStats f;
   lvglPortPeekFlushStats(f);
   snprintf(out, n,
-           "v=%s up=%lus usb=%d sram=%u/min%u/blk%u psram=%u/min%u flush_n=%u avg_us=%u max_us=%u max_px=%u profil=%s fs=%d",
+           "v=%s up=%lus usb=%d sram=%u/min%u/blk%u psram=%u/min%u flush_n=%u avg_us=%u max_us=%u max_px=%u loop_max_us=%u profil=%s fs=%d",
            FIRMWARE_VERSION, (unsigned long)(millis() / 1000), usbHostConnected() ? 1 : 0,
            (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
            (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL),
            (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL),
            (unsigned)heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
            (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM),
-           (unsigned)f.count, (unsigned)(f.count ? f.sumUs / f.count : 0), (unsigned)f.maxUs, (unsigned)f.maxPx,
+           (unsigned)f.count, (unsigned)(f.count ? f.sumUs / f.count : 0), (unsigned)f.maxUs, (unsigned)f.maxPx, (unsigned)f.loopMaxUs,
            profileActive().id, profilesStorageOk() ? 1 : 0);
 }
