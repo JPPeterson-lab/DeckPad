@@ -5,9 +5,10 @@ Display-Treiber flash-sicher (`LCD_RGB_ISR_IRAM_SAFE`, `GDMA_ISR_IRAM_SAFE`), PS
 64-KB-Daten-Cache. Zweck: pruefen, ob die Bildstreifen beim Speichern (Flash-Schreibzugriff) verschwinden, und
 die Grundlage fuer das ESP32-P4-Board.
 
-**Stand (Versuch):** baut. Arduino-ESP32 3.3, LVGL 8.4 und ArduinoJson kommen als Komponenten. **Ohne USB-Geraet**
-(`DECK_NO_USB`): Der Befehlskanal laeuft ueber den UART-Port, Tasten werden nicht gesendet. Im Editor
-"Alle Ports anzeigen" waehlen und den UART-Port (CH343) verbinden: Profile speichern geht wie gewohnt.
+**Stand:** baut und laeuft auf dem Board. Arduino-ESP32 3.3, LVGL 8.4 und ArduinoJson kommen als Komponenten. Die
+USB-Schicht (HID-Tastatur + Consumer + CDC) ist neu auf `esp_tinyusb` aufgesetzt (`src/usb/usb_device_idf.cpp`), die
+Arduino-USB-Klassen werden hier nicht uebersetzt. Die Bildstreifen beim Speichern treten mit dieser Konfiguration nicht auf;
+Pixeltakt 30 MHz statt 15 MHz (weniger Flimmern). Ohne USB (`-DDECK_NO_USB=ON`) laeuft der Befehlskanal ueber den UART-Port.
 
 ```bash
 bash build.sh                       # bauen

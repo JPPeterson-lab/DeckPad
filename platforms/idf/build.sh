@@ -9,9 +9,11 @@ case "$1" in
   clean) rm -rf build sdkconfig sdkconfig.old; echo "aufgeraeumt"; exit 0 ;;
 esac
 [ -f sdkconfig ] || idf.py set-target esp32s3
+# Pixeltakt in MHz per Umgebungsvariable, z. B.  PCLK=40 bash build.sh flash /dev/cu.xxx  (Standard 30)
+DEFS=""; [ -n "$PCLK" ] && DEFS="-DDECK_PIXEL_CLOCK_MHZ=$PCLK"
 if [ "$1" = "flash" ]; then
   [ -n "$2" ] || { echo "Verwendung: bash build.sh flash <PORT>"; exit 1; }
-  idf.py -p "$2" flash
+  idf.py $DEFS -p "$2" flash
 else
-  idf.py build
+  idf.py $DEFS build
 fi

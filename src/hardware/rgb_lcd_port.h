@@ -34,7 +34,12 @@
  */
 #define EXAMPLE_LCD_H_RES               (1024)  ///< Horizontal resolution in pixels
 #define EXAMPLE_LCD_V_RES               (600)  ///< Vertical resolution in pixels
-#define EXAMPLE_LCD_PIXEL_CLOCK_HZ      (15 * 1000 * 1000) ///< 15 MHz (ca. 16 Hz): mehr Zeit pro Bounce-Buffer, damit WLAN/LVGL im PSRAM das Display nicht aushungern. 24 MHz waren ohne WLAN sauber, 18 MHz bei v0.2.5
+// Pixeltakt: Standard 15 MHz (= nur ca. 16 Bilder/s, flimmert, war im Arduino-Core der Kompromiss gegen Streifen).
+// Bildrate = Takt / (1386 x 661): 30 MHz = 33 Hz, 40 MHz = 44 Hz, 51 MHz = 56 Hz. Der ESP-IDF-Build setzt DECK_PIXEL_CLOCK_HZ.
+#ifndef DECK_PIXEL_CLOCK_HZ
+#define DECK_PIXEL_CLOCK_HZ (15 * 1000 * 1000)
+#endif
+#define EXAMPLE_LCD_PIXEL_CLOCK_HZ      (DECK_PIXEL_CLOCK_HZ) ///< 15 MHz (ca. 16 Hz): mehr Zeit pro Bounce-Buffer, damit WLAN/LVGL im PSRAM das Display nicht aushungern. 24 MHz waren ohne WLAN sauber, 18 MHz bei v0.2.5
 
 /**
  * @brief Color and Pixel Configuration

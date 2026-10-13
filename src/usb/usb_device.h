@@ -13,6 +13,15 @@ struct DeckSerialStub {
   operator bool() const { return true; }
 };
 extern DeckSerialStub DeckSerial;
+#elif defined(DECK_USB_IDF)
+// ESP-IDF-Build (esp_tinyusb): gleiche Handgriffe wie USBCDC, siehe usb_device_idf.cpp
+struct DeckSerialIdf {
+  int  available();
+  int  read();
+  size_t print(const char* s);
+  operator bool() const;                // true, solange der PC den Port geoeffnet hat (DTR)
+};
+extern DeckSerialIdf DeckSerial;
 #else
 #include "USB.h"
 #include "USBCDC.h"

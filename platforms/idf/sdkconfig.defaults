@@ -45,3 +45,10 @@ CONFIG_LV_CONF_SKIP=n
 
 # ── Fremdkomponenten (esp-modbus u. a.) brauchen in IDF 5.5 diese Lockerung der Warnungen-als-Fehler ──
 CONFIG_COMPILER_DISABLE_DEFAULT_ERRORS=y
+
+# ── USB-Geraet (HID-Tastatur + Consumer + CDC) ─────────────────────────────────
+CONFIG_TINYUSB_CDC_ENABLED=y
+CONFIG_TINYUSB_CDC_COUNT=1
+CONFIG_TINYUSB_HID_COUNT=1
+CONFIG_TINYUSB_SUSPEND_CALLBACK=y
+CONFIG_TINYUSB_RESUME_CALLBACK=y

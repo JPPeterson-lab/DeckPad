@@ -20,6 +20,10 @@ sind nachfolgend aufgeführt.
 | [ArduinoJson](https://arduinojson.org) 7 | MIT |
 | Arduino-ESP32 / ESP-IDF | LGPL 2.1 / Apache 2.0 |
 
+## Tastaturlayouts
+
+`src/usb/keyboard_layouts.h`: ASCII→HID-Tabellen (Deutsch, US) aus der USB-Bibliothek von Arduino-ESP32 (`USBHIDKeyboard`, LGPL-2.1).
+
 ## Oberfläche & Schrift
 
 - UI-Design und Code-Export: [PicoPixel](https://picopixel.io)

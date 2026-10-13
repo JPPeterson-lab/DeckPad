@@ -11,7 +11,12 @@
 #define DECK_USB_SELECT_LEVEL 0
 
 // Tastaturlayout des Windows-PCs (fuer Text und Buchstaben in Tastenkombinationen): KeyboardLayout_de_DE oder KeyboardLayout_en_US
-#define DECK_KEY_LAYOUT KeyboardLayout_de_DE
+#define DECK_KEY_LAYOUT_DE 1            // 1 = deutsches Layout, 0 = US-Layout
+#if DECK_KEY_LAYOUT_DE
+#define DECK_KEY_LAYOUT KeyboardLayout_de_DE   // Arduino-Build
+#else
+#define DECK_KEY_LAYOUT KeyboardLayout_en_US
+#endif
 
 // ── Kachelraster ───────────────────────────────────────────────────────────────
 #define DECK_DEFAULT_COLS 5     // Standardraster (wie im PicoPixel-Entwurf: 5 x 3 = 15 Tasten)

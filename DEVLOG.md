@@ -1,5 +1,17 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – ESP-IDF: Ergebnis, Pixeltakt, eigene USB-Schicht
+
+**Streifen weg.** Auf dem Board mit dem IDF-Build (Display-ISR flash-sicher, PSRAM 120 MHz, Code im PSRAM, 64-KB-Cache): fünf Profil-Speichervorgänge hintereinander, keine Streifen. Die Schreibzeiten sinken auf 29–93 ms (Arduino: 68–199 ms). Damit ist die Ursache bestätigt: die vorkompilierte Core-Konfiguration.
+
+**Flimmern.** 15 MHz Pixeltakt ergeben bei 1386 × 661 Bildpunkten (Timing des Panels) nur 16,4 Bilder/s. Der niedrige Takt war im XL der Kompromiss gegen Streifen (PSRAM-Bandbreite bei 80 MHz). Mit 30 MHz (33 Hz) „flimmert es nicht mehr“. Der Takt ist über `DECK_PIXEL_CLOCK_HZ` einstellbar (IDF: `PCLK=40 bash build.sh`); 40 MHz ≈ 44 Hz, 51 MHz ≈ 56 Hz bleiben als Stufen.
+
+**USB.** Arduino-USB-Klassen lassen sich in der IDF-Komponentenform nicht nutzen: Sie erwarten `CONFIG_TINYUSB_ENABLED` (existiert in `esp_tinyusb` 1.x und 2.x nicht) und eine eigene TinyUSB-Anbindung. Die USB-Schicht war bewusst vom Rest getrennt (`src/usb/`), daher ließ sie sich ersetzen: `usb_device_idf.cpp` baut über die `esp_tinyusb`-API einen Verbund aus CDC + HID (Tastatur Report-ID 1, Consumer Report-ID 2), VID/PID wie bisher (303A:1001, damit Editor und Helfer das Gerät finden), feste Seriennummer (Windows vergibt dieselbe COM-Nummer). Die Arduino-Quellen `USB*.cpp` werden per CMake aus dem Build genommen. Layout: Die ASCII→Tastencode-Tabellen (Deutsch/US) stammen aus der Arduino-USB-Bibliothek (`keyboard_layouts.h`), damit Text und Buchstaben-Kürzel dasselbe tun wie im Arduino-Build. Das Modul ist dieselbe Schnittstelle (`usb_device.h`), `usb_cdc.cpp`, Aktionen und Profile blieben unverändert.
+
+**Offen:** Test am PC (Tastatur, Medientasten, COM-Port), `usbHostConnected()` über Attach/Detach-Ereignisse, Verhalten bei Standby.
+
+---
+
 ## 2026-10-13 – ESP-IDF-Versuch (platforms/idf)
 
 **Ausgangslage.** Panel-Neustart (v0.3.3) hilft nicht gegen die Streifen nach dem Speichern. Die Ursache liegt in der vorkompilierten Core-Konfiguration (`LCD_RGB_ISR_IRAM_SAFE` aus, PSRAM 80 MHz, kleiner Cache), die der Sketch nicht ändern kann. Auf dem Mac lag bereits ESP-IDF 5.3.2 samt Projekt `zentralsteuerung` (gleiches Board, erprobte Werte: PSRAM 120 MHz, Code im PSRAM, 64-B-Cache-Zeilen). Daneben wurde **ESP-IDF 5.5.5** installiert (passt zum Core 3.3.12 und ist die Mindestversion fürs ESP32-P4-Board).

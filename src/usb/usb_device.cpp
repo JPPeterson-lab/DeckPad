@@ -1,6 +1,8 @@
 #include "usb_device.h"
 #include "../app/diag_log.h"
-#ifdef DECK_NO_USB
+#if defined(DECK_USB_IDF)
+// ESP-IDF-Build: siehe usb_device_idf.cpp
+#elif defined(DECK_NO_USB)
 // ── Versuchsbuild ohne USB-Klassen ────────────────────────────────────────────
 #include "../app/diag_log.h"
 DeckSerialStub DeckSerial;
