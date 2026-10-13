@@ -81,12 +81,12 @@ Beim ersten Start legt das Gerät zwei **Beispielprofile** an: **Standard** (Lau
 
 ## 🖥️ Profile am PC erstellen (DeckPad Editor)
 
-Datei **`tools/editor/deckpad-editor.html`** auf den Windows-PC kopieren ([direkter Download](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html), Rechtsklick → *Link speichern unter*), in **Chrome oder Edge** öffnen und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
+Auf dem Windows-PC in **Chrome oder Edge** <https://jppeterson-lab.github.io/DeckPad/> öffnen (nichts zu installieren; die Seite ist `tools/editor/deckpad-editor.html`, auch als [Einzeldatei zum Speichern](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html) nutzbar) und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
 - Profil wählen oder **Neu** / **Kopie** anlegen, **Name**, Programm, Raster, Design und Helligkeit einstellen,
 - eine **Kachel anklicken**: Beschriftung, **Farbe** (Farbwähler oder Palette), **Aktion**: Medien/Lautstärke, **Tastenkombination**, **Programm, Datei oder Link starten**, Text tippen,
 - **„Auf DeckPad speichern“**: Das Gerät übernimmt das Profil sofort. **„Auf dem Gerät aktivieren“** schaltet es um.
 
-Der Editor setzt beim Verbinden außerdem die **Uhrzeit** des PCs und zeigt Status und Geräte-Log. Ohne Gerät lässt er sich mit **„Demo ohne Gerät“** ausprobieren. Funktioniert Web Serial beim Öffnen der Datei nicht, die Datei über `python -m http.server` im Ordner `tools/editor` bereitstellen und `http://localhost:8000/deckpad-editor.html` öffnen.
+Der Editor setzt beim Verbinden außerdem die **Uhrzeit** des PCs und zeigt Status und Geräte-Log. Ohne Gerät lässt er sich mit **„Demo ohne Gerät“** ausprobieren. Als lokal gespeicherte Datei kann Web Serial je nach Browser blockiert sein; dann `python -m http.server` im Ordner `tools/editor` starten und `http://localhost:8000/deckpad-editor.html` öffnen.
 
 **Programm starten** (`run`): Das DeckPad drückt Win+R, tippt den Text und bestätigt mit Enter, geeignet sind Programmname (`notepad`, `calc`), vollständiger Pfad oder Internetadresse.
 
@@ -231,12 +231,12 @@ On first start the device creates two **example profiles**: **Standard** (volume
 
 ## 🖥️ Creating profiles on the PC (DeckPad Editor)
 
-Copy **`tools/editor/deckpad-editor.html`** to the Windows PC ([direct download](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html), right-click → *Save link as*), open it in **Chrome or Edge** and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
+On the Windows PC open <https://jppeterson-lab.github.io/DeckPad/> in **Chrome or Edge** (nothing to install; the page is `tools/editor/deckpad-editor.html`, also usable as a [single file to save](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html)) and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
 - pick a profile or create **Neu** (new) / **Kopie** (copy), set **name**, program, grid, theme and brightness,
 - **click a tile**: label, **colour** (picker or palette), **action**: media/volume, **key combination**, **start a program, file or link**, type text,
 - **"Auf DeckPad speichern"** (save): the device applies the profile immediately. **"Auf dem Gerät aktivieren"** switches to it.
 
-On connect the editor also sets the PC's **time** and shows status and device log. Without a device try **"Demo ohne Gerät"**. If Web Serial does not work when opening the file, serve the folder `tools/editor` with `python -m http.server` and open `http://localhost:8000/deckpad-editor.html`.
+On connect the editor also sets the PC's **time** and shows status and device log. Without a device try **"Demo ohne Gerät"**. As a locally saved file Web Serial may be blocked depending on the browser; then run `python -m http.server` in the folder `tools/editor` and open `http://localhost:8000/deckpad-editor.html`.
 
 **Start a program** (`run`): the DeckPad presses Win+R, types the text and confirms with Enter; program name (`notepad`, `calc`), full path or web address work.
 

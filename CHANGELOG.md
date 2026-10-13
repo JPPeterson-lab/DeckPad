@@ -6,6 +6,7 @@
 
 ### Neu
 - **DeckPad Editor** (`tools/editor/deckpad-editor.html`): Profile am **Windows-PC** im Browser (Chrome/Edge, Web Serial) anlegen, bearbeiten, kopieren, löschen und aktivieren. Kacheln anklicken, Beschriftung, **Farbe** (Farbwähler und Palette), **Aktion** (Medien, Tastenkombination mit Modifier-Kästchen und Tastenaufnahme, Programm starten, Text, Host-Nachricht) und Schnellauswahl-Vorlagen. Profil-Sicherung als Datei, Demo-Modus ohne Gerät. Setzt beim Verbinden die **Uhrzeit** des PCs. Zeigt Status und Geräte-Log
+- **Editor online:** über GitHub Pages erreichbar (<https://jppeterson-lab.github.io/DeckPad/>), nichts zu installieren. `tools/deploy_editor.sh` kopiert die Datei nach `docs/index.html`
 - **Aktion `run`:** startet ein Programm, eine Datei oder einen Link über Win+R (Programmname, Pfad, Internetadresse). Das Gerät drückt Win+R, tippt den Text und bestätigt mit Enter
 - **COM-Befehle:** `VER`, `LIST`, `GET <id>`, `PUT <id> <json>`, `DEL <id>`, `USE <id>`, `TIME <Unix-Sekunden>` (zusätzlich zu `PING`, `STATUS`, `LOG`). Das Gerät übernimmt Änderungen sofort (Roller, Raster, Farben)
 - **Schichten:** die USB-Schicht kennt nur den Kanal; Befehle werden von `app/host_commands.cpp` angemeldet

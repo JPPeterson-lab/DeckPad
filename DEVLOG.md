@@ -10,6 +10,8 @@
 
 **Programm starten.** Ein HID-Gerät kann kein Programm direkt starten. `run` nutzt, was Windows ohnehin anbietet: Win+R, Text tippen, Enter (700 ms Wartezeit, bis der Dialog offen ist). Das funktioniert für Programmnamen, Pfade und Links. Grenzen: kostet knapp eine Sekunde, braucht ein freies Eingabefenster, und wegen des deutschen Tastaturlayouts beim Tippen müssen Pfadzeichen zum Windows-Layout passen. Für präzisere Steuerung (Fenster aktivieren, Programm nur starten, wenn es nicht läuft) bleibt der Typ `host` mit einem späteren PC-Helfer.
 
+**GitHub Pages.** Das Repo ist öffentlich, daher liefert Pages (Quelle `main`, Ordner `/docs`) den Editor über https: Web Serial verlangt einen sicheren Kontext, das ist bei einer lokal geöffneten Datei nicht garantiert. `docs/index.html` ist eine Kopie von `tools/editor/deckpad-editor.html` (`tools/deploy_editor.sh`), die Pages-Quelle muss ein Ordner im Repo sein.
+
 **Web Serial.** `port.open` mit 115200 Baud, danach DTR/RTS setzen: `usbCdcSendLine` sendet nur, wenn die Gegenseite DTR gesetzt hat (`DeckSerial` ist dann „true“). Der Editor wurde im Demo-Modus (Gerätesimulator im Browser) getestet; am echten Gerät steht der Test noch aus.
 
 ---
