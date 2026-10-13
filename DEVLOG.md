@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.2.1: Streifen nach Profilwechseln
+
+**Befund vom Gerät.** USB, Editor, Profile, Tasten und `run` funktionieren (Log vom Gerät: USB-Ereignis „gestartet“ nach 1,3 s, `Profil 'notepad' geschrieben: ok, 116 ms`). Die Streifen am linken Rand sind **nach dem Boot sauber und tauchen nach mehreren Profilwechseln wieder auf**. Der Flush-Zähler war in diesem Log nicht dabei (nur `LOG`, nicht `STATUS`).
+
+**Verdacht, nicht bestätigt.** Jeder Profilwechsel schrieb `config.json` in den Flash (`saveConfig()`), ohne dass es im Log stand. Ein Schreibvorgang dauert laut Log bis über 100 ms und stoppt den Cache; der RGB-Treiber ist nicht IRAM-sicher (`CONFIG_LCD_RGB_ISR_IRAM_SAFE`, siehe XL-DEVLOG „OTA-Test: Display flackert“). Dazu kommt der Neuaufbau von 15 Kacheln mit Theme-Wechsel in einem Zug. Das passt zu „nach ein paar Mal“, ist aber noch keine Messung. Gegenmaßnahme ohne Nachteil: die Auswahl erst 8 s nach dem letzten Wechsel schreiben. Zusätzlich wird jeder Wechsel mit der Aufbaudauer protokolliert und jeder Flush über 20 ms mit Bereich ins Log geschrieben, damit sich Streifen einem Ereignis zuordnen lassen.
+
+**Vorgehen.** Wie im XL nur eine Änderung auf einmal: nach v0.2.1 mehrfach Profile wechseln. Tauchen die Streifen weiter auf, `LOG` und `STATUS` direkt danach lesen (`[Flush] langsam`, `[UI] … Aufbau … ms`) und die nächste Maßnahme wählen (Raster-Aufbau in Teilen, Übergänge abschalten, Pixeltakt senken).
+
+---
+
 ## 2026-10-13 – v0.2.0: Editor am PC und Programmstart
 
 **Anlass.** Entwickelt wird am Mac, benutzt wird alles am Windows-PC. Profile mussten deshalb von Windows aus erstellbar sein, ohne Werkzeuge zu installieren: eine einzelne HTML-Datei mit **Web Serial** (Chrome/Edge), die die COM-Schnittstelle des DeckPad direkt anspricht.

@@ -42,3 +42,8 @@ void lvgl_port_unlock(void);
 struct LvglFlushStats { uint32_t count, sumUs, maxUs, maxPx; };
 void lvglPortPeekFlushStats(LvglFlushStats& out);   // lesen
 void lvglPortTakeFlushStats(LvglFlushStats& out);   // lesen und zuruecksetzen (nur aus dem LVGL-Task)
+
+// Ausreisser: ein einzelner Flush, der laenger als LVGL_PORT_SLOW_FLUSH_US dauert (Verdacht: PSRAM oder Cache blockiert)
+#define LVGL_PORT_SLOW_FLUSH_US 20000
+struct LvglSlowFlush { uint32_t n, maxUs, px; int x, y, w, h; };
+bool lvglPortTakeSlowFlush(LvglSlowFlush& out);     // true, wenn seit dem letzten Aufruf einer vorkam

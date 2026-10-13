@@ -2,6 +2,14 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.2.1 (2026-10-13)
+
+### Geändert
+- **Profilauswahl wird verzögert gespeichert:** bisher schrieb jeder Profilwechsel sofort in den Flash. Flash-Schreibzugriffe stoppen kurz den Cache (und damit den PSRAM-Zugriff des Displays) und verschleißen den Flash. Jetzt wird die Auswahl erst geschrieben, wenn 8 s lang nicht gewechselt wurde (`[Flash]`-Zeile im Log). Mögliche Ursache der Streifen nach mehreren Profilwechseln, noch nicht bestätigt
+
+### Neu
+- **Mehr Messwerte im Log:** Dauer des Kachel-Aufbaus bei jedem Profilwechsel, und einzelne langsame Flushes (länger als 20 ms) mit Größe und Position des Bereichs
+
 ## v0.2.0 (2026-10-13)
 
 ### Neu

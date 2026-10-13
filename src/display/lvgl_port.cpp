@@ -31,6 +31,17 @@ static void monitor_cb(lv_disp_drv_t *, uint32_t ms, uint32_t px)
 #endif
 
 static volatile LvglFlushStats s_stats = {0, 0, 0, 0};
+static volatile uint32_t s_slowN = 0, s_slowUs = 0, s_slowPx = 0;
+static volatile int s_slowX = 0, s_slowY = 0, s_slowW = 0, s_slowH = 0;
+
+bool lvglPortTakeSlowFlush(LvglSlowFlush& out)
+{
+    if (!s_slowN) return false;
+    out.n = s_slowN; out.maxUs = s_slowUs; out.px = s_slowPx;
+    out.x = s_slowX; out.y = s_slowY; out.w = s_slowW; out.h = s_slowH;
+    s_slowN = s_slowUs = s_slowPx = 0;
+    return true;
+}
 
 void lvglPortPeekFlushStats(LvglFlushStats& out)
 {
@@ -59,6 +70,10 @@ static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *colo
     s_stats.sumUs = s_stats.sumUs + us;
     if (us > s_stats.maxUs) s_stats.maxUs = us;
     if (px > s_stats.maxPx) s_stats.maxPx = px;
+    if (us > LVGL_PORT_SLOW_FLUSH_US) {
+        s_slowN = s_slowN + 1;
+        if (us > s_slowUs) { s_slowUs = us; s_slowPx = px; s_slowX = area->x1; s_slowY = area->y1; s_slowW = w; s_slowH = area->y2 - area->y1 + 1; }
+    }
 #if LVGL_PORT_PERF_LOG
     flush_us_sum += us;
 #endif

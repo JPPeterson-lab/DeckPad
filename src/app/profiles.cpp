@@ -209,13 +209,30 @@ static void builtinFallback()                      // wenn der Flash-Speicher ni
   s_active = 0;
 }
 
+// Die Profilauswahl wird nicht bei jedem Wechsel geschrieben: Flash-Schreibzugriffe stoppen kurz den Cache
+// (damit auch den PSRAM-Zugriff des Displays) und verschleissen den Flash. Stattdessen merken und spaeter schreiben.
+static bool     s_cfgDirty = false;
+static uint32_t s_cfgT = 0;
+#define CFG_SAVE_DELAY_MS 8000
+
 static void saveConfig()
 {
   if (!s_fsOk || s_count == 0) return;
+  s_cfgDirty = true;
+  s_cfgT = millis();
+}
+
+void profilesTick()
+{
+  if (!s_cfgDirty || millis() - s_cfgT < CFG_SAVE_DELAY_MS) return;
+  Guard g;
+  s_cfgDirty = false;
+  const uint32_t t0 = millis();
   JsonDocument doc;
   doc["active"] = s_list[s_active].id;
   File f = LittleFS.open(DECK_CONFIG_FILE, "w");
   if (f) { serializeJson(doc, f); f.close(); }
+  logDiag("[Flash] Auswahl '%s' geschrieben, %lu ms", s_list[s_active].id, (unsigned long)(millis() - t0));
 }
 
 bool profileActivate(int index)

@@ -116,7 +116,11 @@ void deckUiApplyProfile()
 static void switchProfile(int index)
 {
     if (index == profileActiveIndex()) return;
-    if (profileActivate(index)) { logDiag("[UI] Profil gewechselt: %s", profileActive().name); deckUiApplyProfile(); }
+    if (profileActivate(index)) {
+        const uint32_t t0 = millis();
+        deckUiApplyProfile();
+        logDiag("[UI] Profil gewechselt: %s (Aufbau %lu ms)", profileActive().name, (unsigned long)(millis() - t0));
+    }
     else logDiag("[UI] Profil %d konnte nicht geladen werden", index);
 }
 
@@ -179,6 +183,10 @@ static void diagTickCb(lv_timer_t*)
 
 static void tickCb(lv_timer_t*)
 {
+    profilesTick();                                         // verzoegertes Speichern der Profilauswahl
+    LvglSlowFlush sf;                                       // Ausreisser-Flushes ins Log (Ringpuffer), damit sie sich Ereignissen zuordnen lassen
+    if (lvglPortTakeSlowFlush(sf))
+        logDiag("[Flush] langsam: %u mal, max %u us (%u px bei x=%d y=%d %dx%d)", (unsigned)sf.n, (unsigned)sf.maxUs, (unsigned)sf.px, sf.x, sf.y, sf.w, sf.h);
     char buf[8];
     time_t now = time(nullptr);
     if (now > 1700000000) {                                 // Zeit ist gesetzt (kommt spaeter vom PC)

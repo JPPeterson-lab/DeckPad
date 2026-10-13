@@ -2,6 +2,14 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.2.1 (2026-10-13)
+
+### Changed
+- **Profile selection is saved with a delay:** every profile switch used to write to flash immediately. Flash writes briefly stop the cache (and with it the display's PSRAM access) and wear the flash. The selection is now only written once nothing was switched for 8 s (`[Flash]` line in the log). Possible cause of the streaks after several profile switches, not yet confirmed
+
+### New
+- **More measurements in the log:** duration of the tile rebuild on every profile switch, and individual slow flushes (longer than 20 ms) with size and position of the area
+
 ## v0.2.0 (2026-10-13)
 
 ### New

@@ -32,7 +32,8 @@ int   profileCount();
 const ProfileInfo& profileInfo(int index);
 int   profileActiveIndex();
 const DeckProfile& profileActive();
-bool  profileActivate(int index);                  // laden + Auswahl merken
+bool  profileActivate(int index);                  // laden; die Auswahl wird verzoegert gespeichert (siehe profilesTick)
+void  profilesTick();                              // regelmaessig aufrufen (1 s): schreibt die Auswahl, wenn 8 s nichts gewechselt wurde
 void  profileNamesJoined(String& out);             // "A\nB\nC" fuer das Roller-Widget
 
 // Settings des aktiven Profils schreiben (Theme/Helligkeit): nur diese beiden Werte, Tasten bleiben unberuehrt
