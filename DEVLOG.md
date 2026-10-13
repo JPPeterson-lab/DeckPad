@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – Web-Installer
+
+**Aufbau.** Wie im WetterCubePlus XL: `esp-web-tools` (`<esp-web-install-button>`) auf GitHub Pages, Manifest und Firmware unter `docs/`. Anders als im XL (vier Teile, Arduino-Export) gibt es hier **ein zusammengeführtes Image** (`esptool merge_bin`, `deckpad-merged.bin` ab Offset 0, 1,1 MB): Bootloader, Partitionstabelle und Programm. `tools/prepare_release.sh` baut mit ESP-IDF, führt zusammen, prüft die Teile im Image und die Versionsnummer im Programm und schreibt `manifest.json`/`version.json`. Die Datenpartition `storage` (Profile, Icons) liegt hinter dem Image und bleibt beim Update erhalten; „Gerät löschen“ (`new_install_prompt_erase`) löscht sie.
+
+**Stolpersteine, die auf der Seite stehen.** Installiert wird über den **UART-Port** (CH343, setzt den Chip per DTR/RTS in den Bootloader). Der native USB-Port trägt im Normalbetrieb die DeckPad-Firmware und kann den Chip nicht in den Bootloader schalten; außerdem bricht das Schreiben ab, wenn er gleichzeitig am PC hängt (siehe oben). Der Editor wurde auf `editor.html` verschoben, damit die Startseite der Installer ist.
+
+**Entscheidung.** Mittelfristig wird von Arduino IDE auf ESP-IDF gewechselt; wer nicht den Installer nutzt, soll sich im ESP32-Umfeld auskennen (README/Seite sagen das). Die Installation selbst über den Browser ist noch nicht ausprobiert.
+
+---
+
 ## 2026-10-13 – USB unter Windows: PID-Kollision
 
 **Befund.** IDF-Build am Windows-PC: Das Display zeigt „PC verbunden“, aber Tasten tun nichts und der Editor kann den Port nicht öffnen („Failed to open serial port“); der Port heißt jetzt COM9 statt COM6 (neue Seriennummer, erwartet). `Get-PnpDevice`: Das Gerät und der COM-Port sind „OK“, die Schnittstelle MI_02 („DeckPad Tasten“) hat aber die Klasse **USBDevice** statt HIDClass. Am Mac dagegen alles in Ordnung: HID-Tastatur und Consumer mit korrekter Berichtsbeschreibung (Usage-Paare 1/6 und 12/1), CDC antwortet auf `PING`/`VER`/`STATUS`. Die UART-Aufzeichnung zeigte, dass die Tastendrücke das Gerät erreichen und gesendet werden.

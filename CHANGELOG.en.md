@@ -6,6 +6,7 @@
 
 ### New
 - **ESP-IDF build (`platforms/idf/`) as the main path:** same source code, but with its own configuration instead of the precompiled Arduino core. Display drive flash-safe (`LCD_RGB_ISR_IRAM_SAFE`, `GDMA_ISR_IRAM_SAFE`), PSRAM 120 MHz, code in PSRAM, 64 KB data cache. **The streaks when saving no longer occur**, write times drop (29–93 ms instead of 68–199 ms). Build and flash: `platforms/idf/build.sh`
+- **Web installer** (`docs/index.html`, GitHub Pages): one click instead of a development environment, using [esp-web-tools](https://esp.huhn.me/). The firmware image (bootloader, partition table and program in one file) lives in `docs/firmware/`; `tools/prepare_release.sh` builds it and writes `manifest.json`. The editor is now at `…/editor.html`
 - **Pixel clock 30 MHz** (was 15 MHz): about 33 instead of 16 frames/s, the flicker is gone. Adjustable (`PCLK=40 bash build.sh`, `DECK_PIXEL_CLOCK_HZ`)
 - **Own USB layer for IDF** (`src/usb/usb_device_idf.cpp`, `esp_tinyusb`): HID keyboard + media keys + COM port, same interface as the Arduino build
 - **Measurements in the log:** per action wait time and send duration (`[Aktion] …: Warten x ms, Senden y ms`), longest UI round in the `[Diag]` line
@@ -57,7 +58,7 @@
 
 ### New
 - **DeckPad Editor** (`tools/editor/deckpad-editor.html`): create, edit, copy, delete and activate profiles on the **Windows PC** in the browser (Chrome/Edge, Web Serial). Click tiles, set label, **colour** (picker and palette), **action** (media, key combination with modifier boxes and key capture, start a program, text, host message) and quick-pick templates. Back up a profile as a file, demo mode without a device. Sets the PC's **time** on connect. Shows status and device log
-- **Editor online:** available via GitHub Pages (<https://jppeterson-lab.github.io/DeckPad/>), nothing to install. `tools/deploy_editor.sh` copies the file to `docs/index.html`
+- **Editor online:** available via GitHub Pages (<https://jppeterson-lab.github.io/DeckPad/editor.html>), nothing to install. `tools/deploy_editor.sh` copies the file to `docs/index.html`
 - **Editor recognises the wrong port:** the chooser only lists Espressif devices (VID 0x303A), i.e. the native USB port; the UART port (CH343) is recognised and explained. "Alle Ports anzeigen" (show all ports) removes the filter
 - **Action `run`:** starts a program, file or link via Win+R (program name, path, web address). The device presses Win+R, types the text and confirms with Enter
 - **COM commands:** `VER`, `LIST`, `GET <id>`, `PUT <id> <json>`, `DEL <id>`, `USE <id>`, `TIME <unix seconds>` (in addition to `PING`, `STATUS`, `LOG`). The device applies changes immediately (roller, grid, colours)

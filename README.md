@@ -27,6 +27,7 @@ Hardwaretreiber, LVGL-Port und Toolchain stammen aus dem [WetterCubePlus XL](htt
 | Einstellungen pro Profil (Theme hell/dunkel, Helligkeit) | 🧪 gebaut, ungetestet |
 | Taschenrechner (aus dem WetterCubePlus XL) | 🧪 portiert, ungetestet |
 | Küchentimer + Stoppuhr, Display blinkt bei Ablauf | 🧪 gebaut, ungetestet |
+| Web-Installer (GitHub Pages, ein Klick, Firmware-Image im Repo) | 🧪 gebaut, Image geprüft, Installation selbst noch ungetestet |
 | ESP-IDF-Build: keine Bildstreifen beim Speichern, 30 MHz Pixeltakt, eigene USB-Schicht | ✅ am Gerät und PC geprüft |
 | Eigene Partitionstabelle ohne OTA (4 MB App, 11,9 MB Daten) | ✅ geprüft (Tabelle gebaut und gelesen) |
 | Profile am PC bearbeiten und per CDC übertragen (DeckPad Editor, Web Serial) | 🧪 gebaut, im Demo-Modus getestet, am Gerät ungetestet |
@@ -85,7 +86,7 @@ Beim ersten Start legt das Gerät zwei **Beispielprofile** an: **Standard** (Lau
 
 ## 🖥️ Profile am PC erstellen (DeckPad Editor)
 
-Auf dem Windows-PC in **Chrome oder Edge** <https://jppeterson-lab.github.io/DeckPad/> öffnen (nichts zu installieren; die Seite ist `tools/editor/deckpad-editor.html`, auch als [Einzeldatei zum Speichern](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html) nutzbar) und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
+Auf dem Windows-PC in **Chrome oder Edge** <https://jppeterson-lab.github.io/DeckPad/editor.html> öffnen (nichts zu installieren; die Seite ist `tools/editor/deckpad-editor.html`, auch als [Einzeldatei zum Speichern](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html) nutzbar) und **„Mit DeckPad verbinden“** wählen (das Board muss über den USB-Port angeschlossen sein, der COM-Port darf nicht in einem anderen Programm offen sein). Dort:
 - Profil wählen oder **Neu** / **Kopie** anlegen, **Name**, Programm, Raster, Design und Helligkeit einstellen,
 - eine **Kachel anklicken**: Beschriftung, **Farbe** (Farbwähler oder Palette), **Aktion**: Medien/Lautstärke, **Tastenkombination**, **Programm, Datei oder Link starten**, Text tippen,
 - **„Auf DeckPad speichern“**: Das Gerät übernimmt das Profil sofort. **„Auf dem Gerät aktivieren“** schaltet es um.
@@ -136,7 +137,13 @@ Konsequenzen: **CAN ist im DeckPad nicht nutzbar**. Die Polarität (`0` = USB) b
 
 ---
 
-## 🛠️ Bauen und Flashen mit ESP-IDF (empfohlen)
+## 🚀 Installation
+
+**Empfohlen: Web-Installer** – <https://jppeterson-lab.github.io/DeckPad/>. In Chrome oder Edge öffnen, das Board über die Buchse **„UART“** anschließen (die Buchse „USB“ muss dabei frei sein), „Installieren“ klicken und den Port „USB-Enhanced-SERIAL CH343“ wählen. Danach das Kabel der Buchse **„USB“** mit dem PC verbinden. Die Option „Gerät löschen“ löscht auch gespeicherte Profile und Icons; ohne sie bleiben sie erhalten (Update).
+
+> **Wohin die Reise geht:** Das Projekt wechselt mittelfristig von der **Arduino IDE auf ESP-IDF** (keine Bildstreifen beim Speichern, kein Flimmern, saubere USB-Schicht). Selbst zu bauen ist möglich, setzt aber **gute Kenntnisse im ESP32-Umfeld** voraus (ESP-IDF, Partitionen, Flash-Optionen, Treiber): Das ESP-Ökosystem ist komplex. Wer das nicht braucht, nutzt den Web-Installer. Der Arduino-IDE-Build bleibt zunächst als Notlösung bestehen und wird später aufgegeben.
+
+## 🛠️ Selbst bauen mit ESP-IDF (für Erfahrene)
 
 1. **ESP-IDF 5.5.x** installieren: `git clone --branch v5.5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp/esp-idf-v5.5.5 && cd ~/esp/esp-idf-v5.5.5 && ./install.sh esp32s3,esp32p4`.
 2. Board über den **UART-Port** anschließen, dann bauen und flashen:
@@ -148,7 +155,7 @@ bash build.sh flash /dev/cu.usbmodemXXXX     # Port des UART-Anschlusses (CH343)
 
 Pixeltakt: `PCLK=40 bash build.sh flash …` (Standard 30 MHz, ca. 33 Bilder/s). Details: [`platforms/idf/README.md`](platforms/idf/README.md).
 
-## 🛠️ Installation (Arduino IDE / arduino-cli, Notlösung)
+## 🛠️ Arduino IDE / arduino-cli (Notlösung, läuft aus)
 
 1. **ESP32-Core** (≥ 3.3) sowie die Bibliotheken **LVGL 8.x** und **ArduinoJson 7.x** installieren. Die gemeinsame `lv_conf.h` liegt in `Arduino/libraries/` neben dem Ordner `lvgl` – **`LV_COLOR_16_SWAP` muss `0` sein**.
 2. Ordner öffnen, **Board: ESP32S3 Dev Module** mit:
@@ -227,6 +234,7 @@ Hardware drivers, the LVGL port and the toolchain come from the [WetterCubePlus 
 | Per-profile settings (theme light/dark, brightness) | 🧪 built, untested |
 | Calculator (from the WetterCubePlus XL) | 🧪 ported, untested |
 | Kitchen timer + stopwatch, display blinks when the timer ends | 🧪 built, untested |
+| Web installer (GitHub Pages, one click, firmware image in the repo) | 🧪 built, image verified, installation itself not yet tested |
 | ESP-IDF build: no streaks when saving, 30 MHz pixel clock, own USB layer | ✅ verified on device and PC |
 | Custom partition table without OTA (4 MB app, 11.9 MB data) | ✅ verified (table built and read back) |
 | Edit profiles on the PC and transfer them via CDC (DeckPad Editor, Web Serial) | 🧪 built, tested in demo mode, untested on the device |
@@ -265,7 +273,7 @@ On first start the device creates two **example profiles**: **Standard** (volume
 
 ## 🖥️ Creating profiles on the PC (DeckPad Editor)
 
-On the Windows PC open <https://jppeterson-lab.github.io/DeckPad/> in **Chrome or Edge** (nothing to install; the page is `tools/editor/deckpad-editor.html`, also usable as a [single file to save](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html)) and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
+On the Windows PC open <https://jppeterson-lab.github.io/DeckPad/editor.html> in **Chrome or Edge** (nothing to install; the page is `tools/editor/deckpad-editor.html`, also usable as a [single file to save](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html)) and choose **"Mit DeckPad verbinden"** (the board must be connected through the USB port; the COM port must not be open in another program). There you can:
 - pick a profile or create **Neu** (new) / **Kopie** (copy), set **name**, program, grid, theme and brightness,
 - **click a tile**: label, **colour** (picker or palette), **action**: media/volume, **key combination**, **start a program, file or link**, type text,
 - **"Auf DeckPad speichern"** (save): the device applies the profile immediately. **"Auf dem Gerät aktivieren"** switches to it.
@@ -312,7 +320,13 @@ Consequence: **CAN cannot be used with the DeckPad**. The polarity (`0` = USB) i
 | `storage` (LittleFS) | 11.9 MB | profiles, later icons and images |
 | PSRAM (8 MB) | – | framebuffer (1.2 MB) and LVGL memory pool (192 KB); not partitioned |
 
-## 🛠️ Building and flashing with ESP-IDF (recommended)
+## 🚀 Installation
+
+**Recommended: web installer** – <https://jppeterson-lab.github.io/DeckPad/>. Open it in Chrome or Edge, connect the board via the **"UART"** port (the "USB" port must be free), click "Install" and choose the port "USB-Enhanced-SERIAL CH343". Afterwards connect the cable of the **"USB"** port to the PC. The "erase device" option also deletes saved profiles and icons; without it they are kept (update).
+
+> **Where this is going:** the project is moving from the **Arduino IDE to ESP-IDF** in the medium term (no streaks when saving, no flicker, a clean USB layer). Building it yourself is possible but requires **good knowledge of the ESP32 world** (ESP-IDF, partitions, flash options, drivers): the ESP ecosystem is complex. If you do not need that, use the web installer. The Arduino IDE build stays as a fallback for now and will be dropped later.
+
+## 🛠️ Building it yourself with ESP-IDF (for experienced users)
 
 1. Install **ESP-IDF 5.5.x**: `git clone --branch v5.5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp/esp-idf-v5.5.5 && cd ~/esp/esp-idf-v5.5.5 && ./install.sh esp32s3,esp32p4`.
 2. Connect the board via the **UART port**, then build and flash:
@@ -324,7 +338,7 @@ bash build.sh flash /dev/cu.usbmodemXXXX     # port of the UART connector (CH343
 
 Pixel clock: `PCLK=40 bash build.sh flash …` (default 30 MHz, about 33 frames/s). Details: [`platforms/idf/README.md`](platforms/idf/README.md).
 
-## 🛠️ Installation (Arduino IDE / arduino-cli, fallback)
+## 🛠️ Arduino IDE / arduino-cli (fallback, being phased out)
 
 1. Install the **ESP32 core** (≥ 3.3) and the libraries **LVGL 8.x** and **ArduinoJson 7.x**. The shared `lv_conf.h` lives in `Arduino/libraries/` next to the `lvgl` folder – **`LV_COLOR_16_SWAP` must be `0`**.
 2. Open the folder, **board: ESP32S3 Dev Module** with the values from the German table above (PSRAM *OPI*, 16 MB / QIO, partition scheme *Custom*, **USB Mode: USB-OTG (TinyUSB)**, **USB CDC On Boot: Disabled** so that `Serial` stays on the UART port).
