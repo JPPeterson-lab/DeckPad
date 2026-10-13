@@ -1,0 +1,5 @@
+dependencies:
+  idf: ">=5.5.0"
+  espressif/arduino-esp32: "~3.3.0"
+  lvgl/lvgl: "~8.4.0"
+  bblanchon/arduinojson: "^7.0.0"

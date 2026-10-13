@@ -1,5 +1,17 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – ESP-IDF-Versuch (platforms/idf)
+
+**Ausgangslage.** Panel-Neustart (v0.3.3) hilft nicht gegen die Streifen nach dem Speichern. Die Ursache liegt in der vorkompilierten Core-Konfiguration (`LCD_RGB_ISR_IRAM_SAFE` aus, PSRAM 80 MHz, kleiner Cache), die der Sketch nicht ändern kann. Auf dem Mac lag bereits ESP-IDF 5.3.2 samt Projekt `zentralsteuerung` (gleiches Board, erprobte Werte: PSRAM 120 MHz, Code im PSRAM, 64-B-Cache-Zeilen). Daneben wurde **ESP-IDF 5.5.5** installiert (passt zum Core 3.3.12 und ist die Mindestversion fürs ESP32-P4-Board).
+
+**Aufbau.** `platforms/idf/` bindet denselben Quellcode ein (`../../src/**`, `Deckpad.ino` über `main.cpp`), Arduino-ESP32 3.3, LVGL 8.4 und ArduinoJson als Komponenten (Komponentenmanager). `conf/lv_conf.h` ist eine Projektkopie der gemeinsamen `lv_conf.h` mit den Schaltern aus `build_opt.h`. Die `sdkconfig.defaults` setzt `LCD_RGB_ISR_IRAM_SAFE`, `GDMA_ISR_IRAM_SAFE`, PSRAM 120 MHz OPI, `SPIRAM_FETCH_INSTRUCTIONS`/`SPIRAM_RODATA`, 64-KB-Daten-Cache.
+
+**Hürden beim ersten Build** (alle gelöst): (1) LVGL fand `lv_conf.h` nicht: Include-Pfad `conf/`; (2) Fremdkomponente `esp-modbus` (Abhängigkeit der Arduino-Komponente) scheitert in IDF 5.5 an `-Werror=stringop-truncation` und hängt ein eigenes `-Werror` an: gezielte `-Wno-error=…`; (3) die Arduino-Klassen `USBCDC`/`USBHID*` brauchen `CONFIG_TINYUSB_ENABLED`, das es in IDF 5.5 + `esp_tinyusb` 1.x nicht gibt (der Arduino-Core nutzt eine eigene TinyUSB-Anbindung). Für den Versuch gibt es `DECK_NO_USB`: Der Befehlskanal läuft über den UART-Port, Tasten werden nicht gesendet. Für den Dauerbetrieb muss die USB-Schicht neu gebaut werden (`esp_tinyusb`-API: Deskriptoren für HID-Tastatur, Consumer und CDC). Python-Umgebung: Der Installer hatte das venv auf `/Applications/Xcode.app/…/python3` gesetzt, das später nicht mehr existierte; Verweis auf die Command-Line-Tools-Python umgebogen.
+
+**Ergebnis bisher.** Baut (1,0 MB von 4 MB). Wirkung auf die Streifen: **noch nicht getestet.** Der Arduino-Build ist unverändert (gleiche Größe).
+
+---
+
 ## 2026-10-13 – v0.3.3: Panel nach Flash-Schreibzugriff neu starten
 
 **Log vom Gerät (v0.3.2).** Streifen traten auf, nachdem im Editor ein Icon und das Profil gespeichert wurden (Icon 103 ms, Profil 90 ms). Das automatische Neuzeichnen lief danach (`[UI] Vollbild neu gezeichnet`, 29,5 s), die Streifen blieben. Ein vollständiges Neuzeichnen schreibt den Framebuffer komplett neu: Der Bildinhalt im PSRAM ist danach korrekt, also kann der Fehler nicht im Framebuffer liegen. Er liegt in der Ansteuerung des Panels (Bounce-Buffer/DMA aus dem Takt).

@@ -2,10 +2,22 @@
 // USB-Geraet zum PC: Composite aus HID-Tastatur (inkl. Consumer/Media-Tasten) und virtueller
 // serieller Schnittstelle (CDC). Das ist reine Hardware-Schicht - sie kennt weder Kacheln noch Profile.
 #include <Arduino.h>
+
+// DECK_NO_USB (nur im ESP-IDF-Versuchsbuild gesetzt): kein USB-Geraet, der Befehlskanal laeuft stattdessen ueber den
+// UART-Port ("Serial"), Tasten werden nicht gesendet. So laesst sich Display/Speicher testen, ohne die USB-Klassen.
+#ifdef DECK_NO_USB
+struct DeckSerialStub {
+  int  available() { return Serial.available(); }
+  int  read()      { return Serial.read(); }
+  size_t print(const char* s) { return Serial.print(s); }
+  operator bool() const { return true; }
+};
+extern DeckSerialStub DeckSerial;
+#else
 #include "USB.h"
 #include "USBCDC.h"
-
 extern USBCDC DeckSerial;   // die virtuelle COM-Schnittstelle (nicht "Serial": das ist der UART)
+#endif
 
 // Schaltet GPIO19/20 per IO-Expander auf USB und startet HID + CDC. Nach der Display-/Touch-Init aufrufen.
 void usbDeviceInit();

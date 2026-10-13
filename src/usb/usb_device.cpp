@@ -1,5 +1,15 @@
 #include "usb_device.h"
 #include "../app/diag_log.h"
+#ifdef DECK_NO_USB
+// ── Versuchsbuild ohne USB-Klassen ────────────────────────────────────────────
+#include "../app/diag_log.h"
+DeckSerialStub DeckSerial;
+void usbDeviceInit() { logDiag("[USB] DECK_NO_USB: kein USB-Geraet, Befehle ueber den UART-Port"); }
+bool usbHostConnected() { return true; }
+void usbKeyChord(const uint16_t*, uint8_t) {}
+void usbConsumerTap(uint16_t) {}
+void usbTypeText(const char*) {}
+#else
 #include "USBHIDKeyboard.h"
 #include "USBHIDConsumerControl.h"
 #include "../hardware/io_extension.h"
@@ -65,3 +75,4 @@ void usbTypeText(const char* text)
 {
   if (text && *text) s_keyboard.print(text);
 }
+#endif  // DECK_NO_USB

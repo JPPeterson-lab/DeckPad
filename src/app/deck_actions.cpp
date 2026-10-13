@@ -6,7 +6,21 @@
 #include <ctype.h>
 #include "../usb/usb_device.h"
 #include "../usb/usb_cdc.h"
+#ifdef DECK_NO_USB
+// HID-Verbrauchercodes (Consumer Page), dieselben Werte wie in USBHIDConsumerControl.h
+#define CONSUMER_CONTROL_VOLUME_INCREMENT 0x00E9
+#define CONSUMER_CONTROL_VOLUME_DECREMENT 0x00EA
+#define CONSUMER_CONTROL_MUTE             0x00E2
+#define CONSUMER_CONTROL_PLAY_PAUSE       0x00CD
+#define CONSUMER_CONTROL_SCAN_NEXT        0x00B5
+#define CONSUMER_CONTROL_SCAN_PREVIOUS    0x00B6
+#define CONSUMER_CONTROL_STOP             0x00B7
+#define CONSUMER_CONTROL_CALCULATOR       0x0192
+#define CONSUMER_CONTROL_LOCAL_BROWSER    0x0194
+#define CONSUMER_CONTROL_EMAIL_READER     0x018A
+#else
 #include "USBHIDConsumerControl.h"
+#endif
 #include "profiles.h"
 #include "settings_extras.h"
 #include "diag_log.h"
