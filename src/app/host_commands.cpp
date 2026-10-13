@@ -9,6 +9,7 @@
 #include "icons.h"
 #include "settings_extras.h"
 #include "esp_heap_caps.h"
+#include "../display/lvgl_port.h"
 #include "../usb/usb_cdc.h"
 
 // Antworten: Einzeiler. Erfolg "OK", Fehler "ERR <Grund>", LIST/GET/STATUS liefern direkt ihre Daten.
@@ -116,6 +117,8 @@ static void cmdIconGet(const char* a)
 
 static void cmdRedraw(const char*) { { LvLock lock; deckUiRedrawAll(); } logDiag("[PC] Vollbild neu zeichnen angefordert"); usbCdcSendLine("OK"); }
 
+static void cmdPanel(const char*) { { LvLock lock; lvglPortRestartPanel(); } logDiag("[PC] Panel-Neustart angefordert"); usbCdcSendLine("OK"); }
+
 static void cmdStatus(const char*) { char b[320]; logStatus(b, sizeof(b)); usbCdcSendLine(b); }
 static void emitLine(const char* l) { usbCdcSendLine(l); }
 static void cmdLog(const char*) { usbCdcSendLine("--- LOG Anfang ---"); logDump(emitLine); usbCdcSendLine("--- LOG Ende ---"); }
@@ -137,6 +140,7 @@ void hostCommandsInit()
   usbCdcRegister("ICONDEL",   cmdIconDel);
   usbCdcRegister("ICONGET",   cmdIconGet);
   usbCdcRegister("REDRAW", cmdRedraw);
+  usbCdcRegister("PANEL",  cmdPanel);
   usbCdcRegister("STATUS", cmdStatus);
   usbCdcRegister("LOG",    cmdLog);
 }

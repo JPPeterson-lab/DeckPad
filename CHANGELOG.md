@@ -2,6 +2,11 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.3.3 (2026-10-13)
+
+### Neu
+- **Panel-Neustart:** Nach jedem Flash-Schreibzugriff startet das Gerät zusätzlich die Display-Ansteuerung neu (`esp_lcd_rgb_panel_restart`, laut Espressif-Doku gegen eine dauerhafte Verschiebung, wenn LCD-Controller und DMA aus dem Takt geraten sind) und zeichnet den Bildschirm neu. Dazu COM-Befehl `PANEL` und Editor-Knopf **„Panel neu starten“** zum Testen. Ob das die Streifen beseitigt, ist noch nicht bestätigt
+
 ## v0.3.2 (2026-10-13)
 
 ### Neu

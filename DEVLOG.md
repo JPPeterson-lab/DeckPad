@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-13 – v0.3.3: Panel nach Flash-Schreibzugriff neu starten
+
+**Log vom Gerät (v0.3.2).** Streifen traten auf, nachdem im Editor ein Icon und das Profil gespeichert wurden (Icon 103 ms, Profil 90 ms). Das automatische Neuzeichnen lief danach (`[UI] Vollbild neu gezeichnet`, 29,5 s), die Streifen blieben. Ein vollständiges Neuzeichnen schreibt den Framebuffer komplett neu: Der Bildinhalt im PSRAM ist danach korrekt, also kann der Fehler nicht im Framebuffer liegen. Er liegt in der Ansteuerung des Panels (Bounce-Buffer/DMA aus dem Takt).
+
+**Maßnahme.** `esp_lcd_rgb_panel_restart()` (IDF-Doku: „to save the screen from a permanent shift, you can call this function to restart the LCD DMA“). Es setzt ein Flag, der Neustart erfolgt im nächsten VSYNC-Handler. `CONFIG_LCD_RGB_RESTART_IN_VSYNC=y` ist gesetzt und soll das automatisch tun; offenbar reicht das nach einem Cache-Stillstand nicht, deshalb wird es nach jedem Flash-Schreibzugriff ausdrücklich angestoßen. Zum Testen gibt es `PANEL` und einen Editor-Knopf, getrennt von `REDRAW`, damit sich Bildinhalt und Ansteuerung unterscheiden lassen.
+
+**Bewertung.** Das ist weiter eine Hypothese: Wirkt `PANEL`, ist die Ursache bestätigt. Wirkt es nicht, bleibt die nicht IRAM-sichere Konfiguration des vorkompilierten Cores (nur mit eigenem Core oder ESP-IDF änderbar).
+
+---
+
 ## 2026-10-13 – v0.3.2: Streifen kommen mit Icons wieder
 
 **Log vom Gerät.** Beim Hochladen und Speichern vieler Icons und Profile tauchen die Streifen wieder auf. Im Log: **kein einziger Eintrag `[Flush] langsam`**, auch nicht während der Flash-Schreibzugriffe (Profil 68–199 ms, Icon 30–63 ms, Auswahl 10–14 ms), also kein Flush über 20 ms. Der Profilwechsel kostet 12–28 ms, mit den neuen Icon-Kacheln einmal 71 ms. Damit ist ausgeschlossen, dass ein einzelner langer Kopiervorgang ins PSRAM die Ursache ist (die ursprüngliche XL-Hypothese). Übrig bleibt die Display-Ansteuerung selbst.

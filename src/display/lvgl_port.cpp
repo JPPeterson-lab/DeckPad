@@ -30,6 +30,14 @@ static void monitor_cb(lv_disp_drv_t *, uint32_t ms, uint32_t px)
 }
 #endif
 
+static esp_lcd_panel_handle_t s_panel = nullptr;
+
+void lvglPortRestartPanel(void)
+{
+    // Setzt nur ein Flag; der Treiber startet beim naechsten VSYNC neu (siehe esp_lcd_panel_rgb.h)
+    if (s_panel) esp_lcd_rgb_panel_restart(s_panel);
+}
+
 static volatile LvglFlushStats s_stats = {0, 0, 0, 0};
 static volatile uint32_t s_slowN = 0, s_slowUs = 0, s_slowPx = 0;
 static volatile int s_slowX = 0, s_slowY = 0, s_slowW = 0, s_slowH = 0;
@@ -104,6 +112,7 @@ static void touchpad_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
 
 static lv_disp_t *display_init(esp_lcd_panel_handle_t panel)
 {
+    s_panel = panel;
     static lv_disp_draw_buf_t draw_buf;
     static lv_disp_drv_t disp_drv;
 

@@ -2,6 +2,11 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.3.3 (2026-10-13)
+
+### New
+- **Panel restart:** after every flash write the device also restarts the display drive (`esp_lcd_rgb_panel_restart`, per Espressif's documentation against a permanent shift when the LCD controller and DMA get out of sync) and redraws the screen. Plus COM command `PANEL` and an editor button **"Panel neu starten"** for testing. Whether this removes the streaks is not yet confirmed
+
 ## v0.3.2 (2026-10-13)
 
 ### New

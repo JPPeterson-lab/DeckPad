@@ -76,6 +76,7 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
   <button id="btnStatus" disabled>Status</button>
   <button id="btnLog" disabled>Geräte-Log</button>
   <button id="btnTime" disabled>Uhrzeit setzen</button>
+  <button id="btnPanel" disabled title="startet die Display-Ansteuerung neu (hilft, wenn das Bild nach einem Speichern verschoben oder gestreift bleibt)">Panel neu starten</button>
   <button id="btnRedraw" disabled title="zeichnet das ganze Display neu (hilft gegen Bildstreifen, falls der Bildinhalt gestört ist)">Display neu zeichnen</button>
 </header>
 <div id="noSerial" class="banner hidden">Dieser Browser unterstützt kein Web Serial. Bitte <b>Chrome</b> oder <b>Edge</b> unter Windows verwenden (oder den Demo-Modus zum Ausprobieren).</div>
@@ -279,7 +280,7 @@ class DemoTransport {   // Verhält sich wie das Gerät, nur im Speicher
     if(cmd==="VER") return ["DECKPAD demo"];
     if(cmd==="STATUS") return ["v=demo up=1s usb=1 flush_n=0"];
     if(cmd==="LOG") return ["--- LOG Anfang ---","       1 [Demo] kein echtes Gerät","--- LOG Ende ---"];
-    if(cmd==="TIME"||cmd==="REDRAW") return ["OK"];
+    if(cmd==="TIME"||cmd==="REDRAW"||cmd==="PANEL") return ["OK"];
     if(cmd==="ICONBEGIN"){ const [id,w,h]=a.split(" "); this.up={id,w:+w,h:+h,b64:""}; return ["OK"]; }
     if(cmd==="ICONDATA"){ if(!this.up) return ["ERR kein ICONBEGIN"]; this.up.b64+=a; return ["OK"]; }
     if(cmd==="ICONEND"){ if(!this.up) return ["ERR kein ICONBEGIN"]; const u=this.up; this.up=null;
@@ -312,7 +313,7 @@ async function cmd(line, multi){
   return r;
 }
 function setStatus(txt, on){ const s=$("status"); s.textContent=txt; s.classList.toggle("on",!!on); }
-function enableTools(on){ ["btnPing","btnStatus","btnLog","btnTime","btnRedraw"].forEach(i=>$(i).disabled=!on); $("btnDisc").classList.toggle("hidden",!on); }
+function enableTools(on){ ["btnPing","btnStatus","btnLog","btnTime","btnRedraw","btnPanel"].forEach(i=>$(i).disabled=!on); $("btnDisc").classList.toggle("hidden",!on); }
 
 /* ───────── Verbinden ───────── */
 function hex(v){ return v===undefined ? "?" : "0x"+v.toString(16).toUpperCase().padStart(4,"0"); }
@@ -621,6 +622,7 @@ $("btnUse").onclick = async () => {
 $("btnPing").onclick = () => cmd("PING").catch(e=>log(e.message,"err"));
 $("btnStatus").onclick = () => cmd("STATUS").catch(e=>log(e.message,"err"));
 $("btnLog").onclick = () => cmd("LOG","--- LOG Ende ---").catch(e=>log(e.message,"err"));
+$("btnPanel").onclick = () => cmd("PANEL").catch(e=>log(e.message,"err"));
 $("btnRedraw").onclick = () => cmd("REDRAW").catch(e=>log(e.message,"err"));
 $("btnTime").onclick = () => cmd("TIME "+Math.floor(Date.now()/1000)).catch(e=>log(e.message,"err"));
 
