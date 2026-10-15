@@ -2,6 +2,11 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## Unreleased
+
+### New
+- **Windows helper as a proper program:** `DeckPad-Helper.exe` (C#, WinForms, .NET Framework 4.8, about 80 KB) replaces the PowerShell script. Status window, tray icon, single instance. Options (both **off** by default): *Mit Windows starten (im Hintergrund)* (per-user autostart, never running permanently without consent) and *Beenden, wenn das DeckPad getrennt wird*. Source in `tools/helper-app/`, build with `tools/build_helper.sh`. The file is unsigned (SmartScreen notice)
+
 ## v0.5.0 (2026-10-15)
 
 ### New

@@ -2,6 +2,11 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## Unveröffentlicht
+
+### Neu
+- **Windows-Helfer als richtiges Programm:** `DeckPad-Helper.exe` (C#, WinForms, .NET Framework 4.8, ca. 80 KB) ersetzt das PowerShell-Skript. Statusfenster, Symbol im Infobereich, nur eine Instanz. Optionen (beide standardmäßig **aus**): *Mit Windows starten (im Hintergrund)* (Autostart pro Benutzer, kein Dauerbetrieb ohne Zustimmung) und *Beenden, wenn das DeckPad getrennt wird*. Quellcode in `tools/helper-app/`, Bauen mit `tools/build_helper.sh`. Die Datei ist nicht signiert (SmartScreen-Hinweis)
+
 ## v0.5.0 (2026-10-15)
 
 ### Neu

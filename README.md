@@ -109,9 +109,11 @@ Im Editor **„Symbol wählen“** (Emoji) oder **„Bild laden …“** (PNG, J
 ---
 
 ## 🔄 PC-Helfer (Windows)
-Ein kleines PowerShell-Programm ohne Installation: [`deckpad-helper.ps1`](https://jppeterson-lab.github.io/DeckPad/deckpad-helper.ps1) und [`start-helper.cmd`](https://jppeterson-lab.github.io/DeckPad/start-helper.cmd) in einen Ordner speichern, `start-helper.cmd` doppelklicken (Autostart: Verknüpfung in `shell:startup`). Es gibt den COM-Port frei, solange der Editor im Vordergrund ist. Es erfüllt zwei Aufgaben, beide in den Einstellungen des Geräts schaltbar:
+Ein kleines Windows-Programm: [`DeckPad-Helper.exe`](https://jppeterson-lab.github.io/DeckPad/DeckPad-Helper.exe) herunterladen und doppelklicken, nichts zu installieren (.NET Framework 4.8 ist in Windows 10/11 enthalten). Es zeigt ein Fenster mit Status und läuft danach als Symbol im Infobereich der Taskleiste. Windows warnt bei der ungesignierten Datei (SmartScreen): **Weitere Informationen → Trotzdem ausführen**. Es gibt den COM-Port frei, solange der Editor im Vordergrund ist. Zwei Aufgaben, beide in den Einstellungen des Geräts schaltbar:
 - **Automatischer Profilwechsel:** wählt das Profil nach dem Programm im Vordergrund (Feld „Programm“ im Profil, sonst „Standard“).
 - **Tasten am PC ausführen:** führt Tasten, Medientasten, Text und Programmstarts am PC aus, statt dass das Board als USB-Tastatur auftritt (Ausweichweg).
+
+Der Helfer läuft **nur, wenn Sie ihn starten**. Im Fenster gibt es zwei Optionen, beide standardmäßig aus: **Mit Windows starten (im Hintergrund)** und **Beenden, wenn das DeckPad getrennt wird**. Das Fenster zu schließen versteckt es nur, **Beenden** (Fenster oder Rechtsklick auf das Symbol) beendet den Helfer.
 
 Der Helfer sendet nur den Namen des Vordergrundprogramms an das DeckPad und führt im zweiten Modus aus, was das angeschlossene DeckPad schickt: nur selbst eingesteckte Geräte verwenden.
 
@@ -146,7 +148,7 @@ Deckpad/
 ├─ main/main.cpp            Einstieg (Reihenfolge des Starts)
 ├─ CMakeLists.txt, sdkconfig.defaults, partitions.csv, conf/lv_conf.h
 ├─ build.sh                 bauen / flashen
-├─ tools/                   prepare_release.sh, deploy_ui.sh, deploy_editor.sh, bump_version.sh, editor/, helper/
+├─ tools/                   prepare_release.sh, deploy_ui.sh, deploy_editor.sh, bump_version.sh, editor/, helper-app/ (Windows-Helfer, C#), build_helper.sh
 ├─ docs/                    GitHub Pages: Web-Installer, Editor, Helfer, Firmware-Image
 └─ src/
    ├─ hardware/   Waveshare-Treiber: RGB-Panel, GT911, I²C, IO-Expander, Backlight
@@ -252,9 +254,11 @@ On connect the editor also sets the PC's **time** and shows status and device lo
 In the editor **"Symbol wählen"** (emoji) or **"Bild laden …"** (PNG, JPG, SVG), size 32–80 px (with text underneath prefer 48 px or smaller). On save the editor loads new icons onto the device (up to 96 × 96 px, shared by all profiles).
 
 ## 🔄 PC helper (Windows)
-A small PowerShell program, nothing to install: save [`deckpad-helper.ps1`](https://jppeterson-lab.github.io/DeckPad/deckpad-helper.ps1) and [`start-helper.cmd`](https://jppeterson-lab.github.io/DeckPad/start-helper.cmd) into a folder and double-click `start-helper.cmd` (autostart: shortcut in `shell:startup`). It releases the COM port while the editor is in the foreground. Two jobs, both switchable in the device's settings:
+A small Windows program: download [`DeckPad-Helper.exe`](https://jppeterson-lab.github.io/DeckPad/DeckPad-Helper.exe) and double-click it, nothing to install (.NET Framework 4.8 ships with Windows 10/11). It shows a status window and then keeps running as a tray icon. Windows warns about the unsigned file (SmartScreen): **More info → Run anyway**. It releases the COM port while the editor is in the foreground. Two jobs, both switchable in the device's settings:
 - **Automatic profile switch:** picks the profile by the program in the foreground (profile field "Programm", otherwise "Standard").
 - **Run keys on the PC:** performs keys, media keys, text and program launches on the PC instead of the board acting as a USB keyboard (fallback).
+
+The helper **only runs when you start it**. The window has two options, both off by default: **Mit Windows starten (im Hintergrund)** (start with Windows, in the background) and **Beenden, wenn das DeckPad getrennt wird** (quit when the DeckPad is unplugged). Closing the window only hides it; **Beenden** (window or right-click on the tray icon) quits the helper.
 
 The helper only sends the name of the foreground program to the DeckPad and, in the second mode, executes what the connected DeckPad sends: only use devices you plugged in yourself.
 

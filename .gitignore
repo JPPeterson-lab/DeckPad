@@ -6,3 +6,5 @@ dependencies.lock
 managed_components/
 sdkconfig
 sdkconfig.old
+tools/helper-app/bin/
+tools/helper-app/obj/
