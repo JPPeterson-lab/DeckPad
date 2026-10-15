@@ -51,7 +51,7 @@ Weitere Befehle: `bash build.sh` (nur bauen), `bash build.sh clean`, Pixeltakt `
 | Taschenrechner, Küchentimer/Stoppuhr | 🧪 ungetestet |
 | Automatischer Profilwechsel (Schalter + Windows-Helfer) | 🧪 ungetestet |
 | Aktionen über den PC-Helfer statt USB-Tastatur | 🧪 ungetestet |
-| Web-Installer (GitHub Pages) | 🧪 Image geprüft, Installation selbst ungetestet |
+| Web-Installer (GitHub Pages) | ✅ Installation am Gerät geprüft (Update ohne „Gerät löschen“) |
 
 ---
 
@@ -213,7 +213,7 @@ More commands: `bash build.sh` (build only), `bash build.sh clean`, pixel clock 
 | Calculator, kitchen timer/stopwatch | 🧪 untested |
 | Automatic profile switch (switch + Windows helper) | 🧪 untested |
 | Actions via the PC helper instead of the USB keyboard | 🧪 untested |
-| Web installer (GitHub Pages) | 🧪 image verified, installation itself untested |
+| Web installer (GitHub Pages) | ✅ installation verified on the device (update without "erase device") |
 
 ## 🎬 Screens
 
