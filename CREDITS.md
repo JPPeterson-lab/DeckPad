@@ -20,6 +20,16 @@ sind nachfolgend aufgeführt.
 | [ArduinoJson](https://arduinojson.org) 7 | MIT |
 | Arduino-ESP32 / ESP-IDF | LGPL 2.1 / Apache 2.0 |
 
+## Icons der Oberfläche
+
+**Quelle:** [Flat Color Icons](https://github.com/icons8/flat-color-icons) von [Icons8](https://icons8.com/color-icons)
+
+**Lizenz:** MIT oder [Good Boy License](https://icons8.com/good-boy-license/) (frei für private und kommerzielle Nutzung, Namensnennung nicht erforderlich, hier trotzdem genannt)
+
+Verwendet werden die Symbole Haus, Zahnrad, Taschenrechner, Wecker und die beiden Pfeile. Sie sind als Bilddaten in die Firmware eingebettet (`src/ui/images/`).
+
+---
+
 ## Tastaturlayouts
 
 `src/usb/keyboard_layouts.h`: ASCII→HID-Tabellen (Deutsch, US) aus der USB-Bibliothek von Arduino-ESP32 (`USBHIDKeyboard`, LGPL-2.1).

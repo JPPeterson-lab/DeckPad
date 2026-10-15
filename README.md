@@ -163,7 +163,7 @@ Die UI-Logik (`deck_ui.cpp`) kennt nur LVGL und die Profile. Eine Kachel ruft `d
 Ausführliche Seiten (Hardware, Inbetriebnahme, Profile, USB und CDC, Entwicklung): <https://github.com/JPPeterson-lab/DeckPad/wiki>
 
 ## 🙏 Credits
-Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [PicoPixel](https://picopixel.io). Treiber: Waveshare / Espressif.
+Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [PicoPixel](https://picopixel.io), Icons: [Flat Color Icons](https://github.com/icons8/flat-color-icons) von [Icons8](https://icons8.com/color-icons). Treiber: Waveshare / Espressif.
 
 ## 📄 Lizenz
 [CC BY-NC 4.0](LICENSE) – siehe Datei für Details und Drittkomponenten.
@@ -287,7 +287,7 @@ Project structure: see the German section above. The UI logic (`deck_ui.cpp`) on
 Detailed pages (hardware, getting started, profiles, USB and CDC, development): <https://github.com/JPPeterson-lab/DeckPad/wiki>
 
 ## 🙏 Credits
-See [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). UI design: [PicoPixel](https://picopixel.io). Drivers: Waveshare / Espressif.
+See [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). UI design: [PicoPixel](https://picopixel.io), icons: [Flat Color Icons](https://github.com/icons8/flat-color-icons) by [Icons8](https://icons8.com/color-icons). Drivers: Waveshare / Espressif.
 
 ## 📄 License
 [CC BY-NC 4.0](LICENSE) – see the file for details and third-party components.
