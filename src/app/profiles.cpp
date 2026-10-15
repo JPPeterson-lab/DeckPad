@@ -58,10 +58,16 @@ static bool fromJson(const char* id, JsonDocument& doc, DeckProfile& p)
   p.theme      = strcmp(st["theme"] | "light", "dark") == 0 ? 1 : 0;
   p.brightness = constrain((int)(st["brightness"] | DECK_BRIGHTNESS_DEFAULT), DECK_BRIGHTNESS_MIN, 100);
 
-  uint8_t maxTiles = p.cols * p.rows;
+  const uint8_t maxTiles = p.cols * p.rows;
+  bool slotUsed[DECK_MAX_TILES] = {};
+  int pos = 0;                                                       // Platz, falls "slot" fehlt (aeltere Profile): der Reihe nach
   for (JsonObject t : doc["tiles"].as<JsonArray>()) {
-    if (p.tileCount >= maxTiles) break;
+    const int slot = t["slot"] | pos;
+    pos++;
+    if (slot < 0 || slot >= maxTiles || slotUsed[slot] || p.tileCount >= maxTiles) continue;   // ausserhalb oder doppelt: ignorieren
+    slotUsed[slot] = true;
     DeckTile& d = p.tiles[p.tileCount++];
+    d.slot = (uint8_t)slot;
     strlcpy(d.label, t["label"] | "", sizeof(d.label));
     d.color = parseColor(t["color"] | "", 0x34495e);
     d.type  = deckActionTypeFromName(t["type"] | "none");
@@ -80,9 +86,6 @@ static void toJson(const DeckProfile& p, JsonDocument& doc)
   doc["exe"]  = p.exe;
   doc["cols"] = p.cols;
   doc["rows"] = p.rows;
-  JsonObject st = doc["settings"].to<JsonObject>();
-  st["theme"] = p.theme ? "dark" : "light";
-  st["brightness"] = p.brightness;
   JsonArray a = doc["tiles"].to<JsonArray>();
   for (uint8_t i = 0; i < p.tileCount; i++) {
     const DeckTile& t = p.tiles[i];
@@ -92,6 +95,7 @@ static void toJson(const DeckProfile& p, JsonDocument& doc)
     o["color"] = col;
     o["type"]  = deckActionTypeName(t.type);
     o["spec"]  = t.spec;
+    o["slot"]  = t.slot;
     if (t.icon[0]) o["icon"] = t.icon;
   }
 }
@@ -166,6 +170,7 @@ static void scanList()
 static void addTile(DeckProfile& p, const char* label, uint32_t color, DeckActionType t, const char* spec)
 {
   DeckTile& d = p.tiles[p.tileCount++];
+  d.slot = p.tileCount - 1;
   strlcpy(d.label, label, sizeof(d.label)); d.color = color; d.type = t; strlcpy(d.spec, spec, sizeof(d.spec));
 }
 
@@ -189,10 +194,10 @@ static void seedProfiles()
   }
   profileSave(p);
 
-  defaultsInto(p);                                                 // Beispiel fuer ein Programm-Profil mit eigenem Theme
+  defaultsInto(p);                                                 // Beispiel fuer ein Programm-Profil
   strlcpy(p.id, "bambu", sizeof(p.id)); strlcpy(p.name, "Bambu Studio", sizeof(p.name));
   strlcpy(p.exe, "bambu-studio.exe", sizeof(p.exe));
-  p.theme = 1; p.brightness = 70;
+  p.brightness = 70;
   addTile(p, "Rückgängig", 0x2980b9, ACT_KEYS, "ctrl+z");
   addTile(p, "Wiederholen",  0x2980b9, ACT_KEYS, "ctrl+y");
   addTile(p, "Speichern",    0x27ae60, ACT_KEYS, "ctrl+s");
@@ -216,6 +221,8 @@ static void builtinFallback()                      // wenn der Flash-Speicher ni
 
 // Die Profilauswahl wird nicht bei jedem Wechsel geschrieben: Flash-Schreibzugriffe stoppen kurz den Cache
 // (damit auch den PSRAM-Zugriff des Displays) und verschleissen den Flash. Stattdessen merken und spaeter schreiben.
+static uint8_t  s_theme = 0;                // Design des Geraets (0 hell, 1 dunkel)
+static uint8_t  s_brightness = DECK_BRIGHTNESS_DEFAULT;   // Helligkeit des Geraets in Prozent
 static bool     s_autoSwitch = false;
 static bool     s_hostActions = false;
 static bool     s_cfgDirty = false;
@@ -237,6 +244,8 @@ void profilesTick()
   const uint32_t t0 = millis();
   JsonDocument doc;
   doc["active"] = s_list[s_active].id;
+  doc["theme"] = s_theme;
+  doc["brightness"] = s_brightness;
   doc["autoswitch"] = s_autoSwitch;
   doc["hostactions"] = s_hostActions;
   File f = LittleFS.open(DECK_CONFIG_FILE, "w");
@@ -274,6 +283,7 @@ bool profilesInit()
   if (s_count == 0) { builtinFallback(); s_fsOk = false; return false; }
 
   // zuletzt aktives Profil wiederherstellen; ohne Config-Datei startet "Standard"
+  bool haveTheme = false, haveBright = false;
   s_active = 0;
   for (int i = 0; i < s_count; i++) if (strcmp(s_list[i].id, "standard") == 0) s_active = i;
   File f = LittleFS.open(DECK_CONFIG_FILE, "r");
@@ -281,6 +291,10 @@ bool profilesInit()
     JsonDocument doc;
     if (!deserializeJson(doc, f)) {
       s_autoSwitch = doc["autoswitch"] | false;
+      haveTheme = !doc["theme"].isNull();
+      if (haveTheme) s_theme = (doc["theme"] | 0) ? 1 : 0;
+      haveBright = !doc["brightness"].isNull();
+      if (haveBright) s_brightness = constrain((int)(doc["brightness"] | DECK_BRIGHTNESS_DEFAULT), DECK_BRIGHTNESS_MIN, 100);
       s_hostActions = doc["hostactions"] | false;
       const char* a = doc["active"] | "";
       for (int i = 0; i < s_count; i++) if (strcmp(s_list[i].id, a) == 0) s_active = i;
@@ -292,17 +306,18 @@ bool profilesInit()
     for (int i = 0; i < s_count && !ok; i++) if (profileLoad(s_list[i].id, s_cur)) { s_active = i; ok = true; }
     if (!ok) { builtinFallback(); return false; }
   }
+  // Update von v0.4.0 oder frueher: das Design war pro Profil gespeichert; das des aktiven Profils uebernehmen
+  if (!haveTheme) s_theme = s_cur.theme ? 1 : 0;
+  if (!haveBright) s_brightness = s_cur.brightness;
   logDiag("[Profile] %d Profile, aktiv: %s", s_count, s_cur.name);
   return true;
 }
 
-bool profileSaveActiveSettings(uint8_t theme, uint8_t brightness)
-{
-  Guard g;
-  s_cur.theme = theme;
-  s_cur.brightness = constrain((int)brightness, DECK_BRIGHTNESS_MIN, 100);
-  return s_fsOk ? profileSave(s_cur) : false;
-}
+uint8_t profilesTheme() { return s_theme; }
+void profilesSetTheme(uint8_t theme) { s_theme = theme ? 1 : 0; saveConfig(); }
+
+uint8_t profilesBrightness() { return s_brightness; }
+void profilesSetBrightness(uint8_t percent) { s_brightness = constrain((int)percent, DECK_BRIGHTNESS_MIN, 100); saveConfig(); }
 
 bool profilesStorageOk() { return s_fsOk; }
 int  profileCount() { return s_count; }

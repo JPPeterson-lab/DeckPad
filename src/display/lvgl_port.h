@@ -13,7 +13,7 @@
 #define LVGL_PORT_H_RES             (EXAMPLE_LCD_H_RES)
 #define LVGL_PORT_V_RES             (EXAMPLE_LCD_V_RES)
 
-// Zeichenpuffer für das Teilrendering. Der LVGL-Speicherpool liegt im PSRAM (build_opt.h), damit intern
+// Zeichenpuffer für das Teilrendering. Der LVGL-Speicherpool liegt im PSRAM (conf/lv_conf.h), damit intern
 // genug Platz für WLAN und TLS bleibt (TLS braucht ca. 45 KB intern am Stück). Der Zeichenpuffer liegt
 // wieder im schnellen internen SRAM: 20 Zeilen = 40 KB. Bei Speichermangel Zeilen verkleinern oder
 // LVGL_PORT_BUF_IN_PSRAM 1 mit z.B. 60 Zeilen.

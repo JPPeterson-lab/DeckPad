@@ -1,6 +1,6 @@
-# DeckPad als ESP-IDF-Projekt (Arduino-ESP32 als Komponente). Gleicher Quellcode wie der Arduino-IDE-Build (../../src),
-# aber mit eigener sdkconfig: flash-sicherer Display-Treiber, PSRAM 120 MHz, groesserer Daten-Cache.
-# Bauen:  . ~/esp/esp-idf-v5.5.5/export.sh && cd platforms/idf && idf.py set-target esp32s3 && idf.py build
+# DeckPad: ESP-IDF-Projekt (Arduino-ESP32 als Komponente fuer Serial, LittleFS, ArduinoJson).
+# Eigene sdkconfig: flash-sicherer Display-Treiber, PSRAM 120 MHz, groesserer Daten-Cache.
+# Bauen:  bash build.sh   (ESP-IDF 5.5.x muss installiert sein, siehe README)
 cmake_minimum_required(VERSION 3.16)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 # LVGL sucht seine lv_conf.h im Include-Pfad: die Projektkopie liegt in conf/

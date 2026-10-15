@@ -1,6 +1,5 @@
 // USB-Geraet fuer den ESP-IDF-Build (esp_tinyusb): HID-Tastatur + Consumer (Media) + CDC (COM-Port) als Composite-Geraet.
-// Gleiche Schnittstelle wie usb_device.cpp (Arduino-Build), siehe usb_device.h.
-#ifdef DECK_USB_IDF
+// Schnittstelle: siehe usb_device.h.
 #include "usb_device.h"
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -200,4 +199,3 @@ void usbTypeText(const char* text)
     sendKbd(0, none);
   }
 }
-#endif  // DECK_USB_IDF

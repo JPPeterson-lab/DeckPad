@@ -2,6 +2,17 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.5.0 (2026-10-15)
+
+### New
+- **Arrange tiles freely in the grid:** every tile has a fixed position (`slot`), gaps are allowed. In the editor **drag** tiles: dropping on an empty slot moves, dropping on an occupied tile swaps both. When the grid size changes tiles keep their row and column; whatever no longer fits is removed (after a confirmation). Older profiles without `slot` load unchanged (order)
+- **New UI from PicoPixel** (different colours, containers moved, larger profile roller); the extra box on the settings screen now lines up with the containers
+
+### Changed
+- **Theme (light/dark) and brightness apply to the whole device**, no longer per profile. Before, the switch only changed the theme of the currently active profile and new profiles always started light. Both values now live in `config.json` and are saved with a delay (no flash write on every adjustment). On update the device adopts theme and brightness of the active profile. The two controls are gone from the editor, the `settings` entries from the profile files
+- **Fully moved to ESP-IDF, Arduino IDE dropped:** the IDF project now sits in the root folder (`bash build.sh`, `main/main.cpp`); `platforms/`, `Deckpad.ino`, `build_opt.h` and the Arduino USB layer are removed. Arduino-ESP32 stays as a component for `Serial`, LittleFS and ArduinoJson
+- The P4 board will not be used for the DeckPad (it goes into a weather station project); the DeckPad stays on the ESP32-S3
+
 ## v0.4.0 (2026-10-13)
 
 ### New

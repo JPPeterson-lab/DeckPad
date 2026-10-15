@@ -2,7 +2,7 @@
 #include "images.h"
 
 #include "src/ui/images/pico_dark_logo_132.inc"
-#include "src/ui/images/fc_left_42.inc"
+#include "src/ui/images/fc_left_60.inc"
 #include "src/ui/images/fc_right_60.inc"
 #include "src/ui/images/fc_settings_42.inc"
 #include "src/ui/images/fc_home_42.inc"
@@ -10,7 +10,7 @@
 #include "src/ui/images/fc_alarm_clock_42.inc"
 const ext_img_desc_t images[7] = {
     { "pico_dark_logo_132", &pico_dark_logo_132 },
-    { "fc_left_42", &fc_left_42 },
+    { "fc_left_60", &fc_left_60 },
     { "fc_right_60", &fc_right_60 },
     { "fc_settings_42", &fc_settings_42 },
     { "fc_home_42", &fc_home_42 },

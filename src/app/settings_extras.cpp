@@ -51,8 +51,8 @@ static lv_obj_t* mkSwitch(int y, bool on, lv_event_cb_t cb)
 void settingsExtrasInit()
 {
     s_box = lv_obj_create(objects.screensetting);
-    lv_obj_set_pos(s_box, 10, 288);
-    lv_obj_set_size(s_box, 970, 250);
+    lv_obj_set_pos(s_box, 33, 288);                       // fluchtet mit den beiden Containern darueber (PicoPixel-Export)
+    lv_obj_set_size(s_box, 958, 250);
     lv_obj_clear_flag(s_box, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_radius(s_box, 5, 0);
     lv_obj_set_style_pad_all(s_box, 0, 0);
@@ -68,7 +68,7 @@ void settingsExtrasInit()
 
     s_line = lv_obj_create(s_box);                        // Trennlinie
     lv_obj_set_pos(s_line, 20, 124);
-    lv_obj_set_size(s_line, 930, 1);
+    lv_obj_set_size(s_line, 918, 1);
     lv_obj_set_style_border_width(s_line, 0, 0);
     lv_obj_set_style_radius(s_line, 0, 0);
     lv_obj_set_style_bg_opa(s_line, LV_OPA_40, 0);

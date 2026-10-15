@@ -1,5 +1,5 @@
 #pragma once
-// Profile: pro Programm eigene Tasten (Kacheln) und eigene Einstellungen (Theme, Helligkeit, Raster).
+// Profile: pro Programm eigene Tasten (Kacheln) und Rastergroesse. Design (hell/dunkel) und Helligkeit gelten fuer das ganze Geraet.
 // Jedes Profil ist eine JSON-Datei in /profiles/<id>.json auf der Partition "storage" (LittleFS).
 // Diese Schicht kennt weder LVGL noch USB - nur Daten und Dateien.
 #include <Arduino.h>
@@ -12,6 +12,7 @@ struct DeckTile {
   DeckActionType type;
   char           spec[DECK_SPEC_MAX];
   char           icon[24];           // Icon-ID (Datei /icons/<id>.bin), leer = kein Icon
+  uint8_t        slot;               // Platz im Raster (0 = links oben, zeilenweise); Luecken zwischen den Kacheln sind erlaubt
 };
 
 struct DeckProfile {
@@ -19,9 +20,9 @@ struct DeckProfile {
   char     name[32];                 // Anzeigename
   char     exe[48];                  // Programmname fuer den spaeteren Auto-Wechsel (z. B. "bambu-studio.exe")
   uint8_t  cols, rows;
-  uint8_t  theme;                    // 0 = hell, 1 = dunkel (ThemesEnum aus PicoPixel)
-  uint8_t  brightness;               // 3..100 %
-  uint8_t  tileCount;                // belegte Kacheln, zeilenweise; Rest des Rasters bleibt leer
+  uint8_t  theme;                    // veraltet (bis v0.4.0 pro Profil); wird nur noch gelesen, das Design gilt jetzt geraeteweit
+  uint8_t  brightness;               // veraltet (bis v0.4.0 pro Profil); wird nur noch gelesen, die Helligkeit gilt jetzt geraeteweit
+  uint8_t  tileCount;                // Anzahl der Kacheln (tiles[0..tileCount-1]); ihr Platz steht in tile.slot, freie Plaetze bleiben leer
   DeckTile tiles[DECK_MAX_TILES];
 };
 
@@ -42,8 +43,12 @@ int   profileIndexByExe(const char* exe);          // Profil zu einem Programmna
 void  profilesTick();                              // regelmaessig aufrufen (1 s): schreibt die Auswahl, wenn 8 s nichts gewechselt wurde
 void  profileNamesJoined(String& out);             // "A\nB\nC" fuer das Roller-Widget
 
-// Settings des aktiven Profils schreiben (Theme/Helligkeit): nur diese beiden Werte, Tasten bleiben unberuehrt
-bool  profileSaveActiveSettings(uint8_t theme, uint8_t brightness);
+// Helligkeit fuer das ganze Geraet (3..100 %); wird verzoegert gespeichert
+uint8_t profilesBrightness();
+void  profilesSetBrightness(uint8_t percent);
+// Design fuer das ganze Geraet: 0 = hell, 1 = dunkel (ThemesEnum aus PicoPixel); wird verzoegert gespeichert
+uint8_t profilesTheme();
+void  profilesSetTheme(uint8_t theme);
 
 // Fuer den spaeteren Import ueber CDC/PC-Programm
 bool  profileLoad(const char* id, DeckProfile& out);

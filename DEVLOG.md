@@ -1,5 +1,15 @@
 # Entwicklungs-Log
 
+## 2026-10-15 – v0.5.0: freie Plätze, geräteweites Design, nur noch ESP-IDF
+
+**Design pro Profil war mein Entwurf, nicht gewollt.** Der Nutzer meldete: Nach dem Umschalten auf dunkel sind Hauptprofil und Einstellungen dunkel, aber andere (neu angelegte) Profile nicht. Ursache: `theme` und `brightness` standen im Profil (Entwurfsentscheidung aus „Einstellungen pro Programm“), der Schalter schrieb das Design nur in das aktive Profil, und der Editor legte neue Profile mit `light` an. Auf Rückfrage soll auch die Helligkeit nicht pro Profil gelten. Beides ist jetzt geräteweit (`config.json`: `theme`, `brightness`), verzögert gespeichert wie die Profilauswahl; das schont zugleich den Flash (vorher schrieb jedes Loslassen des Helligkeitsreglers die Profildatei). Migration: fehlen die Schlüssel in `config.json`, werden Design und Helligkeit des aktiven Profils übernommen, damit sich beim Update nichts ändert. Die Felder bleiben in `DeckProfile` nur zum Lesen alter Dateien.
+
+**Freie Plätze.** Das Kachelfeld war eine dichte Liste (Platz = Index), Lücken ließen sich nur mit leeren „Füll“-Kacheln darstellen, die dann als farbige Kachel erschienen. Jetzt hat jede Kachel einen `slot`; `fromJson` ignoriert Plätze außerhalb des Rasters und doppelte, `buildGrid` ordnet über eine Tabelle Platz → Kachel zu (der Kachelindex bleibt Schlüssel für Icons und Ereignisse). Im Editor Ziehen und Ablegen mit der HTML5-API (verschieben oder tauschen). Rasteränderung: Kacheln behalten (Zeile, Spalte).
+
+**Nur noch ESP-IDF.** Entscheidung des Nutzers nach dem Test: S3-Board bleibt, komplett auf ESP-IDF. Das Projekt wanderte (`git mv`, Verlauf bleibt) in den Wurzelordner; entfernt wurden `Deckpad.ino` (Inhalt jetzt `main/main.cpp`), `build_opt.h`, `platforms/`, die Arduino-USB-Implementierung und der `DECK_NO_USB`-Sonderweg. Arduino-ESP32 bleibt als Komponente, weil `Serial`, `String`, LittleFS und ArduinoJson im Code stecken; sie ganz herauszulösen wäre ein eigener Schritt. Das P4-Board kommt in ein WetterCube-Projekt.
+
+---
+
 ## 2026-10-13 – Web-Installer
 
 **Aufbau.** Wie im WetterCubePlus XL: `esp-web-tools` (`<esp-web-install-button>`) auf GitHub Pages, Manifest und Firmware unter `docs/`. Anders als im XL (vier Teile, Arduino-Export) gibt es hier **ein zusammengeführtes Image** (`esptool merge_bin`, `deckpad-merged.bin` ab Offset 0, 1,1 MB): Bootloader, Partitionstabelle und Programm. `tools/prepare_release.sh` baut mit ESP-IDF, führt zusammen, prüft die Teile im Image und die Versionsnummer im Programm und schreibt `manifest.json`/`version.json`. Die Datenpartition `storage` (Profile, Icons) liegt hinter dem Image und bleibt beim Update erhalten; „Gerät löschen“ (`new_install_prompt_erase`) löscht sie.

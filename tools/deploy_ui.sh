@@ -1,6 +1,6 @@
 #!/bin/bash
 # PicoPixel-UI-Export für die Arduino IDE / arduino-cli vorbereiten.
-# PicoPixel Exportziel: src/ui/   (Arduino kompiliert src/ automatisch rekursiv)
+# PicoPixel Exportziel: src/ui/   (der ESP-IDF-Build uebersetzt src/ rekursiv)
 # Aufruf nach jedem Export:  bash tools/deploy_ui.sh
 SRC="$(cd "$(dirname "$0")/.." && pwd)/src/ui"
 if [ ! -d "$SRC" ]; then echo "FEHLER: src/ui/ nicht gefunden."; exit 1; fi
@@ -69,4 +69,4 @@ if grep -Eq "\bcontainer_(1|2|3|4|5|6|9|1[0-7])\b" "$SRC/screens.h"; then
   MISSING=$((MISSING+1))
 fi
 if [ $MISSING -eq 0 ]; then echo "  Alles in Ordnung."; else echo; echo "  !! $MISSING Hinweis(e) - siehe oben !!"; fi
-echo; echo "Fertig. src/ui/ ist bereit fuer die Arduino IDE."
+echo; echo "Fertig. src/ui/ ist bereit fuer den ESP-IDF-Build."

@@ -9,19 +9,17 @@ cd "$(dirname "$0")/.."
 VER=$(grep -o 'FIRMWARE_VERSION "[^"]*"' src/app/app_config.h | cut -d'"' -f2)
 source ~/esp/esp-idf-v5.5.5/export.sh > /dev/null 2>&1 || { echo "FEHLER: ESP-IDF 5.5.5 nicht gefunden (~/esp/esp-idf-v5.5.5)"; exit 1; }
 
-cd platforms/idf
 [ -f sdkconfig ] || idf.py set-target esp32s3
 idf.py -DDECK_PIXEL_CLOCK_MHZ="${PCLK:-30}" build
 idf.py merge-bin -o deckpad-merged.bin   # Pfad gilt relativ zum Build-Ordner
-cd ../..
 
-IMG=platforms/idf/build/deckpad-merged.bin
-APP=platforms/idf/build/deckpad.bin
+IMG=build/deckpad-merged.bin
+APP=build/deckpad.bin
 [ -f "$IMG" ] || { echo "FEHLER: $IMG fehlt"; exit 1; }
 # Die Versionsnummer muss im Programm stehen (sonst wurde nach dem Hochzaehlen nicht neu gebaut)
 strings -a "$APP" | grep -qF "Start v$VER" || { echo "FEHLER: Version $VER steht nicht im Programm"; exit 1; }
 # Das zusammengefuehrte Image muss die Teile an den richtigen Stellen enthalten
-python3 - "$IMG" platforms/idf/build/bootloader/bootloader.bin platforms/idf/build/partition_table/partition-table.bin "$APP" <<'PY'
+python3 - "$IMG" build/bootloader/bootloader.bin build/partition_table/partition-table.bin "$APP" <<'PY'
 import sys
 img=open(sys.argv[1],'rb').read()
 for path,off in ((sys.argv[2],0x0),(sys.argv[3],0x8000),(sys.argv[4],0x10000)):

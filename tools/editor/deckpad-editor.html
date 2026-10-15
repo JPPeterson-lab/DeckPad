@@ -43,6 +43,8 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
 #deck{display:grid;gap:8px;margin:8px 0}
 .tile{min-height:72px;border:2px solid transparent;border-radius:12px;color:#fff;font-weight:600;white-space:pre-line;
       text-shadow:0 1px 2px rgba(0,0,0,.35);cursor:pointer;padding:6px;overflow:hidden;word-break:break-word}
+.tile[draggable=true]{cursor:grab}
+.tile.over{outline:2px dashed var(--accent);outline-offset:-4px}
 .tile.empty{background:var(--code)!important;color:var(--muted);border:2px dashed var(--line);text-shadow:none;font-weight:400}
 .tile.sel{border-color:var(--text);outline:2px solid var(--accent)}
 .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
@@ -106,15 +108,14 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
         <div><label for="pExe">Programm (für späteren Auto-Wechsel)</label><input id="pExe" placeholder="z. B. bambu-studio.exe" maxlength="47"></div>
         <div><label for="pId">ID (Dateiname)</label><input id="pId" maxlength="23"></div>
       </div>
-      <div class="grid3">
+      <div class="grid2">
         <div><label for="pCols">Spalten (1–6)</label><input id="pCols" type="number" min="1" max="6"></div>
         <div><label for="pRows">Zeilen (1–4)</label><input id="pRows" type="number" min="1" max="4"></div>
-        <div><label for="pTheme">Design</label><select id="pTheme"><option value="light">hell</option><option value="dark">dunkel</option></select></div>
       </div>
-      <label for="pBright">Helligkeit: <span id="pBrightV"></span> %</label>
-      <input id="pBright" type="range" min="3" max="100">
+      <p class="hint">Design (hell/dunkel) und Helligkeit stellst du am Gerät ein, sie gelten für alle Profile.</p>
 
-      <h2 style="margin-top:18px">Tasten – Kachel anklicken zum Bearbeiten</h2>
+      <h2 style="margin-top:18px">Tasten – anklicken zum Bearbeiten, ziehen zum Verschieben</h2>
+      <p class="hint" style="margin-top:0">Kacheln lassen sich frei im Raster platzieren: auf einen leeren Platz ziehen verschiebt, auf eine belegte Kachel ziehen tauscht beide. Leere Plätze bleiben leer.</p>
       <div id="deck"></div>
 
       <div id="tileEd" class="hidden">
@@ -380,9 +381,10 @@ async function selectProfile(id){
 function normalize(p){
   p.name = p.name||"Neu"; p.exe = p.exe||"";
   p.cols = clamp(p.cols||5,1,6); p.rows = clamp(p.rows||3,1,4);
-  p.settings = p.settings||{}; p.settings.theme = p.settings.theme==="dark"?"dark":"light";
-  p.settings.brightness = clamp(p.settings.brightness||80,3,100);
-  p.tiles = (p.tiles||[]).map(t=>({label:t.label||"",color:t.color||"#34495e",type:t.type||"none",spec:t.spec||"",icon:t.icon||""}));
+  delete p.settings;                       // Design und Helligkeit gelten am Geraet fuer alle Profile, nicht mehr im Profil
+  const cap=p.cols*p.rows, used=new Set();
+  p.tiles = (p.tiles||[]).map((t,i)=>({slot:Number.isInteger(t.slot)?t.slot:i,label:t.label||"",color:t.color||"#34495e",type:t.type||"none",spec:t.spec||"",icon:t.icon||""}))
+    .filter(t=>t.slot>=0 && t.slot<cap && !used.has(t.slot) && used.add(t.slot));   // Platz im Raster muss gueltig und einmalig sein
   p.v = 1; return p;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||a));
@@ -427,32 +429,55 @@ $("fileImport").onchange = async e => {
 function fillProfile(){
   const p=S.cur;
   $("pName").value=p.name; $("pExe").value=p.exe; $("pId").value=S.id; $("pId").disabled=!S.isNew;
-  $("pCols").value=p.cols; $("pRows").value=p.rows; $("pTheme").value=p.settings.theme;
-  $("pBright").value=p.settings.brightness; $("pBrightV").textContent=p.settings.brightness;
+  $("pCols").value=p.cols; $("pRows").value=p.rows;
 }
 $("pName").oninput = e => { S.cur.name=e.target.value; if(S.isNew){ S.id=uniqueId(slug(e.target.value)); $("pId").value=S.id; } };
 $("pExe").oninput = e => S.cur.exe=e.target.value.trim();
 $("pId").oninput = e => { S.id = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g,""); e.target.value=S.id; };
-$("pCols").onchange = e => { S.cur.cols=clamp(e.target.value,1,6); e.target.value=S.cur.cols; renderDeck(); };
-$("pRows").onchange = e => { S.cur.rows=clamp(e.target.value,1,4); e.target.value=S.cur.rows; renderDeck(); };
-$("pTheme").onchange = e => S.cur.settings.theme=e.target.value;
-$("pBright").oninput = e => { S.cur.settings.brightness=+e.target.value; $("pBrightV").textContent=e.target.value; };
+// Rastergroesse aendern: Kacheln behalten ihre Zeile/Spalte (nicht ihre Nummer); was nicht mehr hineinpasst, faellt weg
+function resizeGrid(newCols,newRows){
+  const p=S.cur, oc=p.cols, keep=[]; let dropped=0;
+  p.tiles.forEach(t=>{ const r=Math.floor(t.slot/oc), c=t.slot%oc; if(c<newCols && r<newRows){ keep.push(Object.assign(t,{slot:r*newCols+c})); } else dropped++; });
+  if(dropped && !confirm(dropped+" Kachel(n) liegen außerhalb des neuen Rasters und werden entfernt. Fortfahren?")) return false;
+  p.tiles=keep; p.cols=newCols; p.rows=newRows; S.sel=-1; return true;
+}
+function onGrid(){
+  const nc=clamp($("pCols").value,1,6), nr=clamp($("pRows").value,1,4);
+  if(!resizeGrid(nc,nr)){ $("pCols").value=S.cur.cols; $("pRows").value=S.cur.rows; return; }
+  $("pCols").value=nc; $("pRows").value=nr; renderDeck(); renderTile();
+}
+$("pCols").onchange = onGrid; $("pRows").onchange = onGrid;
 
 /* ───────── Raster ───────── */
+const tileAt = slot => S.cur.tiles.find(t=>t.slot===slot);
+function moveTile(from,to){
+  if(from===to || from==null) return;
+  const a=tileAt(from), b=tileAt(to);
+  if(!a) return;
+  if(b) b.slot=from;                       // belegt: tauschen
+  a.slot=to;
+  S.sel=to; renderDeck(); renderTile();
+}
 function renderDeck(){
   const p=S.cur, d=$("deck"); d.innerHTML="";
   d.style.gridTemplateColumns = `repeat(${p.cols},minmax(0,1fr))`;
   for(let i=0;i<p.cols*p.rows;i++){
-    const t=p.tiles[i], b=document.createElement("button"); b.className="tile";
+    const t=tileAt(i), b=document.createElement("button"); b.className="tile";
     if(t){
       b.style.background=t.color;
       const ic=t.icon?ICONS[t.icon]:null;
       if(t.icon && !ic) ensureIcon(t.icon);
-      if(ic){ const im=document.createElement("img"); im.src=ic.url; im.width=Math.min(ic.w,56); im.height=Math.min(ic.h,56); b.appendChild(im); }
+      if(ic){ const im=document.createElement("img"); im.src=ic.url; im.width=Math.min(ic.w,56); im.height=Math.min(ic.h,56); im.draggable=false; b.appendChild(im); }
       if(t.label || !ic) b.appendChild(document.createTextNode(t.label||(ic?"":"(ohne Text)")));
+      b.draggable=true;
+      b.ondragstart=e=>{ S.drag=i; e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain",String(i)); };
     } else { b.classList.add("empty"); b.textContent="+"; }
     if(i===S.sel) b.classList.add("sel");
-    b.onclick=()=>{ S.sel=i; while(p.tiles.length<=i) p.tiles.push({label:"",color:"#34495e",type:"none",spec:"",icon:""}); renderDeck(); renderTile(); };
+    b.ondragover=e=>{ e.preventDefault(); e.dataTransfer.dropEffect="move"; b.classList.add("over"); };
+    b.ondragleave=()=>b.classList.remove("over");
+    b.ondrop=e=>{ e.preventDefault(); b.classList.remove("over"); const f=S.drag; S.drag=null; moveTile(f,i); };
+    b.ondragend=()=>{ S.drag=null; };
+    b.onclick=()=>{ S.sel=i; if(!tileAt(i)) p.tiles.push({slot:i,label:"",color:"#34495e",type:"none",spec:"",icon:""}); renderDeck(); renderTile(); };
     d.appendChild(b);
   }
 }
@@ -463,7 +488,7 @@ fillSelect($("tMedia"), MEDIA); fillSelect($("tPreset"), PRESETS); fillSelect($(
 COLORS.forEach(c=>{ const b=document.createElement("button"); b.className="sw"; b.style.background=c; b.title=c; b.onclick=()=>setColor(c); $("swatches").appendChild(b); });
 MODS.forEach(([v,t])=>{ const l=document.createElement("label"); const c=document.createElement("input"); c.type="checkbox"; c.value=v; c.onchange=keysChanged; l.appendChild(c); l.append(t); $("kMods").appendChild(l); });
 
-const tile = () => S.cur && S.sel>=0 ? S.cur.tiles[S.sel] : null;
+const tile = () => S.cur && S.sel>=0 ? tileAt(S.sel) : null;
 function renderTile(){
   const t=tile(); $("tileEd").classList.toggle("hidden", !t); if(!t) return;
   $("tLabel").value=t.label; showIconPrev(); $("tColor").value=t.color; $("tColorHex").textContent=t.color; $("tType").value=t.type; $("tPreset").value="";
@@ -496,7 +521,7 @@ $("tPreset").onchange = e => {
   renderTile(); renderDeck();
 };
 $("btnTileClear").onclick = () => {
-  S.cur.tiles.splice(S.sel,1); S.sel=-1; renderDeck(); renderTile();
+  S.cur.tiles=S.cur.tiles.filter(t=>t.slot!==S.sel); S.sel=-1; renderDeck(); renderTile();
 };
 
 /* Tastenkombination: Modifier-Kästchen + eine Taste */
@@ -574,7 +599,7 @@ async function ensureIcon(id){        // Icon vom Gerät holen, falls es nur dor
   ICON_PENDING.delete(id);
 }
 async function uploadIcons(){
-  const used=new Set(S.cur.tiles.slice(0,S.cur.cols*S.cur.rows).map(t=>t.icon).filter(Boolean));
+  const used=new Set(S.cur.tiles.map(t=>t.icon).filter(Boolean));
   for(const id of used){
     const ic=ICONS[id]; if(!ic||ic.onDevice) continue;
     let r=await cmd("ICONBEGIN "+id+" "+ic.w+" "+ic.h); if(r[0]!=="OK") throw new Error("Icon "+id+": "+r[0]);
@@ -596,10 +621,11 @@ $("btnIconDel").onclick=()=>{ const t=tile(); if(!t) return; t.icon=""; showIcon
 /* ───────── Speichern ───────── */
 function toJson(){
   const p=S.cur, n=p.cols*p.rows;
-  const tiles=p.tiles.slice(0,n).map(t=>{ const o={label:t.label,color:t.color,type:t.type,spec:t.spec}; if(t.icon) o.icon=t.icon; return o; });
-  const bad=tiles.findIndex(t=>t.type!=="none"&&!t.spec);
-  if(bad>=0) throw new Error("Kachel "+(bad+1)+" hat eine Aktion ohne Angabe.");
-  return JSON.stringify({v:1,name:p.name,exe:p.exe,cols:p.cols,rows:p.rows,settings:p.settings,tiles});
+  const tiles=p.tiles.filter(t=>t.slot>=0&&t.slot<n).sort((a,b)=>a.slot-b.slot)
+    .map(t=>{ const o={slot:t.slot,label:t.label,color:t.color,type:t.type,spec:t.spec}; if(t.icon) o.icon=t.icon; return o; });
+  const bad=tiles.find(t=>t.type!=="none"&&!t.spec);
+  if(bad) throw new Error("Die Kachel in Zeile "+(Math.floor(bad.slot/p.cols)+1)+", Spalte "+(bad.slot%p.cols+1)+" hat eine Aktion ohne Angabe.");
+  return JSON.stringify({v:2,name:p.name,exe:p.exe,cols:p.cols,rows:p.rows,tiles});
 }
 $("btnSave").onclick = async () => {
   try{

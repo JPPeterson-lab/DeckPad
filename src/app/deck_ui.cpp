@@ -90,11 +90,15 @@ static void buildGrid()
     const int th = (H - gap * (p.rows - 1)) / p.rows;
     const lv_color_t emptyColor = lv_color_hex(theme_colors[active_theme_index][THEME_COLOR_BACKGR_CONT] & 0xFFFFFF);
 
+    int8_t bySlot[DECK_MAX_TILES];                          // Platz im Raster -> Index der Kachel (-1 = frei)
+    for (auto& v : bySlot) v = -1;
+    for (int k = 0; k < p.tileCount; k++) if (p.tiles[k].slot < DECK_MAX_TILES) bySlot[p.tiles[k].slot] = (int8_t)k;
+
     for (int r = 0; r < p.rows; r++) {
         for (int c = 0; c < p.cols; c++) {
-            const int i = r * p.cols + c;
+            const int i = bySlot[r * p.cols + c];            // Index der Kachel an diesem Platz
             const int x = c * (tw + gap), y = r * (th + gap);
-            if (i >= p.tileCount) {                         // freier Platz im Raster: dezente, nicht antippbare Fläche
+            if (i < 0) {                                    // freier Platz im Raster: dezente, nicht antippbare Fläche
                 lv_obj_t* o = lv_obj_create(g);
                 lv_obj_set_pos(o, x, y);
                 lv_obj_set_size(o, tw, th);
@@ -135,11 +139,11 @@ static void buildGrid()
 void deckUiApplyProfile()
 {
     const DeckProfile& p = profileActive();
-    change_color_theme(p.theme);                            // PicoPixel: alle Farben des Themes
+    change_color_theme(profilesTheme());                    // PicoPixel: alle Farben des Themes (gilt fuer alle Profile)
     styleStatus(usbHostConnected());                        // setzt die Textfarbe des Status-Labels zurueck, daher neu
     settingsExtrasApplyTheme();
-    backlightSet(p.brightness);
-    lv_arc_set_value(objects.labellightchangevalue, p.brightness);
+    backlightSet(profilesBrightness());                     // Helligkeit und Design gelten fuer alle Profile
+    lv_arc_set_value(objects.labellightchangevalue, profilesBrightness());
     lv_label_set_text(objects.labelprofil, p.name);
     lv_roller_set_selected(objects.rollerprofile, profileActiveIndex(), LV_ANIM_OFF);
     buildGrid();
@@ -193,20 +197,20 @@ static void cbRoller(lv_event_t*) { switchProfile(lv_roller_get_selected(objects
 static void cbPrev(lv_event_t*)   { int n = profileCount(); if (n > 1) switchProfile((profileActiveIndex() + n - 1) % n); }
 static void cbNext(lv_event_t*)   { int n = profileCount(); if (n > 1) switchProfile((profileActiveIndex() + 1) % n); }
 
-// ── Einstellungen: Helligkeit und Theme gelten pro Profil ──────────────────────
+// ── Einstellungen: Helligkeit und Design gelten fuer das ganze Geraet ───────────
 static void cbBrightness(lv_event_t* e)
 {
     int v = lv_arc_get_value(objects.labellightchangevalue);
     if (v < DECK_BRIGHTNESS_MIN) v = DECK_BRIGHTNESS_MIN;
     backlightSet(v);                                        // live mitziehen
-    if (lv_event_get_code(e) == LV_EVENT_RELEASED)          // erst beim Loslassen speichern (schont den Flash)
-        profileSaveActiveSettings((uint8_t)active_theme_index, (uint8_t)v);
+    if (lv_event_get_code(e) == LV_EVENT_RELEASED)          // erst beim Loslassen merken
+        profilesSetBrightness((uint8_t)v);                  // verzoegert gespeichert (kein sofortiger Flash-Zugriff)
 }
 
 static void cbTheme(lv_event_t*)
 {
     // PicoPixel hat das Theme in seinem eigenen Callback bereits umgeschaltet (zuerst registriert).
-    profileSaveActiveSettings((uint8_t)active_theme_index, backlightGet());
+    profilesSetTheme((uint8_t)active_theme_index);          // geraeteweit, verzoegert gespeichert (kein sofortiger Flash-Zugriff)
     styleStatus(usbHostConnected());
     settingsExtrasApplyTheme();
     buildGrid();                                            // leere Plätze folgen der Theme-Farbe
@@ -224,10 +228,8 @@ static void diagTickCb(lv_timer_t*)
     char b[320]; LvglFlushStats f;
     lvglPortTakeFlushStats(f);
     logStatus(b, sizeof(b));
-#ifndef DECK_NO_USB
     Serial.printf("[Diag] %s | letzte 10 s: Flush n=%u avg=%u us max=%u us max_px=%u, laengste LVGL-Runde %u us\n", b, (unsigned)f.count,
                   (unsigned)(f.count ? f.sumUs / f.count : 0), (unsigned)f.maxUs, (unsigned)f.maxPx, (unsigned)f.loopMaxUs);
-#endif
 }
 
 static void tickCb(lv_timer_t*)

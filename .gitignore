@@ -1,8 +1,8 @@
 *.bak
 .DS_Store
 build/
-platforms/idf/build/
-platforms/idf/dependencies.lock
-platforms/idf/managed_components/
-platforms/idf/sdkconfig
-platforms/idf/sdkconfig.old
+build/
+dependencies.lock
+managed_components/
+sdkconfig
+sdkconfig.old

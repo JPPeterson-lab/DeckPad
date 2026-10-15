@@ -43,7 +43,7 @@ static uint32_t    alT0    = 0;
 static void alarmStop() {
   if (alTimer) { lv_timer_del(alTimer); alTimer = nullptr; }
   if (alObj)   { lv_obj_del(alObj); alObj = alLabel = nullptr; }
-  backlightSet(profileActive().brightness);
+  backlightSet(profilesBrightness());
   tmState = TM_IDLE;
   tmRemainMs = tmSetMs;
 }

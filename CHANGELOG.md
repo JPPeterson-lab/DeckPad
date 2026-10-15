@@ -2,6 +2,17 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.5.0 (2026-10-15)
+
+### Neu
+- **Kacheln frei im Raster anordnen:** jede Kachel hat einen festen Platz (`slot`), Lücken sind erlaubt. Im Editor Kacheln **ziehen**: auf einen leeren Platz verschiebt, auf eine belegte Kachel tauscht beide. Beim Ändern der Rastergröße behalten die Kacheln ihre Zeile und Spalte, was nicht mehr hineinpasst, fällt (nach Rückfrage) weg. Ältere Profile ohne `slot` laden unverändert (Reihenfolge)
+- **Neue UI aus PicoPixel** (andere Farben, Container verschoben, größerer Profil-Roller); das Zusatzfeld im Einstellungs-Screen fluchtet jetzt mit den Containern
+
+### Geändert
+- **Design (hell/dunkel) und Helligkeit gelten für das ganze Gerät**, nicht mehr pro Profil. Vorher änderte der Schalter nur das Design des gerade aktiven Profils, und neue Profile starteten immer hell. Beide Werte stehen jetzt in `config.json` und werden verzögert gespeichert (kein Flash-Schreibzugriff mehr bei jedem Verstellen). Beim Update übernimmt das Gerät Design und Helligkeit des aktiven Profils. Aus dem Editor sind die beiden Regler entfallen, aus den Profildateien die Einträge `settings`
+- **Komplett auf ESP-IDF umgestellt, Arduino IDE entfällt:** das IDF-Projekt liegt jetzt im Wurzelordner (`bash build.sh`, `main/main.cpp`), `platforms/`, `Deckpad.ino`, `build_opt.h` und die Arduino-USB-Schicht sind entfernt. Arduino-ESP32 bleibt als Komponente für `Serial`, LittleFS und ArduinoJson
+- Das P4-Board wird nicht für das DeckPad eingesetzt (kommt in ein Wetterstation-Projekt), das DeckPad bleibt beim ESP32-S3
+
 ## v0.4.0 (2026-10-13)
 
 ### Neu

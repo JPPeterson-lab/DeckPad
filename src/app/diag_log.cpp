@@ -20,9 +20,7 @@ void logDiag(const char* fmt, ...)
   va_list ap; va_start(ap, fmt);
   vsnprintf(line, sizeof(line), fmt, ap);
   va_end(ap);
-#ifndef DECK_NO_USB                          // im UART-Befehlsmodus waere die Log-Ausgabe mit den Antworten vermischt
-  Serial.println(line);
-#endif
+  Serial.println(line);                       // UART-Port (Debug-Ausgabe)
   xSemaphoreTake(s_lock, portMAX_DELAY);
   snprintf(s_buf[s_head], LOG_LEN, "%8lu %s", (unsigned long)millis(), line);
   s_head = (s_head + 1) % LOG_LINES;

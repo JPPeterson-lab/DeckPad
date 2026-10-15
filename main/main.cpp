@@ -1,13 +1,10 @@
-// DeckPad — Stream-Deck-ähnliches Touch-Pad auf dem Waveshare ESP32-S3-Touch-LCD-7B (1024x600, RGB + GT911)
+// DeckPad - Stream-Deck-aehnliches Touch-Pad auf dem Waveshare ESP32-S3-Touch-LCD-7B (1024x600, RGB + GT911)
 //
-// Arduino-IDE-Einstellungen (Details im README):
-//   Board: ESP32S3 Dev Module | PSRAM: OPI PSRAM | Flash Size: 16 MB | Flash Mode: QIO
-//   Partition Scheme: Custom (partitions.csv im Sketch-Ordner) | USB Mode: USB-OTG (TinyUSB)
-//   USB CDC On Boot: Disabled   -> "Serial" bleibt auf dem USB-C-UART-Port (Flashen + Debug),
-//                                  der native USB-Port gehört dem PC (Tastatur + COM-Port)
+// ESP-IDF-Projekt mit Arduino-ESP32 als Komponente: setup()/loop() werden ueber CONFIG_AUTOSTART_ARDUINO aufgerufen.
+// Bauen und Flashen: bash build.sh flash <UART-Port>   (Details im README)
 //
-// Schichten:  hardware/ (Display, Touch, Backlight)  usb/ (HID + CDC)  app/ (Profile, Aktionen, UI-Logik)
-//             ui/ (PicoPixel-Export, nicht von Hand ändern)
+// Schichten:  src/hardware/ (Display, Touch, Backlight)  src/usb/ (HID + CDC)  src/app/ (Profile, Aktionen, UI-Logik)
+//             src/ui/ (PicoPixel-Export, nicht von Hand aendern)
 #include <Arduino.h>
 #include "src/app/app_config.h"
 #include "src/display/lvgl_port.h"

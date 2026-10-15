@@ -18,7 +18,7 @@ typedef struct _ext_img_desc_t {
 #endif
 
 extern const lv_img_dsc_t pico_dark_logo_132;
-extern const lv_img_dsc_t fc_left_42;
+extern const lv_img_dsc_t fc_left_60;
 extern const lv_img_dsc_t fc_right_60;
 extern const lv_img_dsc_t fc_settings_42;
 extern const lv_img_dsc_t fc_home_42;
