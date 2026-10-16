@@ -69,15 +69,15 @@ static void cmdTime(const char* a)
   usbCdcSendLine("OK");
 }
 
-// QUICK <id1> <id2> <id3>   Belegung der Tasten P1..P3 ("-" = frei); ohne Angabe: aktuelle Belegung zeigen (wie LIST)
+// QUICK <id1> ... <id5>   Belegung der Tasten P1..P5 ("-" = frei); ohne Angabe: aktuelle Belegung zeigen (wie LIST)
 static void cmdQuick(const char* a)
 {
   char id[DECK_QUICK_COUNT][24];
-  int n = a && *a ? sscanf(a, "%23s %23s %23s", id[0], id[1], id[2]) : 0;
-  if (n != DECK_QUICK_COUNT) { err("Format: QUICK <id1> <id2> <id3> (- = frei)"); return; }
+  int n = a && *a ? sscanf(a, "%23s %23s %23s %23s %23s", id[0], id[1], id[2], id[3], id[4]) : 0;
+  if (n != DECK_QUICK_COUNT) { err("Format: QUICK <id1> <id2> <id3> <id4> <id5> (- = frei)"); return; }
   for (int i = 0; i < DECK_QUICK_COUNT; i++) profilesSetQuick(i, strcmp(id[i], "-") == 0 ? "" : id[i]);
   { LvLock lock; deckUiQuickChanged(); }
-  logDiag("[PC] Schnellwahl P1..P3 gesetzt");
+  logDiag("[PC] Schnellwahl P1..P5 gesetzt");
   usbCdcSendLine("OK");
 }
 

@@ -1,5 +1,9 @@
 # Entwicklungs-Log
 
+## 2026-10-16 – v0.6.1: fünf Schnelltasten, Bootstrap Icons
+
+Die UI wurde erneut überarbeitet: `buttonp4` und `buttonp5` sind dazugekommen, alle Symbole sind jetzt Bootstrap Icons (`bs_*`-Bilder). Die Schnellwahl hängt nur an der Konstante `DECK_QUICK_COUNT` (3 → 5), dem Objekt-Lookup in `quickBtn()` und dem Editor; in `config.json` ist `quick` ein Array, ein altes mit drei Einträgen liest sich unverändert (fehlende Einträge = frei). `QUICK` verlangt jetzt genau fünf Angaben, ein alter Editor mit drei bekommt `ERR`. Die Icons8-Symbole sind nirgends mehr im Einsatz, deshalb ersetzen die Bootstrap Icons sie in den Credits (MIT verlangt den Copyright-Vermerk, steht in `CREDITS.md`). `bump_version.sh` passt jetzt auch die „Beta (vX)“-Zeile im README an.
+
 ## 2026-10-16 – v0.6.0: Schnelltasten, Beta
 
 **Schnelltasten.** Die neue UI bringt vier Tasten unter dem Raster (`buttonstandard`, `buttonp1..3`). Sie liegen auf dem Deck-Screen und nicht im Kachelfeld, das beim Profilwechsel neu gebaut wird; damit sind sie auf jeder Profilseite da, ohne dass der Code sie je neu anlegen muss (alle Profile teilen sich diesen einen Screen). „Standard“ ist fest an die Profil-ID `standard` gebunden. P1–P3 stehen als ID-Liste `quick` in der `config.json` (geräteweit wie Design und Helligkeit, verzögert geschrieben). Eine ID, die es nicht mehr gibt, zählt als frei, die Datei wird dafür nicht angefasst. Der Editor setzt die Belegung mit `QUICK`, `LIST` liefert sie zurück. Optik ohne neue Grafik: frei = 30 % Deckkraft und nicht klickbar, aktives Profil = 3 px blauer Rand.

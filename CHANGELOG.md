@@ -2,6 +2,15 @@
 
 *[English version](CHANGELOG.en.md)*
 
+## v0.6.1 (2026-10-16)
+
+### Neu
+- **Fünf Schnelltasten statt drei:** **P1–P5** lassen sich im Editor frei auf Profile legen (Bereich „Schnellwahl am Gerät“ mit fünf Auswahlfeldern). Der CDC-Befehl `QUICK` nimmt jetzt fünf Profil-IDs (`QUICK <id1> … <id5>`, `-` = frei). Eine bestehende Belegung von P1–P3 bleibt erhalten, P4 und P5 sind zunächst frei
+- Neue UI aus PicoPixel
+
+### Geändert
+- **Symbole der Oberfläche jetzt aus den [Bootstrap Icons](https://icons.getbootstrap.com/)** (MIT) statt aus den Flat Color Icons von Icons8; Credits, README und Installer-Seite angepasst
+
 ## v0.6.0 (2026-10-16) – Beta
 
 Das Projekt wechselt von **Alpha** zu **Beta**: der Funktionsumfang steht, Kernfunktionen sind am Gerät und am Windows-PC geprüft.

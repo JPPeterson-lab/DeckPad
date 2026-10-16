@@ -94,10 +94,12 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 3px}
     </div>
     <p class="hint">Das aktive Profil auf dem Gerät hat das Zeichen „aktiv“.</p>
     <h2 style="margin-top:18px">Schnellwahl am Gerät</h2>
-    <p class="hint" style="margin-top:0">Die Tasten <b>P1–P3</b> unter dem Kachelfeld springen auf das hier gewählte Profil, auf jeder Profilseite. Die Taste <b>Standard</b> springt immer auf das Profil „standard“.</p>
+    <p class="hint" style="margin-top:0">Die Tasten <b>P1–P5</b> unter dem Kachelfeld springen auf das hier gewählte Profil, auf jeder Profilseite. Die Taste <b>Standard</b> springt immer auf das Profil „standard“.</p>
     <div class="row" style="align-items:center"><label for="qSel0" style="margin:0;width:2.2em">P1</label><select id="qSel0" data-q="0" style="flex:1"></select></div>
     <div class="row" style="align-items:center"><label for="qSel1" style="margin:0;width:2.2em">P2</label><select id="qSel1" data-q="1" style="flex:1"></select></div>
     <div class="row" style="align-items:center"><label for="qSel2" style="margin:0;width:2.2em">P3</label><select id="qSel2" data-q="2" style="flex:1"></select></div>
+    <div class="row" style="align-items:center"><label for="qSel3" style="margin:0;width:2.2em">P4</label><select id="qSel3" data-q="3" style="flex:1"></select></div>
+    <div class="row" style="align-items:center"><label for="qSel4" style="margin:0;width:2.2em">P5</label><select id="qSel4" data-q="4" style="flex:1"></select></div>
     <div class="row" style="margin-top:12px">
       <button id="btnExport" disabled>Als Datei sichern</button>
       <button id="btnImport">Datei laden</button>
@@ -276,7 +278,7 @@ class DemoTransport {   // Verhält sich wie das Gerät, nur im Speicher
         {label:"Strg+Shift+M",color:"#8e44ad",type:"keys",spec:"ctrl+shift+m"},{label:"Stumm",color:"#c0392b",type:"media",spec:"mute"}]},
       bambu:{name:"Bambu Studio",exe:"bambu-studio.exe",cols:5,rows:3,settings:{theme:"dark",brightness:70},tiles:[
         {label:"Speichern",color:"#27ae60",type:"keys",spec:"ctrl+s"},{label:"Editor",color:"#2c3e50",type:"run",spec:"notepad"}]}};
-    this.active="standard"; this.icons={}; this.up=null; this.quick=["","",""];
+    this.active="standard"; this.icons={}; this.up=null; this.quick=["","","","",""];
   }
   async open(){} async close(){}
   async send(line, multi){
@@ -294,7 +296,7 @@ class DemoTransport {   // Verhält sich wie das Gerät, nur im Speicher
     if(cmd==="ICONLIST") return [JSON.stringify({icons:Object.values(this.icons).map(i=>({id:i.id,w:i.w,h:i.h}))})];
     if(cmd==="ICONGET") return this.icons[a] ? ["ICON "+this.icons[a].w+" "+this.icons[a].h+" "+this.icons[a].b64] : ["ERR unbekannt"];
     if(cmd==="ICONDEL"){ delete this.icons[a]; return ["OK"]; }
-    if(cmd==="QUICK"){ const q=a.split(" "); if(q.length!==3) return ["ERR Format: QUICK <id1> <id2> <id3> (- = frei)"]; this.quick=q.map(x=>x==="-"?"":x); return ["OK"]; }
+    if(cmd==="QUICK"){ const q=a.split(" "); if(q.length!==5) return ["ERR Format: QUICK <id1> <id2> <id3> <id4> <id5> (- = frei)"]; this.quick=q.map(x=>x==="-"?"":x); return ["OK"]; }
     if(cmd==="LIST") return [JSON.stringify({active:this.active,quick:this.quick.map(x=>this.p[x]?x:""),profiles:Object.entries(this.p).map(([id,v])=>({id,name:v.name,exe:v.exe}))})];
     if(cmd==="GET") return this.p[a] ? [JSON.stringify(Object.assign({v:1},this.p[a]))] : ["ERR unbekannt"];
     if(cmd==="PUT"){ const i=a.indexOf(" "); try{ this.p[a.slice(0,i)]=JSON.parse(a.slice(i+1)); return ["OK"]; }catch(e){ return ["ERR JSON fehlerhaft"]; } }
@@ -363,9 +365,9 @@ $("btnDisc").onclick = async () => {
 async function refreshList(){
   const r = await cmd("LIST");
   const d = JSON.parse(r[0]);
-  S.list = d.profiles; S.active = d.active; S.quick = d.quick || ["","",""]; renderList();
+  S.list = d.profiles; S.active = d.active; S.quick = d.quick || ["","","","",""]; renderList();
 }
-/* Schnellwahl P1..P3: Auswahlfelder fuellen; eine Aenderung geht sofort ans Geraet */
+/* Schnellwahl P1..P5: Auswahlfelder fuellen; eine Aenderung geht sofort ans Geraet */
 function renderQuick(){
   document.querySelectorAll("select[data-q]").forEach(sel=>{
     const n=+sel.dataset.q, cur=(S.quick&&S.quick[n])||"";
@@ -376,11 +378,11 @@ function renderQuick(){
   });
 }
 document.querySelectorAll("select[data-q]").forEach(sel=>sel.onchange=async()=>{
-  const q=[0,1,2].map(n=>document.getElementById("qSel"+n).value||"-");
+  const q=[0,1,2,3,4].map(n=>document.getElementById("qSel"+n).value||"-");
   try{
     const r=await cmd("QUICK "+q.join(" "));
     if(r[0].startsWith("ERR")) throw new Error(r[0]);
-    S.quick=q.map(x=>x==="-"?"":x); log("Schnellwahl P1–P3 gesetzt.");
+    S.quick=q.map(x=>x==="-"?"":x); log("Schnellwahl P1–P5 gesetzt.");
   }catch(e){ log("Fehler: "+e.message,"err"); refreshList(); }
 });
 function renderList(){

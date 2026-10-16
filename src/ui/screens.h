@@ -30,6 +30,8 @@ typedef struct _objects_t {
     lv_obj_t *buttonp1;
     lv_obj_t *buttonp2;
     lv_obj_t *buttonp3;
+    lv_obj_t *buttonp4;
+    lv_obj_t *buttonp5;
     lv_obj_t *containergrid;
     lv_obj_t *labellightchange;
     lv_obj_t *container_8;
@@ -50,6 +52,8 @@ typedef struct _objects_t {
     lv_obj_t *buttonp1_label;
     lv_obj_t *buttonp2_label;
     lv_obj_t *buttonp3_label;
+    lv_obj_t *buttonp4_label;
+    lv_obj_t *buttonp5_label;
     lv_obj_t *labelswitchtheme_label;
     lv_obj_t *labelbuttonhome_label;
     lv_obj_t *buttoncalc_label;

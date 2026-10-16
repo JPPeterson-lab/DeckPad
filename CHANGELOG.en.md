@@ -2,6 +2,15 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
+## v0.6.1 (2026-10-16)
+
+### New
+- **Five quick keys instead of three:** **P1–P5** can be assigned freely to profiles in the editor (section "Schnellwahl am Gerät" with five selectors). The CDC command `QUICK` now takes five profile ids (`QUICK <id1> … <id5>`, `-` = free). An existing P1–P3 assignment is kept, P4 and P5 start out free
+- New UI from PicoPixel
+
+### Changed
+- **UI symbols now come from [Bootstrap Icons](https://icons.getbootstrap.com/)** (MIT) instead of Icons8's Flat Color Icons; credits, README and installer page updated
+
 ## v0.6.0 (2026-10-16) – Beta
 
 The project moves from **alpha** to **beta**: the feature set is complete and the core functions are verified on the device and on the Windows PC.

@@ -135,11 +135,15 @@ static void buildGrid()
     }
 }
 
-// ── Profil-Schnelltasten: Standard und P1..P3 ──────────────────────────────────
+// ── Profil-Schnelltasten: Standard und P1..P5 ──────────────────────────────────
 // Sie liegen auf dem Deck-Bildschirm neben dem Kachelfeld und gelten damit fuer jedes Profil.
-// "Standard" springt immer auf das Profil "standard"; P1..P3 auf das im Editor zugewiesene Profil.
+// "Standard" springt immer auf das Profil "standard"; P1..P5 auf das im Editor zugewiesene Profil.
 static void switchProfile(int index);
-static lv_obj_t* quickBtn(int n) { return n < 0 ? objects.buttonstandard : n == 0 ? objects.buttonp1 : n == 1 ? objects.buttonp2 : objects.buttonp3; }
+static lv_obj_t* quickBtn(int n)
+{
+    lv_obj_t* const b[DECK_QUICK_COUNT] = { objects.buttonp1, objects.buttonp2, objects.buttonp3, objects.buttonp4, objects.buttonp5 };
+    return n < 0 ? objects.buttonstandard : b[n];
+}
 
 static void updateQuickButtons()
 {

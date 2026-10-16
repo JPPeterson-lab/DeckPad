@@ -16,17 +16,19 @@ sind nachfolgend aufgeführt.
 
 | Bibliothek | Lizenz |
 |---|---|
-| [LVGL](https://lvgl.io) 8.3 (inkl. lodepng) | MIT / zlib |
+| [LVGL](https://lvgl.io) 8.4 (inkl. lodepng) | MIT / zlib |
 | [ArduinoJson](https://arduinojson.org) 7 | MIT |
 | Arduino-ESP32 / ESP-IDF | LGPL 2.1 / Apache 2.0 |
 
 ## Icons der Oberfläche
 
-**Quelle:** [Flat Color Icons](https://github.com/icons8/flat-color-icons) von [Icons8](https://icons8.com/color-icons)
+**Quelle:** [Bootstrap Icons](https://icons.getbootstrap.com/) ([GitHub](https://github.com/twbs/icons)), seit v0.6.1
 
-**Lizenz:** MIT oder [Good Boy License](https://icons8.com/good-boy-license/) (frei für private und kommerzielle Nutzung, Namensnennung nicht erforderlich, hier trotzdem genannt)
+**Lizenz:** MIT, Copyright (c) 2019-2024 The Bootstrap Authors
 
-Verwendet werden die Symbole Haus, Zahnrad, Taschenrechner, Wecker und die beiden Pfeile. Sie sind als Bilddaten in die Firmware eingebettet (`src/ui/images/`).
+Verwendet werden die Symbole Haus, Pfeil links/rechts, Taschenrechner, Wecker, Sternchen und die Ziffern 1 bis 5 im Quadrat (`house`, `arrow-left`, `arrow-right`, `calculator`, `alarm`, `asterisk`, `1-square` bis `5-square`). Sie sind als Bilddaten in die Firmware eingebettet (`src/ui/images/`).
+
+Bis v0.6.0 stammten die Symbole aus den [Flat Color Icons](https://github.com/icons8/flat-color-icons) von Icons8 (MIT / Good Boy License); sie werden nicht mehr verwendet.
 
 ---
 

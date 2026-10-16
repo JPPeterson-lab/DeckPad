@@ -225,7 +225,7 @@ static uint8_t  s_theme = 0;                // Design des Geraets (0 hell, 1 dun
 static uint8_t  s_brightness = DECK_BRIGHTNESS_DEFAULT;   // Helligkeit des Geraets in Prozent
 static bool     s_autoSwitch = false;
 static bool     s_hostActions = false;
-static char     s_quick[DECK_QUICK_COUNT][24] = {"", "", ""};   // Profil-IDs der Schnellwahl-Tasten P1..P3
+static char     s_quick[DECK_QUICK_COUNT][24] = {};   // Profil-IDs der Schnellwahl-Tasten P1..P5
 static bool     s_cfgDirty = false;
 static uint32_t s_cfgT = 0;
 #define CFG_SAVE_DELAY_MS 8000
