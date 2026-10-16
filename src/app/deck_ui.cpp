@@ -135,6 +135,38 @@ static void buildGrid()
     }
 }
 
+// ── Profil-Schnelltasten: Standard und P1..P3 ──────────────────────────────────
+// Sie liegen auf dem Deck-Bildschirm neben dem Kachelfeld und gelten damit fuer jedes Profil.
+// "Standard" springt immer auf das Profil "standard"; P1..P3 auf das im Editor zugewiesene Profil.
+static void switchProfile(int index);
+static lv_obj_t* quickBtn(int n) { return n < 0 ? objects.buttonstandard : n == 0 ? objects.buttonp1 : n == 1 ? objects.buttonp2 : objects.buttonp3; }
+
+static void updateQuickButtons()
+{
+    const char* activeId = profileInfo(profileActiveIndex()).id;
+    for (int n = -1; n < DECK_QUICK_COUNT; n++) {
+        lv_obj_t* b = quickBtn(n);
+        if (!b) continue;
+        const char* id = n < 0 ? "standard" : profilesQuickId(n);
+        const bool assigned = id[0] && profileIndexOf(id) >= 0;
+        if (assigned) lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE); else lv_obj_clear_flag(b, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_opa(b, assigned ? LV_OPA_COVER : LV_OPA_30, 0);        // nicht belegte Taste blass und ohne Funktion
+        const bool isActive = assigned && strcmp(id, activeId) == 0;
+        lv_obj_set_style_border_width(b, isActive ? 3 : 0, 0);                  // das gerade aktive Profil ist umrandet
+        lv_obj_set_style_border_color(b, lv_color_hex(0x3498db), 0);
+    }
+}
+
+static void cbQuick(lv_event_t* e)
+{
+    const int n = (int)(intptr_t)lv_event_get_user_data(e);
+    const char* id = n < 0 ? "standard" : profilesQuickId(n);
+    const int i = profileIndexOf(id);
+    if (i >= 0) switchProfile(i);
+}
+
+void deckUiQuickChanged() { updateQuickButtons(); }
+
 // ── Profil uebernehmen ────────────────────────────────────────────────────────
 void deckUiApplyProfile()
 {
@@ -147,6 +179,7 @@ void deckUiApplyProfile()
     lv_label_set_text(objects.labelprofil, p.name);
     lv_roller_set_selected(objects.rollerprofile, profileActiveIndex(), LV_ANIM_OFF);
     buildGrid();
+    updateQuickButtons();
 }
 
 static void switchProfile(int index)
@@ -292,6 +325,8 @@ void deckUiInit()
     lv_obj_add_event_cb(objects.rollerprofile, cbRoller, LV_EVENT_VALUE_CHANGED, nullptr);
     lv_obj_add_event_cb(objects.labelbuttonbackward, cbPrev, LV_EVENT_CLICKED, nullptr);
     lv_obj_add_event_cb(objects.labelbuttonforward,  cbNext, LV_EVENT_CLICKED, nullptr);
+    for (int n = -1; n < DECK_QUICK_COUNT; n++)
+        lv_obj_add_event_cb(quickBtn(n), cbQuick, LV_EVENT_CLICKED, (void*)(intptr_t)n);
     lv_obj_add_event_cb(objects.labellightchangevalue, cbBrightness, LV_EVENT_VALUE_CHANGED, nullptr);
     lv_obj_add_event_cb(objects.labellightchangevalue, cbBrightness, LV_EVENT_RELEASED, nullptr);
     lv_obj_add_event_cb(objects.labelswitchtheme, cbTheme, LV_EVENT_CLICKED, nullptr);

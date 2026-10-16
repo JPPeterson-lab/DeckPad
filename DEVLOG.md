@@ -1,5 +1,11 @@
 # Entwicklungs-Log
 
+## 2026-10-16 – v0.6.0: Schnelltasten, Beta
+
+**Schnelltasten.** Die neue UI bringt vier Tasten unter dem Raster (`buttonstandard`, `buttonp1..3`). Sie liegen auf dem Deck-Screen und nicht im Kachelfeld, das beim Profilwechsel neu gebaut wird; damit sind sie auf jeder Profilseite da, ohne dass der Code sie je neu anlegen muss (alle Profile teilen sich diesen einen Screen). „Standard“ ist fest an die Profil-ID `standard` gebunden. P1–P3 stehen als ID-Liste `quick` in der `config.json` (geräteweit wie Design und Helligkeit, verzögert geschrieben). Eine ID, die es nicht mehr gibt, zählt als frei, die Datei wird dafür nicht angefasst. Der Editor setzt die Belegung mit `QUICK`, `LIST` liefert sie zurück. Optik ohne neue Grafik: frei = 30 % Deckkraft und nicht klickbar, aktives Profil = 3 px blauer Rand.
+
+**Beta.** Entscheidung des Nutzers nach dem intensiven Test von 0.5.0. Freie Plätze und geräteweites Design stehen in der Statustabelle jetzt auf „geprüft“; ungetestet bleiben Rechner, Timer, Windows-Helfer und Helfer-Modus, die Schnelltasten sind neu. Bis 1.0 können sich Formate und Befehle noch ändern.
+
 ## 2026-10-15 – Windows-Helfer als richtiges Programm
 
 Das PowerShell-Skript wirkte wie ein Provisorium (Konsolenfenster, Ausführungsrichtlinie, `.cmd`-Starter). Der Ersatz ist ein kleines C#-Programm (WinForms, .NET Framework 4.8): das ist in Windows 10/11 schon vorhanden, die exe bleibt dadurch bei ca. 80 KB und braucht keine Installation. Gebaut wird auf dem Mac mit dem .NET-8-SDK (`~/.dotnet`) und den Referenzassemblies von NuGet (`tools/build_helper.sh`). **Nur gebaut, auf dem Mac nicht lauffähig:** die Logik (WMI-Portsuche nach 303A:4DC0, `ACTIVE`-Meldung, `DO`-Aktionen per `SendInput`, Port freigeben, solange der Editor im Vordergrund ist) ist 1:1 aus dem Skript übernommen und muss unter Windows getestet werden. Entscheidung des Nutzers: der Helfer soll nicht dauerhaft im Autostart laufen, deshalb sind *Mit Windows starten* (Registry `HKCU\…\Run`, `--tray`) und *Beenden, wenn das DeckPad getrennt wird* beide standardmäßig aus. Die exe ist nicht signiert (Zertifikat kostet), Windows zeigt SmartScreen.

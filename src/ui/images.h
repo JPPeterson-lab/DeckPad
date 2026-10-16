@@ -17,14 +17,17 @@ typedef struct _ext_img_desc_t {
 } ext_img_desc_t;
 #endif
 
-extern const lv_img_dsc_t pico_dark_logo_132;
-extern const lv_img_dsc_t fc_left_60;
-extern const lv_img_dsc_t fc_right_60;
 extern const lv_img_dsc_t fc_settings_42;
-extern const lv_img_dsc_t fc_home_42;
+extern const lv_img_dsc_t bs2square_42_87ceeb;
+extern const lv_img_dsc_t bs3square_42_87ceeb;
+extern const lv_img_dsc_t fc_left_60;
 extern const lv_img_dsc_t fc_calculator_42;
+extern const lv_img_dsc_t fc_right_60;
+extern const lv_img_dsc_t bs1square_42_87ceeb;
+extern const lv_img_dsc_t fc_home_42;
 extern const lv_img_dsc_t fc_alarm_clock_42;
-extern const ext_img_desc_t images[7];
+extern const lv_img_dsc_t pico_dark_logo_132;
+extern const ext_img_desc_t images[10];
 
 
 #ifdef __cplusplus

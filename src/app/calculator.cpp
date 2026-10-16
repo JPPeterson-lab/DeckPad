@@ -10,6 +10,7 @@
 #include "navigation.h"
 #include "../ui/screens.h"
 #include "../ui/fonts/fonts.h"
+#include "app_fonts.h"
 
 static lv_obj_t* rcScreen = nullptr;
 static lv_obj_t* rcWert   = nullptr;   // große Anzeige

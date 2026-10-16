@@ -8,6 +8,7 @@
 #include "../ui/screens.h"
 #include "../ui/colors.h"
 #include "../ui/fonts/fonts.h"
+#include "app_fonts.h"
 #include "../hardware/backlight.h"
 
 // ── Zustand (unabhängig vom Screen) ───────────────────────────────────────────

@@ -225,6 +225,7 @@ static uint8_t  s_theme = 0;                // Design des Geraets (0 hell, 1 dun
 static uint8_t  s_brightness = DECK_BRIGHTNESS_DEFAULT;   // Helligkeit des Geraets in Prozent
 static bool     s_autoSwitch = false;
 static bool     s_hostActions = false;
+static char     s_quick[DECK_QUICK_COUNT][24] = {"", "", ""};   // Profil-IDs der Schnellwahl-Tasten P1..P3
 static bool     s_cfgDirty = false;
 static uint32_t s_cfgT = 0;
 #define CFG_SAVE_DELAY_MS 8000
@@ -248,6 +249,8 @@ void profilesTick()
   doc["brightness"] = s_brightness;
   doc["autoswitch"] = s_autoSwitch;
   doc["hostactions"] = s_hostActions;
+  JsonArray q = doc["quick"].to<JsonArray>();
+  for (int i = 0; i < DECK_QUICK_COUNT; i++) q.add(s_quick[i]);
   File f = LittleFS.open(DECK_CONFIG_FILE, "w");
   if (f) { serializeJson(doc, f); f.close(); }
   logDiag("[Flash] Auswahl '%s' geschrieben, %lu ms", s_list[s_active].id, (unsigned long)(millis() - t0));
@@ -296,6 +299,7 @@ bool profilesInit()
       haveBright = !doc["brightness"].isNull();
       if (haveBright) s_brightness = constrain((int)(doc["brightness"] | DECK_BRIGHTNESS_DEFAULT), DECK_BRIGHTNESS_MIN, 100);
       s_hostActions = doc["hostactions"] | false;
+      for (int i = 0; i < DECK_QUICK_COUNT; i++) strlcpy(s_quick[i], doc["quick"][i] | "", sizeof(s_quick[i]));
       const char* a = doc["active"] | "";
       for (int i = 0; i < s_count; i++) if (strcmp(s_list[i].id, a) == 0) s_active = i;
     }
@@ -311,6 +315,21 @@ bool profilesInit()
   if (!haveBright) s_brightness = s_cur.brightness;
   logDiag("[Profile] %d Profile, aktiv: %s", s_count, s_cur.name);
   return true;
+}
+
+const char* profilesQuickId(int n)
+{
+  if (n < 0 || n >= DECK_QUICK_COUNT) return "";
+  Guard g;
+  return profileIndexOf(s_quick[n]) >= 0 ? s_quick[n] : "";
+}
+
+void profilesSetQuick(int n, const char* id)
+{
+  if (n < 0 || n >= DECK_QUICK_COUNT) return;
+  Guard g;
+  strlcpy(s_quick[n], id ? id : "", sizeof(s_quick[n]));
+  saveConfig();
 }
 
 uint8_t profilesTheme() { return s_theme; }
@@ -355,6 +374,8 @@ void profileListJson(String& out)
   Guard g;
   JsonDocument doc;
   doc["active"] = s_count ? s_list[s_active].id : "";
+  JsonArray q = doc["quick"].to<JsonArray>();
+  for (int i = 0; i < DECK_QUICK_COUNT; i++) q.add(profileIndexOf(s_quick[i]) >= 0 ? s_quick[i] : "");
   JsonArray a = doc["profiles"].to<JsonArray>();
   for (int i = 0; i < s_count; i++) {
     JsonObject o = a.add<JsonObject>();

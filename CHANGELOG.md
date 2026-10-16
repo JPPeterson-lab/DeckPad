@@ -2,10 +2,17 @@
 
 *[English version](CHANGELOG.en.md)*
 
-## Unveröffentlicht
+## v0.6.0 (2026-10-16) – Beta
+
+Das Projekt wechselt von **Alpha** zu **Beta**: der Funktionsumfang steht, Kernfunktionen sind am Gerät und am Windows-PC geprüft.
 
 ### Neu
+- **Schnelltasten auf dem Deck-Bildschirm** (neue UI aus PicoPixel): **Standard** springt von jedem Profil zurück auf das Profil `standard`. **P1–P3** springen auf ein frei wählbares Profil. Sie liegen neben dem Kachelraster und sind damit auf jeder Profilseite sichtbar und bedienbar. Nicht belegte Tasten sind blass und ohne Funktion, das aktive Profil ist blau umrandet
+- **Belegung im Editor:** Bereich „Schnellwahl am Gerät“ mit je einer Auswahl für P1–P3 (wirkt sofort). Gespeichert wird geräteweit in `config.json` (`quick`), `LIST` liefert sie mit; neuer CDC-Befehl `QUICK <id1> <id2> <id3>` (`-` = frei). Wird ein Profil gelöscht, wird die Taste frei
 - **Windows-Helfer als richtiges Programm:** `DeckPad-Helper.exe` (C#, WinForms, .NET Framework 4.8, ca. 80 KB) ersetzt das PowerShell-Skript. Statusfenster, Symbol im Infobereich, nur eine Instanz. Optionen (beide standardmäßig **aus**): *Mit Windows starten (im Hintergrund)* (Autostart pro Benutzer, kein Dauerbetrieb ohne Zustimmung) und *Beenden, wenn das DeckPad getrennt wird*. Quellcode in `tools/helper-app/`, Bauen mit `tools/build_helper.sh`. Die Datei ist nicht signiert (SmartScreen-Hinweis)
+
+### Geändert
+- Neue UI-Exports (Schriftgröße 62 entfällt, 92 neu, Icons für die Schnelltasten)
 
 ## v0.5.0 (2026-10-15)
 

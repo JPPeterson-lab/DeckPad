@@ -4,7 +4,7 @@
  * Bpp: 4
  ******************************************************************************/
 
-#include "../screens.h"
+#include <lvgl.h>
 
 #ifndef FONT_MONTSERRAT_62
 #define FONT_MONTSERRAT_62 1

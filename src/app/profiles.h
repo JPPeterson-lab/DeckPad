@@ -50,6 +50,12 @@ void  profilesSetBrightness(uint8_t percent);
 uint8_t profilesTheme();
 void  profilesSetTheme(uint8_t theme);
 
+// Schnellwahl P1..P3 auf dem Deck-Bildschirm: je Taste eine Profil-ID (leer = nicht belegt), geraeteweit, vom Editor gesetzt.
+// Die Taste "Standard" springt immer auf das Profil "standard".
+#define DECK_QUICK_COUNT 3
+const char* profilesQuickId(int n);                // n = 0..2; "" wenn nicht belegt oder das Profil nicht (mehr) existiert
+void  profilesSetQuick(int n, const char* id);     // "" = frei; wird verzoegert gespeichert
+
 // Fuer den spaeteren Import ueber CDC/PC-Programm
 bool  profileLoad(const char* id, DeckProfile& out);
 bool  profileSave(const DeckProfile& p);

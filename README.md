@@ -1,7 +1,7 @@
 # 🎛️ DeckPad
 
-![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.5.0-blue?style=flat-square&cacheSeconds=1)
+![Status](https://img.shields.io/badge/Status-Beta-yellow?style=flat-square)
+![Version](https://img.shields.io/badge/Version-v0.6.0-blue?style=flat-square&cacheSeconds=1)
 ![Hardware](https://img.shields.io/badge/Hardware-Waveshare%20ESP32--S3--Touch--LCD--7B-red?style=flat-square&logo=espressif&logoColor=white)
 ![Display](https://img.shields.io/badge/Display-7%22%201024×600%20RGB-informational?style=flat-square)
 ![Lizenz](https://img.shields.io/badge/Lizenz-CC%20BY--NC%204.0-lightgrey?style=flat-square)
@@ -11,7 +11,7 @@
 
 Hardwaretreiber und LVGL-Port stammen aus dem [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (gleiches Board). Das Projekt ist ein **ESP-IDF-Projekt** (Arduino-ESP32 läuft als Komponente für `Serial`, LittleFS und ArduinoJson), ohne WLAN und ohne OTA.
 
-> **🟠 Alpha (v0.5.0):** Läuft am Gerät und am Windows-PC (Tastatur, Medientasten, COM-Port, Editor, Icons). Keine Bildstreifen beim Speichern, kein Flimmern. Frei anordnbare Kacheln und das geräteweite Design/Helligkeit (v0.5.0) sind noch frisch und nicht ausführlich getestet.
+> **🟡 Beta (v0.6.0):** Der Kern ist fertig und läuft am Gerät und am Windows-PC (Tastatur, Medientasten, COM-Port, Editor, Icons, freie Kachelplätze, Schnellwahl). Keine Bildstreifen beim Speichern, kein Flimmern. Noch nicht ausführlich getestet sind Rechner, Timer, der Windows-Helfer und der Helfer-Modus; Dateiformate und Befehle können sich bis zur 1.0 noch ändern. Fehler bitte als [Issue](https://github.com/JPPeterson-lab/DeckPad/issues) melden.
 
 ---
 
@@ -41,9 +41,10 @@ Weitere Befehle: `bash build.sh` (nur bauen), `bash build.sh clean`, Pixeltakt `
 | Display-Ansteuerung flash-sicher (keine Streifen beim Speichern) | ✅ am Gerät geprüft |
 | USB-Verbund: HID-Tastatur + Medientasten + COM-Port (eigene USB-ID) | ✅ am PC geprüft |
 | Kachelraster (5×3, bis 6×4), Farbwechsel beim Antippen | ✅ geprüft |
-| **Kacheln frei im Raster anordnen** (Lücken erlaubt, Ziehen im Editor) | 🧪 neu in v0.5.0, ungetestet |
+| **Kacheln frei im Raster anordnen** (Lücken erlaubt, Ziehen im Editor) | ✅ geprüft |
+| **Schnellwahl: Taste „Standard“ und P1–P3** (im Editor belegbar, auf jeder Profilseite) | 🧪 neu in v0.6.0, ungetestet |
 | Profile im Flash (JSON pro Profil), Auswahl per Roller und Pfeil-Tasten | ✅ geprüft |
-| **Design und Helligkeit gelten für das ganze Gerät** | 🧪 neu in v0.5.0, ungetestet |
+| **Design und Helligkeit gelten für das ganze Gerät** | ✅ geprüft |
 | DeckPad Editor (Web Serial, Farben, Aktionen, Icons) | ✅ am Gerät geprüft |
 | Icons auf Kacheln (Emoji oder eigene Bilder) | ✅ am Gerät geprüft |
 | Programmstart (`run`) | ✅ geprüft |
@@ -59,7 +60,7 @@ Weitere Befehle: `bash build.sh` (nur bauen), `bash build.sh clean`, Pixeltakt `
 
 | Screen | Inhalt |
 |---|---|
-| **Deck** | Uhrzeit, PC-Status (grün/rot), Profilname, Kachelraster, Pfeile zum Profilwechsel, Zahnrad |
+| **Deck** | Uhrzeit, PC-Status (grün/rot), Profilname, Kachelraster, Pfeile zum Profilwechsel, Schnelltasten Standard/P1–P3, Zahnrad |
 | **Einstellungen** | Helligkeit, Design (hell/dunkel), Profil-Roller, Version, Schalter für Auto-Profilwechsel und „Tasten am PC ausführen“, Rechner und Timer |
 | **Rechner** | Vier Grundrechenarten, Prozent, Vorzeichen |
 | **Timer / Stoppuhr** | Küchentimer mit Zeittasten (läuft im Hintergrund, bei Ablauf blinkt das Display), Stoppuhr mit Rundenzeiten |
@@ -93,7 +94,7 @@ Jedes Profil ist eine JSON-Datei `/profiles/<id>.json` auf der Datenpartition: N
 | `run` | `notepad`, `C:\Pfad\x.exe`, `https://…` | startet Programm/Datei/Link über Win+R |
 | `host` | frei | geht als `ACTION <spec>` über die COM-Schnittstelle an ein PC-Programm |
 
-Beim ersten Start legt das Gerät zwei **Beispielprofile** an: **Standard** und **Bambu Studio**. Gewechselt wird über den **Roller** in den Einstellungen oder die **Pfeil-Tasten** auf dem Deck.
+Beim ersten Start legt das Gerät zwei **Beispielprofile** an: **Standard** und **Bambu Studio**. Gewechselt wird über den **Roller** in den Einstellungen oder die **Pfeil-Tasten** auf dem Deck. Unter dem Kachelraster liegen die **Schnelltasten**: **Standard** springt von jedem Profil zurück auf das Profil „standard“, **P1–P3** springen auf ein Profil, das Sie im Editor (Bereich „Schnellwahl am Gerät“) zuweisen. Sie sind auf jeder Profilseite sichtbar; nicht belegte Tasten sind blass, das aktive Profil ist blau umrandet.
 
 ### Profile am PC erstellen (DeckPad Editor)
 Auf dem Windows-PC in **Chrome oder Edge** <https://jppeterson-lab.github.io/DeckPad/editor.html> öffnen (auch als [Einzeldatei](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html) nutzbar), **„Mit DeckPad verbinden“** wählen (Board über „USB“ angeschlossen, der COM-Port darf nirgends sonst offen sein). Dort:
@@ -179,7 +180,7 @@ Siehe [CREDITS.md](CREDITS.md). GUI: [LVGL](https://lvgl.io). Oberfläche: [Pico
 
 Hardware drivers and the LVGL port come from the [WetterCubePlus XL](https://github.com/JPPeterson-lab/WetterCubePlus-XL) (same board). The project is an **ESP-IDF project** (Arduino-ESP32 runs as a component for `Serial`, LittleFS and ArduinoJson), with no Wi-Fi and no OTA.
 
-> **🟠 Alpha (v0.5.0):** Runs on the device and on the Windows PC (keyboard, media keys, COM port, editor, icons). No streaks when saving, no flicker. Freely arranged tiles and the device-wide theme/brightness (v0.5.0) are new and not yet thoroughly tested.
+> **🟡 Beta (v0.6.0):** The core is finished and runs on the device and on the Windows PC (keyboard, media keys, COM port, editor, icons, free tile positions, quick select). No streaks when saving, no flicker. Calculator, timer, the Windows helper and helper mode are not yet thoroughly tested; file formats and commands may still change before 1.0. Please report bugs as an [issue](https://github.com/JPPeterson-lab/DeckPad/issues).
 
 ## 🚀 Installation
 
@@ -205,9 +206,10 @@ More commands: `bash build.sh` (build only), `bash build.sh clean`, pixel clock 
 | Flash-safe display drive (no streaks when saving) | ✅ verified on the device |
 | USB composite: HID keyboard + media keys + COM port (own USB id) | ✅ verified on the PC |
 | Tile grid (5×3, up to 6×4), colour change on touch | ✅ verified |
-| **Arrange tiles freely in the grid** (gaps allowed, drag in the editor) | 🧪 new in v0.5.0, untested |
+| **Arrange tiles freely in the grid** (gaps allowed, drag in the editor) | ✅ verified |
+| **Quick select: "Standard" key and P1–P3** (assignable in the editor, on every profile page) | 🧪 new in v0.6.0, untested |
 | Profiles in flash (JSON per profile), selection by roller and arrow keys | ✅ verified |
-| **Theme and brightness apply to the whole device** | 🧪 new in v0.5.0, untested |
+| **Theme and brightness apply to the whole device** | ✅ verified |
 | DeckPad Editor (Web Serial, colours, actions, icons) | ✅ verified on the device |
 | Icons on tiles (emoji or own images) | ✅ verified on the device |
 | Program launch (`run`) | ✅ verified |
@@ -240,7 +242,7 @@ Each profile is a JSON file `/profiles/<id>.json` on the data partition: name, p
 | `run` | `notepad`, `C:\path\x.exe`, `https://…` | starts a program/file/link via Win+R |
 | `host` | free | sent as `ACTION <spec>` over the COM port to a PC program |
 
-On first start the device creates two **example profiles**: **Standard** and **Bambu Studio**. Switch with the **roller** in the settings or the **arrow keys** on the deck.
+On first start the device creates two **example profiles**: **Standard** and **Bambu Studio**. Switch with the **roller** in the settings or the **arrow keys** on the deck. Below the tile grid are the **quick keys**: **Standard** jumps back to the profile "standard" from any profile, **P1–P3** jump to a profile you assign in the editor (section "Schnellwahl am Gerät"). They are visible on every profile page; unassigned keys are dimmed, the active profile has a blue outline.
 
 ### Creating profiles on the PC (DeckPad Editor)
 On the Windows PC open <https://jppeterson-lab.github.io/DeckPad/editor.html> in **Chrome or Edge** (also usable as a [single file](https://raw.githubusercontent.com/JPPeterson-lab/DeckPad/main/tools/editor/deckpad-editor.html)) and choose **"Mit DeckPad verbinden"** (board connected via "USB"; the COM port must not be open elsewhere). There you can:

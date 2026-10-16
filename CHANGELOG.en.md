@@ -2,10 +2,17 @@
 
 *[Deutsche Version](CHANGELOG.md)*
 
-## Unreleased
+## v0.6.0 (2026-10-16) – Beta
+
+The project moves from **alpha** to **beta**: the feature set is complete and the core functions are verified on the device and on the Windows PC.
 
 ### New
+- **Quick keys on the deck screen** (new PicoPixel UI): **Standard** jumps from any profile back to the profile `standard`. **P1–P3** jump to a freely chosen profile. They sit next to the tile grid and are therefore visible and usable on every profile page. Unassigned keys are dimmed and do nothing, the active profile has a blue outline
+- **Assignment in the editor:** section "Schnellwahl am Gerät" with one selector each for P1–P3 (takes effect at once). Stored device-wide in `config.json` (`quick`), returned by `LIST`; new CDC command `QUICK <id1> <id2> <id3>` (`-` = free). If a profile is deleted the key becomes free
 - **Windows helper as a proper program:** `DeckPad-Helper.exe` (C#, WinForms, .NET Framework 4.8, about 80 KB) replaces the PowerShell script. Status window, tray icon, single instance. Options (both **off** by default): *Mit Windows starten (im Hintergrund)* (per-user autostart, never running permanently without consent) and *Beenden, wenn das DeckPad getrennt wird*. Source in `tools/helper-app/`, build with `tools/build_helper.sh`. The file is unsigned (SmartScreen notice)
+
+### Changed
+- New UI exports (font size 62 dropped, 92 added, icons for the quick keys)
 
 ## v0.5.0 (2026-10-15)
 
